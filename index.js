@@ -173,10 +173,16 @@ async function checkNodeStatus() {
     }
 
     try {
+            // Check if a Codex node is already running
+    const nodeRunning = await isNodeRunning();
+
+    if (nodeRunning) {
+        console.log(chalk.green('A Codex node is already running.'));
+        await showNavigationMenu();
         const spinner = createSpinner('Checking node status...').start();
         const response = await runCommand('curl http://localhost:8080/api/codex/v1/debug/info -w \'\\n\'');
         spinner.success();
-
+        
         // Parse the JSON response
         const data = JSON.parse(response);
         
@@ -186,8 +192,8 @@ async function checkNodeStatus() {
         
         // Display node status based on connected peers
         const statusMessage = isOnline
-            ? chalk.bgGreen(" Node status : ONLINE & DISCOVERABLE ")
-            : chalk.bgRed(" Node status : OFFLINE ");
+        ? chalk.bgGreen(" Node status : ONLINE & DISCOVERABLE ")
+        : chalk.bgRed(" Node status : OFFLINE ");
         const peerMessage = `Connected peers : ${peerCount}`;
         
         console.log('\n' + chalk.bold.cyanBright('📊 Node Status Summary'));
@@ -224,6 +230,11 @@ async function checkNodeStatus() {
         
         console.log('━'.repeat(50));
         await showNavigationMenu();
+    }
+    else{
+        console.log(chalk.red('\nOops...Codex node is not running. Try again after starting the node in port 8080'));
+        await showNavigationMenu();
+    }
     } catch (error) {
         console.error(chalk.red('Failed to check node status:', error.message));
         await showNavigationMenu();
