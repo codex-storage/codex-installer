@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import axios from 'axios'; 
+import * as fs from 'fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -93,16 +94,16 @@ async function installCodex() { // TODO : TEST INSTALLATION TO SEE IF BACKGROUND
         const downloadCommand = 'curl -# -L https://get.codex.storage/install.sh | bash';
         await runCommand(downloadCommand);
         console.log(chalk.green('Codex binaries downloaded'));
-
-        console.log(chalk.cyanBright('Installing dependencies...'));
+        console.log(chalk.cyanBright('\nInstalling dependencies...'));
         await runCommand('sudo apt update && sudo apt install libgomp1');
-        console.log(chalk.green('Dependencies installed'));
-
-        const version = await runCommand('codex --version');
-        console.log(chalk.green('Codex is successfully installed. Version:'));
-        console.log(chalk.cyanBright(version));
+        console.log(chalk.green('Dependencies installed successfully!'));
+            const version = await runCommand('\ncodex --version');
+            console.log(chalk.green('Codex is successfully installed!'));
+            console.log(chalk.cyanBright(version));
+            await showNavigationMenu();
     } catch (error) {
         console.error(chalk.red('Failed to install Codex:', error.message));
+        await showNavigationMenu();
     }
 }
 
@@ -124,6 +125,7 @@ async function runCodex() {
         await showNavigationMenu();
     }
     else {
+
     const { discPort, listenPort } = await inquirer.prompt([
         {
             type: 'number',
@@ -163,7 +165,6 @@ async function runCodex() {
     }
 }
 }
-
 
 
 async function checkNodeStatus() {
@@ -372,6 +373,26 @@ else{
 }
 
 
+
+async function uninstallCodex() {
+    const binaryPath = '/usr/local/bin/codex';
+
+    try {
+        console.log(`Attempting to remove Codex binary from ${binaryPath} using sudo...`);
+        // Use sudo rm to delete the Codex binary
+        await runCommand(`sudo rm ${binaryPath}`);
+        console.log(`Codex binary removed from ${binaryPath}.`);
+        await showNavigationMenu();
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            console.log('Codex binary not found, nothing to uninstall.');
+        } else {
+            console.error(chalk.red(`Looks like Codex is not installed yet. Please install before trying to remove the Codex binaries.`));
+        }
+        await showNavigationMenu();
+    }
+}
+
 async function main() {
     
     while (true) {
@@ -383,18 +404,18 @@ async function main() {
                 name: 'choice',
                 message: 'Select an option:',
                 choices: [
-                    '1. Download Codex node',
+                    '1. Download and install Codex',
                     '2. Run Codex node',
                     '3. Check node status',
                     '4. Upload a file',
                     '5. Download a file',
                     '6. Show local data',
-                    '7. Exit'
+                    '7. Uninstall Codex node',
                 ]
             }
         ]);
 
-        if (choice.startsWith('7.')) {
+        if (choice.startsWith('8')) {
             console.log(chalk.cyanBright('\nGoodbye! 👋\n'));
             break;
         }
@@ -406,7 +427,7 @@ async function main() {
             case '2':
                 await runCodex();
                 return;
-                case '3':
+            case '3':
                 await checkNodeStatus();
                 break;
             case '4':
@@ -418,6 +439,9 @@ async function main() {
             case '6':
                 await showLocalFiles();
                 break;
+            case '7':
+                await uninstallCodex();
+                break;    
         }
 
         console.log('\n'); // Add some spacing between operations
