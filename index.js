@@ -148,7 +148,7 @@ async function runCodex() {
             --api-cors-origin="*" \
             --bootstrap-node=spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P`;
 
-        console.log(chalk.cyanBright('\n\n Starting Codex node...'));
+        console.log(chalk.cyanBright('\n\n Codex node is running...'));
         console.log(chalk.cyanBright('\n Please keep this terminal open. Start a new terminal to start interacting with the node'));
         console.log(chalk.cyanBright('\n Press CTRL+C to stop the node'));
         await runCommand(command);
@@ -177,8 +177,6 @@ async function checkNodeStatus() {
     const nodeRunning = await isNodeRunning();
 
     if (nodeRunning) {
-        console.log(chalk.green('A Codex node is already running.'));
-        await showNavigationMenu();
         const spinner = createSpinner('Checking node status...').start();
         const response = await runCommand('curl http://localhost:8080/api/codex/v1/debug/info -w \'\\n\'');
         spinner.success();
@@ -385,7 +383,7 @@ async function main() {
                 name: 'choice',
                 message: 'Select an option:',
                 choices: [
-                    '1. Install Codex node',
+                    '1. Download Codex node',
                     '2. Run Codex node',
                     '3. Check node status',
                     '4. Upload a file',
