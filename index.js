@@ -173,7 +173,7 @@ async function checkNodeStatus() {
     }
 
     try {
-            // Check if a Codex node is already running
+    // Check if a Codex node is already running
     const nodeRunning = await isNodeRunning();
 
     if (nodeRunning) {
@@ -232,7 +232,7 @@ async function checkNodeStatus() {
         await showNavigationMenu();
     }
     else{
-        console.log(chalk.red('\nOops...Codex node is not running. Try again after starting the node in port 8080'));
+        console.log(chalk.red('\nOops...Codex node is not running. Try again after starting the node'));
         await showNavigationMenu();
     }
     } catch (error) {
@@ -247,7 +247,9 @@ async function uploadFile() {
         console.log(chalk.yellow('Coming soon for Windows!'));
         return;
     }
+    const nodeRunning = await isNodeRunning();
 
+    if (nodeRunning) {
     console.log(chalk.bgYellow('\n ⚠️  Warning: Codex does not encrypt files. Anything uploaded will be available publicly on testnet. The testnet does not provide any guarentees - please do not use in production ⚠️ \n'));
 
     const { filePath } = await inquirer.prompt([
@@ -273,6 +275,11 @@ async function uploadFile() {
         await showNavigationMenu();
     }
 }
+else{
+    console.log(chalk.red('\nOops...Codex node is not running. Try again after starting the node'));
+    await showNavigationMenu();
+}
+}
 
 async function downloadFile() {
     if (platform === 'win32') {
@@ -280,6 +287,9 @@ async function downloadFile() {
         return;
     }
 
+    const nodeRunning = await isNodeRunning();
+
+    if (nodeRunning) {
     const { cid } = await inquirer.prompt([
         {
             type: 'input',
@@ -301,13 +311,20 @@ async function downloadFile() {
         await showNavigationMenu();
     }
 }
+else{
+    console.log(chalk.red('\nOops...Codex node is not running. Try again after starting the node'));
+    await showNavigationMenu();
+}
+}
 
 async function showLocalFiles() {
     if (platform === 'win32') {
         console.log(chalk.yellow('Coming soon for Windows!'));
         return;
     }
+ const nodeRunning = await isNodeRunning();
 
+    if (nodeRunning) {
     try {
         const spinner = createSpinner('Fetching local files...').start();
         const filesResponse = await runCommand('curl http://localhost:8080/api/codex/v1/data -w \'\\n\'');
@@ -349,6 +366,11 @@ async function showLocalFiles() {
         console.error(chalk.red('Failed to show local files:', error.message));
         await showNavigationMenu();
     }
+}
+else{
+    console.log(chalk.red('\nOops...Codex node is not running. Try again after starting the node'));
+    await showNavigationMenu();
+}
 }
 
 
