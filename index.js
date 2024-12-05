@@ -23,7 +23,7 @@ const ASCII_ART = `
 ██╔════╝██╔═══██╗██╔══██╗██╔════╝╚██╗██╔╝                  
 ██║     ██║   ██║██║  ██║█████╗   ╚███╔╝                   
 ██║     ██║   ██║██║  ██║██╔══╝   ██╔██╗                   
-╚██████╗╚██████╔╝██████╔╝██████��� ██╗                  
+╚██████╗╚██████╔╝██████╔╝██████ ██╗                  
  ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝                  
                                                            
 ███████╗████████╗ ██████╗ ██████╗  █████╗  ██████╗ ███████╗
@@ -269,15 +269,27 @@ async function runCodex() {
             // Wait for node to start and get initial data
             await new Promise(resolve => setTimeout(resolve, 5000));
 
-            // Log node data to Supabase
+            // Log node data to Supabase silently
             try {
                 const response = await axios.get('http://localhost:8080/api/codex/v1/debug/info');
                 if (response.status === 200) {
                     await logToSupabase(response.data);
-                    console.log(showSuccessMessage('Node data logged successfully'));
+                    // Show privacy notice after successful logging
+                    console.log(boxen(
+                        chalk.cyan('We are logging some of your node\'s public data for improving the Codex experience'),
+                        {
+                            padding: 1,
+                            margin: 1,
+                            borderStyle: 'round',
+                            borderColor: 'cyan',
+                            title: '🔒 Privacy Notice',
+                            titleAlignment: 'center',
+                            dimBorder: true
+                        }
+                    ));
                 }
             } catch (error) {
-                console.log(showErrorMessage(`Failed to log node data: ${error.message}`));
+                // Silently handle any logging errors
             }
 
             // Wait for node process to exit
@@ -287,6 +299,7 @@ async function runCodex() {
                     else reject(new Error(`Node exited with code ${code}`));
                 });
             });
+
         } catch (error) {
             console.log(showErrorMessage(`Failed to run Codex: ${error.message}`));
         }
@@ -298,7 +311,6 @@ async function logToSupabase(nodeData) {
     try {
         // Ensure peerCount is at least 0 (not undefined or null)
         const peerCount = nodeData.table.nodes ? nodeData.table.nodes.length : "0";
-        console.log("peerCount is",peerCount);
         const payload = {
             nodeId: nodeData.table.localNode.nodeId,
             peerId: nodeData.table.localNode.peerId,
@@ -309,8 +321,6 @@ async function logToSupabase(nodeData) {
             listeningAddress: nodeData.table.localNode.address
         };
 
-        console.log('Sending data to Supabase:', JSON.stringify(payload, null, 2));
-
         const response = await axios.post('https://vfcnsjxahocmzefhckfz.supabase.co/functions/v1/codexnodes', payload, {
             headers: {
                 'Content-Type': 'application/json'
@@ -318,7 +328,6 @@ async function logToSupabase(nodeData) {
         });
         
         if (response.status === 200) {
-            console.log('Successfully logged to Supabase');
             return true;
         } else {
             console.error('Unexpected response:', response.status, response.data);
