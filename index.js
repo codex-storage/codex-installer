@@ -226,7 +226,24 @@ async function isNodeRunning() {
     }
 }
 
+async function isCodexInstalled() {
+    try {
+        await runCommand('codex --version');
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
 async function runCodex() {
+    // First check if Codex is installed
+    const isInstalled = await isCodexInstalled();
+    if (!isInstalled) {
+        console.log(showErrorMessage('Codex is not installed. Please install Codex first using option 1 from the main menu.'));
+        await showNavigationMenu();
+        return;
+    }
+
     const nodeAlreadyRunning = await isNodeRunning();
 
     if (nodeAlreadyRunning) {
