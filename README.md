@@ -1,51 +1,77 @@
 # Codex Storage CLI
 
-![CodexCLI](/images/screenshot.png)
+A command-line interface for interacting with Codex Storage.
 
-This CLI is the easiest way to get started with [Codex](https://codex.storage). Get your node up and running in a matter of seconds and start interacting with the Codex Testnet by uploading and downloading files from the other peers in the network.
+## Features
 
-> ⚠️ Note : Codex is currently in testnet and there is no guarentee for files stored on the Codex test network. All the files uploaded to Codex are not encrypted by default and hence, the files are publicly accessible. By using this application, you agree to acknowledge the [disclaimer](https://github.com/codex-storage/codex-testnet-starter/blob/master/DISCLAIMER.md).
+- Install and manage Codex node
+- Run Codex node with custom configuration
+- Check node status and connected peers
+- Upload and download files
+- View local data
+- Cross-platform support (Windows, Linux, macOS)
 
-## How it works?
+## Installation
 
-Run the Codex Storage CLI in your terminal
-
+```bash
+npm install -g codexstorage
 ```
+
+Or run directly with npx:
+
+```bash
 npx codexstorage
 ```
 
-#### Downloading and running the Codex node
+## Usage
 
-A CLI interface would appear with multiple options. Start by downloading the Codex binaries by using option 1.
+### Interactive Mode
 
-![Installing]()
+Simply run:
 
-Once you are done downloading the binaries, you can go ahead and try running the Codex node by choosing option 2. You will be asked to enter your listening (default : 8070) and discovery (default : 8090) ports during this step.
+```bash
+codexstorage
+```
 
-![Running]()
+This will start the interactive CLI menu where you can:
+1. Download and install Codex
+2. Run Codex node
+3. Check node status
+4. Upload a file
+5. Download a file
+6. Show local data
+7. Uninstall Codex node
 
-#### Checking the node status
+### Command Line Mode
 
-Now that your node is running, keep the terminal window open and start another instance of the Codex CLI by using the first command. We will be using this terminal to interact with the Codex node that is active.
+Upload a file:
+```bash
+codexstorage --upload <filename>
+```
 
-You can checkout the node status to ensure that the node is discoverable and connected to the other peers in the Codex test network.
+Download a file:
+```bash
+codexstorage --download <cid>
+```
 
-![Status]()
+## Requirements
 
-If you face any issues (peer discovery, port forwarding etc.,), join our [discord server](https://discord.gg/codex-storage) and ask for help.
+- Node.js 14 or higher
+- For Linux users: libgomp1 library
+- For Windows users: curl command available
 
-#### Uploading and downloading files from the testnet
+## Development
 
-To upload a new file into the testnet, select option 4 and enter the file's relative path. A unique CID will be displayed once the file is uploaded.
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
+3. Run the CLI:
+```bash
+npm start
+```
 
-![Upload]()
+## License
 
-To download a file from the testnet, select option 5 and enter the file's CID.
-
-![Download]()
-
-If you wish to view all the files that are stored in your local node, choose option 6 to display all the available CIDs.
-
-#### What's next?
-
-More features will be added soon!
+MIT
