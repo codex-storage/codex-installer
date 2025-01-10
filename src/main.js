@@ -8,6 +8,7 @@ import { handleCommandLineOperation, parseCommandLineArgs } from './cli/commandP
 import { uploadFile, downloadFile, showLocalFiles } from './handlers/fileHandlers.js';
 import { checkCodexInstallation, installCodex, uninstallCodex } from './handlers/installationHandlers.js';
 import { runCodex, checkNodeStatus } from './handlers/nodeHandlers.js';
+import { showInfoMessage } from './utils/messages.js';
 
 async function showNavigationMenu() {
     console.log('\n')
@@ -82,17 +83,18 @@ export async function main() {
                         '5. Download a file',
                         '6. Show local data',
                         '7. Uninstall Codex node',
-                        '8. Exit'
+                        '8. Submit feedback',
+                        '9. Exit'
                     ],
-                    pageSize: 8,
+                    pageSize: 9,
                     loop: true
                 }
             ]).catch(() => {
                 handleExit();
-                return { choice: '8' };
+                return { choice: '9' };
             });
 
-            if (choice.startsWith('8')) {
+            if (choice.startsWith('9')) {
                 handleExit();
                 break;
             }
@@ -118,7 +120,14 @@ export async function main() {
                     break;
                 case '7':
                     await uninstallCodex(showNavigationMenu);
-                    break;    
+                    break;
+                case '8':
+                    const { exec } = await import('child_process');
+                    const url = 'https://docs.google.com/forms/d/1U21xp6shfDkJWzJSKHhUjwIE7fsYk94gmLUKAbxUMcw/edit';
+                    const command = process.platform === 'win32' ? `start ${url}` : process.platform === 'darwin' ? `open ${url}` : `xdg-open ${url}`;
+                    exec(command);
+                    console.log(showInfoMessage('Opening feedback form in your browser...'));
+                    break;
             }
 
             console.log('\n');
