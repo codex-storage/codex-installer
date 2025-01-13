@@ -53,14 +53,14 @@ export async function logToSupabase(nodeData, retryCount = 3, retryDelay = 1000)
                 port: nodeData.announceAddresses[0].split('/')[4],
                 listeningAddress: nodeData.table.localNode.address,
                 timestamp: new Date().toISOString(),
-                wallet: currentWallet // Include wallet address in payload
+                wallet: currentWallet
             };
 
             const response = await axios.post('https://vfcnsjxahocmzefhckfz.supabase.co/functions/v1/codexnodes', payload, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                timeout: 5000 // 5 second timeout
+                timeout: 5000
             });
             
             return response.status === 200;
@@ -69,7 +69,7 @@ export async function logToSupabase(nodeData, retryCount = 3, retryDelay = 1000)
             const isNetworkError = error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED';
 
             if (isLastAttempt || !isNetworkError) {
-                console.error(`Failed to log to Supabase (attempt ${attempt}/${retryCount}):`, error.message);
+                console.error(`Failed to log node data (attempt ${attempt}/${retryCount}):`, error.message);
                 if (error.response) {
                     console.error('Error response:', {
                         status: error.response.status,
@@ -79,7 +79,7 @@ export async function logToSupabase(nodeData, retryCount = 3, retryDelay = 1000)
                 if (isLastAttempt) return false;
             } else {
                 // Only log retry attempts for network errors
-                console.log(`Retrying Supabase log (attempt ${attempt}/${retryCount}) after ${retryDelay}ms...`);
+                console.log(`Retrying to log data (attempt ${attempt}/${retryCount})...`);
                 await delay(retryDelay);
             }
         }
@@ -115,7 +115,7 @@ export async function startPeriodicLogging() {
             }
         } catch (error) {
             // Silently handle any logging errors to not disrupt the node operation
-            console.error('Failed to log node info:', error.message);
+            console.error('Failed to log node data:', error.message);
         }
     };
 
