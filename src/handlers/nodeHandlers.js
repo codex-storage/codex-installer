@@ -1,7 +1,7 @@
 import { createSpinner } from 'nanospinner';
 import { runCommand } from '../utils/command.js';
 import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
-import { isNodeRunning, isCodexInstalled, logToSupabase } from '../services/nodeService.js';
+import { isNodeRunning, isCodexInstalled, logToSupabase, startPeriodicLogging, getWalletAddress, setWalletAddress } from '../services/nodeService.js';
 import inquirer from 'inquirer';
 import boxen from 'boxen';
 import chalk from 'chalk';
@@ -10,6 +10,22 @@ import { exec } from 'child_process';
 import axios from 'axios';
 
 const platform = os.platform();
+
+async function promptForWalletAddress() {
+    const { wallet } = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'wallet',
+            message: 'Please enter your ERC20 wallet address (or press enter to skip):',
+            validate: (input) => {
+                if (!input) return true; // Allow empty input
+                if (/^0x[a-fA-F0-9]{40}$/.test(input)) return true;
+                return 'Please enter a valid ERC20 wallet address (0x followed by 40 hexadecimal characters) or press enter to skip';
+            }
+        }
+    ]);
+    return wallet || null;
+}
 
 export async function runCodex(showNavigationMenu) {
     const isInstalled = await isCodexInstalled();
@@ -84,7 +100,28 @@ export async function runCodex(showNavigationMenu) {
             try {
                 const response = await axios.get('http://localhost:8080/api/codex/v1/debug/info');
                 if (response.status === 200) {
-                    await logToSupabase(response.data);
+                    // Check if wallet exists
+                    try {
+                        const existingWallet = await getWalletAddress();
+                        if (!existingWallet) {
+                            console.log(showInfoMessage('[OPTIONAL] Please provide your ERC20 wallet address.'));
+                            const wallet = await promptForWalletAddress();
+                            if (wallet) {
+                                await setWalletAddress(wallet);
+                                console.log(showSuccessMessage('Wallet address saved successfully!'));
+                            }
+                        }
+                    } catch (error) {
+                        console.log(showErrorMessage('Failed to process wallet address. Continuing without wallet update.'));
+                    }
+
+                    // Start periodic logging
+                    const stopLogging = await startPeriodicLogging();
+                    
+                    nodeProcess.on('exit', () => {
+                        stopLogging();
+                    });
+
                     console.log(boxen(
                         chalk.cyan('We are logging some of your node\'s public data for improving the Codex experience'),
                         {
@@ -131,10 +168,11 @@ async function showNodeDetails(data, showNavigationMenu) {
             choices: [
                 '1. View Connected Peers',
                 '2. View Node Information',
-                '3. Back to Main Menu',
-                '4. Exit'
+                '3. Update Wallet Address',
+                '4. Back to Main Menu',
+                '5. Exit'
             ],
-            pageSize: 4,
+            pageSize: 5,
             loop: true
         }
     ]);
@@ -183,8 +221,31 @@ async function showNodeDetails(data, showNavigationMenu) {
             ));
             return showNodeDetails(data, showNavigationMenu);
         case '3':
-            return showNavigationMenu();
+            try {
+                const existingWallet = await getWalletAddress();
+                
+                console.log(boxen(
+                    `${chalk.cyan('Current wallet address:')}\n${existingWallet || 'Not set'}`,
+                    {
+                        padding: 1,
+                        margin: 1,
+                        borderStyle: 'round',
+                        borderColor: 'blue'
+                    }
+                ));
+
+                const wallet = await promptForWalletAddress();
+                if (wallet) {
+                    await setWalletAddress(wallet);
+                    console.log(showSuccessMessage('Wallet address updated successfully!'));
+                }
+            } catch (error) {
+                console.log(showErrorMessage(`Failed to update wallet address: ${error.message}`));
+            }
+            return showNodeDetails(data, showNavigationMenu);
         case '4':
+            return showNavigationMenu();
+        case '5':
             process.exit(0);
     }
 }

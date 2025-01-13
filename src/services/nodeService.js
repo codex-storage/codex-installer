@@ -5,6 +5,21 @@ import os from 'os';
 
 const platform = os.platform();
 
+// Add a variable to store wallet address in memory
+let currentWallet = null;
+
+export async function setWalletAddress(wallet) {
+    // Basic ERC20 address validation
+    if (wallet && !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+        throw new Error('Invalid ERC20 wallet address format');
+    }
+    currentWallet = wallet;
+}
+
+export async function getWalletAddress() {
+    return currentWallet;
+}
+
 export async function isNodeRunning() {
     try {
         const response = await axios.get('http://localhost:8080/api/codex/v1/debug/info');
@@ -23,36 +38,53 @@ export async function isCodexInstalled() {
     }
 }
 
-export async function logToSupabase(nodeData) {
-    try {
-        const peerCount = nodeData.table.nodes ? nodeData.table.nodes.length : "0";
-        const payload = {
-            nodeId: nodeData.table.localNode.nodeId,
-            peerId: nodeData.table.localNode.peerId,
-            publicIp: nodeData.announceAddresses[0].split('/')[2],
-            version: nodeData.codex.version,
-            peerCount: peerCount == 0 ? "0" : peerCount,
-            port: nodeData.announceAddresses[0].split('/')[4],
-            listeningAddress: nodeData.table.localNode.address
-        };
+export async function logToSupabase(nodeData, retryCount = 3, retryDelay = 1000) {
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-        const response = await axios.post('https://vfcnsjxahocmzefhckfz.supabase.co/functions/v1/codexnodes', payload, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        return response.status === 200;
-    } catch (error) {
-        console.error('Failed to log to Supabase:', error.message);
-        if (error.response) {
-            console.error('Error response:', {
-                status: error.response.status,
-                data: error.response.data
+    for (let attempt = 1; attempt <= retryCount; attempt++) {
+        try {
+            const peerCount = nodeData.table.nodes ? nodeData.table.nodes.length : "0";
+            const payload = {
+                nodeId: nodeData.table.localNode.nodeId,
+                peerId: nodeData.table.localNode.peerId,
+                publicIp: nodeData.announceAddresses[0].split('/')[2],
+                version: nodeData.codex.version,
+                peerCount: peerCount == 0 ? "0" : peerCount,
+                port: nodeData.announceAddresses[0].split('/')[4],
+                listeningAddress: nodeData.table.localNode.address,
+                timestamp: new Date().toISOString(),
+                wallet: currentWallet // Include wallet address in payload
+            };
+
+            const response = await axios.post('https://vfcnsjxahocmzefhckfz.supabase.co/functions/v1/codexnodes', payload, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                timeout: 5000 // 5 second timeout
             });
+            
+            return response.status === 200;
+        } catch (error) {
+            const isLastAttempt = attempt === retryCount;
+            const isNetworkError = error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED';
+
+            if (isLastAttempt || !isNetworkError) {
+                console.error(`Failed to log to Supabase (attempt ${attempt}/${retryCount}):`, error.message);
+                if (error.response) {
+                    console.error('Error response:', {
+                        status: error.response.status,
+                        data: error.response.data
+                    });
+                }
+                if (isLastAttempt) return false;
+            } else {
+                // Only log retry attempts for network errors
+                console.log(`Retrying Supabase log (attempt ${attempt}/${retryCount}) after ${retryDelay}ms...`);
+                await delay(retryDelay);
+            }
         }
-        return false;
     }
+    return false;
 }
 
 export async function checkDependencies() {
@@ -70,4 +102,52 @@ export async function checkDependencies() {
         }
     }
     return true;
+}
+
+export async function startPeriodicLogging() {
+    const FIFTEEN_MINUTES = 15 * 60 * 1000; // 15 minutes in milliseconds
+    
+    const logNodeInfo = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/codex/v1/debug/info');
+            if (response.status === 200) {
+                await logToSupabase(response.data);
+            }
+        } catch (error) {
+            // Silently handle any logging errors to not disrupt the node operation
+            console.error('Failed to log node info:', error.message);
+        }
+    };
+
+    // Initial log
+    await logNodeInfo();
+
+    // Set up periodic logging
+    const intervalId = setInterval(logNodeInfo, FIFTEEN_MINUTES);
+
+    // Return cleanup function
+    return () => clearInterval(intervalId);
+}
+
+export async function updateWalletAddress(nodeId, wallet) {
+    // Basic ERC20 address validation
+    if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+        throw new Error('Invalid ERC20 wallet address format');
+    }
+
+    try {
+        const response = await axios.post('https://vfcnsjxahocmzefhckfz.supabase.co/functions/v1/wallet', {
+            nodeId,
+            wallet
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            timeout: 5000
+        });
+        return response.status === 200;
+    } catch (error) {
+        console.error('Failed to update wallet address:', error.message);
+        throw error;
+    }
 } 
