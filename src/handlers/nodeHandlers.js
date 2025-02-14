@@ -57,12 +57,6 @@ export async function runCodex(showNavigationMenu) {
         ]);
 
         try {
-            if (platform === 'win32') {
-                console.log(showInfoMessage('Setting up firewall rules...'));
-                await runCommand(`netsh advfirewall firewall add rule name="Allow Codex (TCP-In)" protocol=TCP dir=in localport=${listenPort} action=allow`);
-                await runCommand(`netsh advfirewall firewall add rule name="Allow Codex (UDP-In)" protocol=UDP dir=in localport=${discPort} action=allow`);
-            }
-
             let nat;
             if (platform === 'win32') {
                 const result = await runCommand('for /f "delims=" %a in (\'curl -s --ssl-reqd ip.codex.storage\') do @echo %a');
