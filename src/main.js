@@ -9,6 +9,7 @@ import { uploadFile, downloadFile, showLocalFiles } from './handlers/fileHandler
 import { checkCodexInstallation, installCodex, uninstallCodex } from './handlers/installationHandlers.js';
 import { runCodex, checkNodeStatus } from './handlers/nodeHandlers.js';
 import { showInfoMessage } from './utils/messages.js';
+import { getAppDataDir } from "./utils/appdata.js";
 
 async function showNavigationMenu() {
     console.log('\n')
@@ -49,6 +50,10 @@ function handleExit() {
     process.exit(0);
 }
 
+function getWorkingDir(commandArgs) {
+
+}
+
 export async function main() {
     const commandArgs = parseCommandLineArgs();
     if (commandArgs) {
@@ -69,6 +74,7 @@ export async function main() {
     try {
         while (true) {
             console.log('\n' + chalk.cyanBright(ASCII_ART));
+            console.log(showInfoMessage(`Working directory: ${getAppDataDir()}`));
 
             const { choice } = await inquirer.prompt([
                 {
