@@ -57,12 +57,6 @@ export async function runCodex(showNavigationMenu) {
         ]);
 
         try {
-            if (platform === 'win32') {
-                console.log(showInfoMessage('Setting up firewall rules...'));
-                await runCommand(`netsh advfirewall firewall add rule name="Allow Codex (TCP-In)" protocol=TCP dir=in localport=${listenPort} action=allow`);
-                await runCommand(`netsh advfirewall firewall add rule name="Allow Codex (UDP-In)" protocol=UDP dir=in localport=${discPort} action=allow`);
-            }
-
             let nat;
             if (platform === 'win32') {
                 const result = await runCommand('for /f "delims=" %a in (\'curl -s --ssl-reqd ip.codex.storage\') do @echo %a');
@@ -71,22 +65,19 @@ export async function runCodex(showNavigationMenu) {
                 nat = await runCommand('curl -s https://ip.codex.storage');
             }
 
-            const command = platform === 'win32' 
-                ? `codex ^
-                    --data-dir=datadir ^
-                    --disc-port=${discPort} ^
-                    --listen-addrs=/ip4/0.0.0.0/tcp/${listenPort} ^
-                    --nat=${nat} ^
-                    --api-cors-origin="*" ^
-                    --bootstrap-node=spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P`
-                : `codex \
-                    --data-dir=datadir \
-                    --disc-port=${discPort} \
-                    --listen-addrs=/ip4/0.0.0.0/tcp/${listenPort} \
-                    --nat=\`curl -s https://ip.codex.storage\` \
-                    --api-cors-origin="*" \
-                    --bootstrap-node=spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P`;
+            const executable = `codex`;
+            const args = [
+                `--data-dir=datadir`,
+                `--disc-port=${discPort}`,
+                `--listen-addrs=/ip4/0.0.0.0/tcp/${listenPort}`,
+                `--nat=${nat}`,
+                `--api-cors-origin="*"`,
+                `--bootstrap-node=spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P`
+            ];
 
+            const command = 
+                `${executable} ${args.join(" ")}`
+            
             console.log(showInfoMessage(
                 '🚀 Codex node is running...\n\n' +
                 'Please keep this terminal open. Start a new terminal to interact with the node.\n\n' +
@@ -256,7 +247,7 @@ export async function checkNodeStatus(showNavigationMenu) {
 
         if (nodeRunning) {
             const spinner = createSpinner('Checking node status...').start();
-            const response = await runCommand('curl http://localhost:8080/api/codex/v1/debug/info -w \'\\n\'');
+            const response = await runCommand('curl http://localhost:8080/api/codex/v1/debug/info');
             spinner.success();
             
             const data = JSON.parse(response);

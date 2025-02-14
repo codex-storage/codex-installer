@@ -94,7 +94,9 @@ export async function installCodex(showNavigationMenu) {
                 try {
                     await runCommand('setx PATH "%PATH%;%LOCALAPPDATA%\\Codex"');
                     spinner.success();
-                    console.log(showSuccessMessage('Codex has been installed and PATH has been updated automatically!'));
+                    console.log(showSuccessMessage('Codex has been installed and PATH has been updated automatically!\n' +
+                        `You may need to restart your terminal.`
+                    ));
                 } catch (error) {
                     spinner.success();
                     console.log(showInfoMessage(
