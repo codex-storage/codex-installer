@@ -15,8 +15,3 @@
 ### In repository root
 - 'npm install' successfully installs package
 - 'npm start' run the CLI tool
-
-### Using CLI tool
-- After installing Codex: Restart of terminal was required.
-- Attempt to start Codex failed: command for firewall modification failed.
-- Disabled firewall commands and tried again: tool reports Codex is running and to open a new terminal to interact with it. Then (with no action) the tool stops. (No Codex process is running.)
