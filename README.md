@@ -1,4 +1,4 @@
-# Codex Storage CLI
+Npx # Codex Storage CLI
 
 A command-line interface for interacting with Codex Storage.
 
