@@ -1,7 +1,12 @@
 import path from 'path';
+import fs from 'fs';
 
 export function getAppDataDir() {
-  return appData("codex-cli");
+  const dir = appData("codex-cli");
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+  return dir;
 }
 
 function appData(...app) {
