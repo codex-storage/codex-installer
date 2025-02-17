@@ -137,8 +137,7 @@ export async function installCodex(config, showNavigationMenu) {
                 const dependenciesInstalled = await checkDependencies();
                 if (!dependenciesInstalled) {
                     console.log(showInfoMessage('Please install the required dependencies and try again.'));
-                    await showNavigationMenu();
-                    return;
+                    throw new Error("Missing dependencies.");
                 }
 
                 const downloadCommand = 'curl -# --connect-timeout 10 --max-time 60 -L https://get.codex.storage/install.sh -o install.sh && chmod +x install.sh';
