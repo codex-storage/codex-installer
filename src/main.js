@@ -49,6 +49,10 @@ function handleExit() {
     process.exit(0);
 }
 
+function getWorkingDir(commandArgs) {
+
+}
+
 export async function main() {
     const commandArgs = parseCommandLineArgs();
     if (commandArgs) {
@@ -69,7 +73,6 @@ export async function main() {
     try {
         while (true) {
             console.log('\n' + chalk.cyanBright(ASCII_ART));
-
             const { choice } = await inquirer.prompt([
                 {
                     type: 'list',
