@@ -3,13 +3,17 @@ import path from 'path';
 import { getAppDataDir } from '../utils/appdata.js';
 
 const defaultConfig = {
-  dataDir: "",
-  storageQuota: 0,
-  ports: {
-    discPort: 8090,
-    listenPort: 8070,
-    apiPort: 8080
-  }
+  codexExe: "",
+  
+  // TODO:
+  // Save user-selected config options. Use these when starting Codex.
+  // dataDir: "",
+  // storageQuota: 0,
+  // ports: {
+  //   discPort: 8090,
+  //   listenPort: 8070,
+  //   apiPort: 8080
+  // }
 };
 
 function getConfigFilename() {
@@ -18,7 +22,6 @@ function getConfigFilename() {
 
 export function saveConfig(config) {
   const filePath = getConfigFilename();
-  console.log("writing to: " + filePath );
   try {
     fs.writeFileSync(filePath, JSON.stringify(config));
   } catch (error) {
@@ -29,7 +32,6 @@ export function saveConfig(config) {
 
 export function loadConfig() {
   const filePath = getConfigFilename();
-  console.log("loading from: " + filePath );
   try {
     if (!fs.existsSync(filePath)) {
       saveConfig(defaultConfig);

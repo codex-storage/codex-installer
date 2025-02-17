@@ -1,11 +1,14 @@
-import { createSpinner } from 'nanospinner';
-import { runCommand } from '../utils/command.js';
-import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
-import { checkDependencies, isCodexInstalled } from '../services/nodeService.js';
+import path from 'path';
 import inquirer from 'inquirer';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import os from 'os';
+import fs from 'fs';
+import { createSpinner } from 'nanospinner';
+import { runCommand } from '../utils/command.js';
+import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
+import { checkDependencies, isCodexInstalled } from '../services/nodeService.js';
+import { saveConfig } from '../services/config.js';
 
 const platform = os.platform();
 
@@ -52,19 +55,43 @@ These information will be used for calculating various metrics that can eventual
     return agreement.toLowerCase() === 'y';
 }
 
-export async function checkCodexInstallation(showNavigationMenu) {
+async function getCodexVersion(config) {
     try {
-        const version = await runCommand('codex --version');
-        console.log(chalk.green('Codex is already installed. Version:'));
-        console.log(chalk.green(version));
-        await showNavigationMenu();
+        const version = await runCommand(`${config.codexExe} --version`);
+        if (version.length < 1) throw new Error("Version info not found.");
+        return version;
     } catch (error) {
-        console.log(chalk.cyanBright('Codex is not installed, proceeding with installation...'));
-        await installCodex(showNavigationMenu);
+        return "";
     }
 }
 
-export async function installCodex(showNavigationMenu) {
+export async function checkCodexInstallation(config, showNavigationMenu) {
+    const version = await getCodexVersion(config);
+
+    if (version.length > 0) {
+        console.log(chalk.green('Codex is already installed. Version:'));
+        console.log(chalk.green(version));
+        await showNavigationMenu();
+    } else {
+        console.log(chalk.cyanBright('Codex is not installed, proceeding with installation...'));
+        await installCodex(config, showNavigationMenu);
+    }
+}
+
+async function saveCodexExePathToConfig(config) {
+    config.codexExe = path.join(process.env.LOCALAPPDATA, "Codex", "codex.exe");
+    if (!fs.existsSync(config.codexExe)) {
+        console.log(showErrorMessage(`Codex executable not found in expected path: ${config.codexExe}`));
+        throw new Error("Exe not found");
+    }
+    if (await getCodexVersion(config).length < 1) {
+        console.log(showInfoMessage("no"));
+        throw new Error(`Codex not found at path after install. Path: '${config.codexExe}'`);
+    }
+    saveConfig(config);
+}
+
+export async function installCodex(config, showNavigationMenu) {
     const agreed = await showPrivacyDisclaimer();
     if (!agreed) {
         console.log(showInfoMessage('You can find manual setup instructions at docs.codex.storage'));
@@ -72,40 +99,22 @@ export async function installCodex(showNavigationMenu) {
         return;
     }
 
+    const spinner = createSpinner('Installing Codex...').start();
+
     try {
-        const spinner = createSpinner('Downloading Codex binaries...').start();
         
         if (platform === 'win32') {
             try {
                 try {
                     await runCommand('curl --version');
                 } catch (error) {
-                    spinner.error();
                     throw new Error('curl is not available. Please install curl or update your Windows version.');
                 }
 
                 await runCommand('curl -LO --ssl-no-revoke https://get.codex.storage/install.cmd');
+                await runCommand(`"${process.cwd()}\\install.cmd"`);
                 
-                const currentDir = process.cwd();
-                await runCommand(`"${currentDir}\\install.cmd"`);
-                
-                await runCommand('set "PATH=%PATH%;%LOCALAPPDATA%\\Codex"');
-                
-                try {
-                    await runCommand('setx PATH "%PATH%;%LOCALAPPDATA%\\Codex"');
-                    spinner.success();
-                    console.log(showSuccessMessage('Codex has been installed and PATH has been updated automatically!\n' +
-                        `You may need to restart your terminal.`
-                    ));
-                } catch (error) {
-                    spinner.success();
-                    console.log(showInfoMessage(
-                        'To complete installation:\n\n' +
-                        '1. Open Control Panel → System → Advanced System settings → Environment Variables\n' +
-                        '2. Or type "environment variables" in Windows Search\n' +
-                        '3. Add "%LOCALAPPDATA%\\Codex" to your Path variable'
-                    ));
-                }
+                await saveCodexExePathToConfig(config);
 
                 try {
                     await runCommand('del /f install.cmd');
@@ -113,20 +122,18 @@ export async function installCodex(showNavigationMenu) {
                     // Ignore cleanup errors
                 }
             } catch (error) {
-                spinner.error();
                 if (error.message.includes('Access is denied')) {
                     throw new Error('Installation failed. Please run the command prompt as Administrator and try again.');
                 } else if (error.message.includes('curl')) {
                     throw new Error(error.message);
                 } else {
-                    throw new Error('Installation failed. Please check your internet connection and try again.');
+                    throw new Error(`Installation failed: "${error.message}"`);
                 }
             }
         } else {
             try {
                 const dependenciesInstalled = await checkDependencies();
                 if (!dependenciesInstalled) {
-                    spinner.error();
                     console.log(showInfoMessage('Please install the required dependencies and try again.'));
                     await showNavigationMenu();
                     return;
@@ -150,9 +157,7 @@ export async function installCodex(showNavigationMenu) {
                     await runCommand('timeout 120 bash install.sh');
                 }
                 
-                spinner.success();
             } catch (error) {
-                spinner.error();
                 if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {
                     throw new Error('Installation failed. Please check your internet connection and try again.');
                 } else if (error.message.includes('Permission denied')) {
@@ -168,7 +173,7 @@ export async function installCodex(showNavigationMenu) {
         }
         
         try {
-            const version = await runCommand('codex --version');
+            const version = await getCodexVersion(config);
             console.log(showSuccessMessage(
                 'Codex is successfully installed!\n\n' +
                 `Version: ${version}`
@@ -177,8 +182,10 @@ export async function installCodex(showNavigationMenu) {
             throw new Error('Installation completed but Codex command is not available. Please restart your terminal and try again.');
         }
         
+        spinner.success();
         await showNavigationMenu();
     } catch (error) {
+        spinner.error();
         console.log(showErrorMessage(`Failed to install Codex: ${error.message}`));
         await showNavigationMenu();
     }
@@ -231,4 +238,4 @@ export async function uninstallCodex(showNavigationMenu) {
         }
         await showNavigationMenu();
     }
-} 
+}
