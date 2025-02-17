@@ -27,8 +27,8 @@ async function promptForWalletAddress() {
     return wallet || null;
 }
 
-export async function runCodex(showNavigationMenu) {
-    const isInstalled = await isCodexInstalled();
+export async function runCodex(config, showNavigationMenu) {
+    const isInstalled = await isCodexInstalled(config);
     if (!isInstalled) {
         console.log(showErrorMessage('Codex is not installed. Please install Codex first using option 1 from the main menu.'));
         await showNavigationMenu();
@@ -65,7 +65,7 @@ export async function runCodex(showNavigationMenu) {
                 nat = await runCommand('curl -s https://ip.codex.storage');
             }
 
-            const executable = `codex`;
+            const executable = config.codexExe;
             const args = [
                 `--data-dir=datadir`,
                 `--disc-port=${discPort}`,
@@ -80,6 +80,7 @@ export async function runCodex(showNavigationMenu) {
             
             console.log(showInfoMessage(
                 '🚀 Codex node is running...\n\n' +
+                'If your firewall ask, be sure to allow Codex to receive connections. \n' +
                 'Please keep this terminal open. Start a new terminal to interact with the node.\n\n' +
                 'Press CTRL+C to stop the node'
             ));

@@ -109,7 +109,7 @@ export async function main() {
                     await checkCodexInstallation(config, showNavigationMenu);
                     break;
                 case '2':
-                    await runCodex(showNavigationMenu);
+                    await runCodex(config, showNavigationMenu);
                     return;
                 case '3':
                     await checkNodeStatus(showNavigationMenu);

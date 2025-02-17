@@ -55,7 +55,9 @@ These information will be used for calculating various metrics that can eventual
     return agreement.toLowerCase() === 'y';
 }
 
-async function getCodexVersion(config) {
+export async function getCodexVersion(config) {
+    if (config.codexExe.length < 1) return "";
+
     try {
         const version = await runCommand(`${config.codexExe} --version`);
         if (version.length < 1) throw new Error("Version info not found.");
@@ -175,7 +177,8 @@ export async function installCodex(config, showNavigationMenu) {
         try {
             const version = await getCodexVersion(config);
             console.log(showSuccessMessage(
-                'Codex is successfully installed!\n\n' +
+                'Codex is successfully installed!\n' +
+                `Install path: "${config.codexExe}"\n\n` +
                 `Version: ${version}`
             ));
         } catch (error) {
