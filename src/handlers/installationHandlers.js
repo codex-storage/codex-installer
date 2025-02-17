@@ -159,7 +159,8 @@ export async function installCodex(config, showNavigationMenu) {
                     await runCommand('timeout 120 bash install.sh');
                 }
 
-                await saveCodexExePathToConfig(config, path.join(process.env.LOCALAPPDATA, "Codex", "codex"));
+                const codexExePath = (await runCommand("which codex")).replace("\n", "");
+                await saveCodexExePathToConfig(config, codexExePath);
                 
             } catch (error) {
                 if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {
