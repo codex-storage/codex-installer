@@ -50,10 +50,6 @@ function handleExit() {
     process.exit(0);
 }
 
-function getWorkingDir(commandArgs) {
-
-}
-
 export async function main() {
     const commandArgs = parseCommandLineArgs();
     if (commandArgs) {
