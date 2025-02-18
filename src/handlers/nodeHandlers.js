@@ -1,7 +1,8 @@
+import path from 'path';
 import { createSpinner } from 'nanospinner';
 import { runCommand } from '../utils/command.js';
 import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
-import { isNodeRunning, isCodexInstalled, logToSupabase, startPeriodicLogging, getWalletAddress, setWalletAddress } from '../services/nodeService.js';
+import { isNodeRunning, isCodexInstalled, startPeriodicLogging, getWalletAddress, setWalletAddress } from '../services/nodeService.js';
 import inquirer from 'inquirer';
 import boxen from 'boxen';
 import chalk from 'chalk';
@@ -25,6 +26,13 @@ async function promptForWalletAddress() {
         }
     ]);
     return wallet || null;
+}
+
+function getCurrentLogFile(config) {
+    const timestamp = new Date().toISOString()
+        .replaceAll(":", "-")
+        .replaceAll(".", "-");
+    return path.join(config.logsDir, `codex_${timestamp}.log`);
 }
 
 export async function runCodex(config, showNavigationMenu) {
@@ -65,9 +73,19 @@ export async function runCodex(config, showNavigationMenu) {
                 nat = await runCommand('curl -s https://ip.codex.storage');
             }
 
+            if (config.dataDir.length < 1) throw new Error("Missing config: dataDir");
+            if (config.logsDir.length < 1) throw new Error("Missing config: logsDir");
+            const logFilePath = getCurrentLogFile(config);
+
+            console.log(showInfoMessage(
+                `Data location: ${config.dataDir}\n` +
+                `Logs: ${logFilePath}`
+            ));
+
             const executable = config.codexExe;
             const args = [
-                `--data-dir=datadir`,
+                `--data-dir=${config.dataDir}`,
+                `--log-file=${logFilePath}`,
                 `--disc-port=${discPort}`,
                 `--listen-addrs=/ip4/0.0.0.0/tcp/${listenPort}`,
                 `--nat=${nat}`,

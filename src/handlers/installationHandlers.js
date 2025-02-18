@@ -9,7 +9,7 @@ import { runCommand } from '../utils/command.js';
 import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
 import { checkDependencies } from '../services/nodeService.js';
 import { saveConfig } from '../services/config.js';
-import { getCodexInstallPath } from '../utils/appdata.js';
+import { getCodexInstallPath, getCodexDataDirDefaultPath, getCodexLogsPath } from '../utils/appdata.js';
 
 const platform = os.platform();
 
@@ -83,6 +83,8 @@ export async function checkCodexInstallation(config, showNavigationMenu) {
 
 async function saveCodexExePathToConfig(config, codexExePath) {
     config.codexExe = codexExePath;
+    config.dataDir = getCodexDataDirDefaultPath();
+    config.logsDir = getCodexLogsPath();
     if (!fs.existsSync(config.codexExe)) {
         console.log(showErrorMessage(`Codex executable not found in expected path: ${config.codexExe}`));
         throw new Error("Exe not found");

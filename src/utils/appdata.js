@@ -2,17 +2,26 @@ import path from 'path';
 import fs from 'fs';
 
 export function getAppDataDir() {
-  return getExists("codex-cli");
+  return ensureExists(appData("codex-cli"));
 }
 
 export function getCodexInstallPath() {
-  return getExists("codex");
+  return ensureExists(path.join(appData("codex"), "bin"));
 }
 
-function getExists(appName) {
-  const dir = appData(appName);
+export function getCodexDataDirDefaultPath() {
+  // This path does not exist on first startup. That's good: Codex will
+  // create it with the required access permissions.
+  return path.join(appData("codex"), "datadir");
+}
+
+export function getCodexLogsPath() {
+  return ensureExists(path.join(appData("codex"), "logs"));
+}
+
+function ensureExists(dir) {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+    fs.mkdirSync(dir, { recursive: true });
   }
   return dir;
 }
