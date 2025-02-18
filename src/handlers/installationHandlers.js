@@ -9,7 +9,7 @@ import { runCommand } from '../utils/command.js';
 import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
 import { checkDependencies } from '../services/nodeService.js';
 import { saveConfig } from '../services/config.js';
-import { getCodexInstallPath, getCodexDataDirDefaultPath, getCodexLogsPath } from '../utils/appdata.js';
+import { getCodexRootPath, getCodexBinPath, getCodexDataDirDefaultPath, getCodexLogsPath } from '../utils/appdata.js';
 
 const platform = os.platform();
 
@@ -96,6 +96,13 @@ async function saveCodexExePathToConfig(config, codexExePath) {
     saveConfig(config);
 }
 
+async function clearCodexExePathFromConfig(config) {
+    config.codexExe = "";
+    config.dataDir = "";
+    config.logsDir = "";
+    saveConfig(config);
+}
+
 export async function installCodex(config, showNavigationMenu) {
     const agreed = await showPrivacyDisclaimer();
     if (!agreed) {
@@ -104,7 +111,7 @@ export async function installCodex(config, showNavigationMenu) {
         return;
     }
 
-    const installPath = getCodexInstallPath();
+    const installPath = getCodexBinPath();
     console.log(showInfoMessage("Install location: " + installPath));
 
     const spinner = createSpinner('Installing Codex...').start();
@@ -201,12 +208,19 @@ export async function installCodex(config, showNavigationMenu) {
     }
 }
 
-export async function uninstallCodex(showNavigationMenu) {
+function removeDir(dir) {
+    fs.rmSync(dir, { recursive: true, force: true });
+}
+
+export async function uninstallCodex(config, showNavigationMenu) {
     const { confirm } = await inquirer.prompt([
         {
             type: 'confirm',
             name: 'confirm',
-            message: chalk.yellow('⚠️  Are you sure you want to uninstall Codex? This action cannot be undone.'),
+            message: chalk.yellow(
+                '⚠️  Are you sure you want to uninstall Codex? This action cannot be undone. \n' +
+                'All data stored in the local Codex node will be deleted as well.'
+            ),
             default: false
         }
     ]);
@@ -218,26 +232,9 @@ export async function uninstallCodex(showNavigationMenu) {
     }
 
     try {
-        if (platform === 'win32') {
-            console.log(showInfoMessage('Removing Codex from Windows...'));
-            
-            await runCommand('netsh advfirewall firewall delete rule name="Allow Codex (TCP-In)"');
-            await runCommand('netsh advfirewall firewall delete rule name="Allow Codex (UDP-In)"');
-            
-            await runCommand('rd /s /q "%LOCALAPPDATA%\\Codex"');
-            
-            console.log(showInfoMessage(
-                'To complete uninstallation:\n\n' +
-                '1. Open Control Panel → System → Advanced System settings → Environment Variables\n' +
-                '2. Or type "environment variables" in Windows Search\n' +
-                '3. Remove "%LOCALAPPDATA%\\Codex" from your Path variable'
-            ));
-        } else {
-            const binaryPath = '/usr/local/bin/codex';
-            console.log(showInfoMessage(`Attempting to remove Codex binary from ${binaryPath}...`));
-            await runCommand(`sudo rm ${binaryPath}`);
-        }
-        
+        removeDir(getCodexRootPath());
+        clearCodexExePathFromConfig(config);
+
         console.log(showSuccessMessage('Codex has been successfully uninstalled.'));
         await showNavigationMenu();
     } catch (error) {

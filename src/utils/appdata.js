@@ -5,7 +5,11 @@ export function getAppDataDir() {
   return ensureExists(appData("codex-cli"));
 }
 
-export function getCodexInstallPath() {
+export function getCodexRootPath() {
+  return ensureExists(appData("codex"));
+}
+
+export function getCodexBinPath() {
   return ensureExists(path.join(appData("codex"), "bin"));
 }
 

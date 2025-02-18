@@ -120,7 +120,7 @@ export async function main() {
                     await showLocalFiles(showNavigationMenu);
                     break;
                 case '7':
-                    await uninstallCodex(showNavigationMenu);
+                    await uninstallCodex(config, showNavigationMenu);
                     break;
                 case '8':
                     const { exec } = await import('child_process');
