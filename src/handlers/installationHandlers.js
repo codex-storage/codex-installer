@@ -7,8 +7,9 @@ import fs from 'fs';
 import { createSpinner } from 'nanospinner';
 import { runCommand } from '../utils/command.js';
 import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
-import { checkDependencies, isCodexInstalled } from '../services/nodeService.js';
+import { checkDependencies } from '../services/nodeService.js';
 import { saveConfig } from '../services/config.js';
+import { getCodexInstallPath } from '../utils/appdata.js';
 
 const platform = os.platform();
 
@@ -101,6 +102,9 @@ export async function installCodex(config, showNavigationMenu) {
         return;
     }
 
+    const installPath = getCodexInstallPath();
+    console.log(showInfoMessage("Install location: " + installPath));
+
     const spinner = createSpinner('Installing Codex...').start();
 
     try {
@@ -114,9 +118,9 @@ export async function installCodex(config, showNavigationMenu) {
                 }
 
                 await runCommand('curl -LO --ssl-no-revoke https://get.codex.storage/install.cmd');
-                await runCommand(`"${process.cwd()}\\install.cmd"`);
+                await runCommand(`set "INSTALL_DIR=${installPath}" && "${process.cwd()}\\install.cmd"`);
                 
-                await saveCodexExePathToConfig(config, path.join(process.env.LOCALAPPDATA, "Codex", "codex.exe"));
+                await saveCodexExePathToConfig(config, path.join(installPath, "codex.exe"));
 
                 try {
                     await runCommand('del /f install.cmd');
@@ -148,18 +152,17 @@ export async function installCodex(config, showNavigationMenu) {
                         eval {
                             local $SIG{ALRM} = sub { die "timeout\\n" };
                             alarm(120);
-                            system("bash install.sh");
+                            system("INSTALL_DIR="${installPath}" bash install.sh");
                             alarm(0);
                         };
                         die if $@;
                     '`;
                     await runCommand(timeoutCommand);
                 } else {
-                    await runCommand('timeout 120 bash install.sh');
+                    await runCommand(`INSTALL_DIR="${installPath}" timeout 120 bash install.sh`);
                 }
 
-                const codexExePath = (await runCommand("which codex")).replace("\n", "");
-                await saveCodexExePathToConfig(config, codexExePath);
+                await saveCodexExePathToConfig(config, path.join(installPath, "codex"));
                 
             } catch (error) {
                 if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {

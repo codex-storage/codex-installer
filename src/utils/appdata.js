@@ -2,7 +2,15 @@ import path from 'path';
 import fs from 'fs';
 
 export function getAppDataDir() {
-  const dir = appData("codex-cli");
+  return getExists("codex-cli");
+}
+
+export function getCodexInstallPath() {
+  return getExists("codex");
+}
+
+function getExists(appName) {
+  const dir = appData(appName);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
