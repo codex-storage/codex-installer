@@ -60,7 +60,7 @@ export async function getCodexVersion(config) {
     if (config.codexExe.length < 1) return "";
 
     try {
-        const version = await runCommand(`${config.codexExe} --version`);
+        const version = await runCommand(`"${config.codexExe}" --version`);
         if (version.length < 1) throw new Error("Version info not found.");
         return version;
     } catch (error) {

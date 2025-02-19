@@ -84,8 +84,8 @@ export async function runCodex(config, showNavigationMenu) {
 
             const executable = config.codexExe;
             const args = [
-                `--data-dir=${config.dataDir}`,
-                `--log-file=${logFilePath}`,
+                `--data-dir="${config.dataDir}"`,
+                `--log-file="${logFilePath}"`,
                 `--disc-port=${discPort}`,
                 `--listen-addrs=/ip4/0.0.0.0/tcp/${listenPort}`,
                 `--nat=${nat}`,
@@ -94,7 +94,7 @@ export async function runCodex(config, showNavigationMenu) {
             ];
 
             const command = 
-                `${executable} ${args.join(" ")}`
+                `"${executable}" ${args.join(" ")}`
             
             console.log(showInfoMessage(
                 '🚀 Codex node is running...\n\n' +
