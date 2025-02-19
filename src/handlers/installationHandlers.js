@@ -161,7 +161,7 @@ export async function installCodex(config, showNavigationMenu) {
                         eval {
                             local $SIG{ALRM} = sub { die "timeout\\n" };
                             alarm(120);
-                            system("INSTALL_DIR=\"${installPath}\" bash install.sh");
+                            system("INSTALL_DIR=\\"${installPath}\\" bash install.sh");
                             alarm(0);
                         };
                         die if $@;
