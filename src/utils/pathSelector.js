@@ -18,9 +18,31 @@ function splitPath(str) {
   return str.replaceAll("\\", "/").split("/");
 }
 
+function dropEmptyParts(parts) {
+  var result = [];
+  parts.forEach(function(part) {
+    if (part.length > 0) {
+      result.push(part);
+    }
+  })
+  return result;
+}
+
+function combine(parts) {
+  const toJoin = dropEmptyParts(parts);
+  if (toJoin.length == 1) return toJoin[0];
+  return path.join(...toJoin);
+}
+
+function combineWith(parts, extra) {
+  const toJoin = dropEmptyParts(parts);
+  if (toJoin.length == 1) return path.join(toJoin[0], extra);
+  return path.join(...toJoin, extra);
+}
+
 function showCurrent(currentPath) {
   const len = currentPath.length;
-  showMsg(`Current path: [${len}]\n` + path.join(...currentPath));
+  showMsg(`Current path: [${len}]\n` + combine(currentPath));
 }
 
 async function showMain(currentPath) {
@@ -34,10 +56,9 @@ async function showMain(currentPath) {
             '1. Enter path',
             '2. Go up one',
             '3. Go down one',
-            '4. Check path exists',
-            '5. Create new folder here',
-            '6. Select this path',
-            '7. Cancel'
+            '4. Create new folder here',
+            '5. Select this path',
+            '6. Cancel'
         ],
         pageSize: 6,
         loop: true
@@ -50,15 +71,15 @@ async function showMain(currentPath) {
   return choice;
 }
 
-export async function selectPath() {
-  var currentPath = splitPath(process.cwd());
+export async function showPathSelector(startingPath, pathMustExist) {
+  var currentPath = splitPath(startingPath);
 
   while (true) {
     const choice = await showMain(currentPath);
 
     switch (choice.split('.')[0]) {
       case '1':
-          currentPath = await enterPath();
+          currentPath = await enterPath(currentPath, pathMustExist);
           break;
       case '2':
           currentPath = upOne(currentPath);
@@ -67,24 +88,22 @@ export async function selectPath() {
           currentPath = await downOne(currentPath);
           break;
       case '4':
-          await checkExists(currentPath);
+          currentPath = await createSubDir(currentPath, pathMustExist);
           break;
       case '5':
-          currentPath = await createSubDir(currentPath);
-          break;
-      case '6':
-        if (!isDir(currentPath)) {
+        if (pathMustExist && !isDir(combine(currentPath))) {
           console.log("Current path does not exist.");
+          break;
         } else {
-          return currentPath;
+          return combine(currentPath);
         }
-      case '7':
-          return "";
+      case '6':
+          return combine(currentPath);
     }
   }
 }
 
-async function enterPath() {
+async function enterPath(currentPath, pathMustExist) {
   const response = await inquirer.prompt([
     {
         type: 'input',
@@ -92,6 +111,11 @@ async function enterPath() {
         message: 'Enter Path:'
     }]);
 
+  const newPath = response.path;
+  if (pathMustExist && !isDir(newPath)) {
+    console.log("The entered path does not exist.");
+    return currentPath;
+  }
   return splitPath(response.path);
 }
 
@@ -99,20 +123,30 @@ function upOne(currentPath) {
   return currentPath.slice(0, currentPath.length - 1);
 }
 
-function isDir(dir) {
-  return fs.lstatSync(dir).isDirectory();
+export function isDir(dir) {
+  try {
+    return fs.lstatSync(dir).isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 function isSubDir(currentPath, entry) {
-  const newPath = path.join(...currentPath, entry);
+  const newPath = combineWith(currentPath, entry);
   return isDir(newPath);
 }
 
 function getSubDirOptions(currentPath) {
-  const entries = fs.readdirSync(path.join(...currentPath));
+  const fullPath = combine(currentPath);
+  currentPath.forEach(function(part) {
+    console.log("part: '" + part + "'");
+  });
+  console.log("current: '" + fullPath + "'");
+  const entries = fs.readdirSync(fullPath);
   var result = [];
   var counter = 1;
   entries.forEach(function(entry) {
+    console.log("entry: " + entry);
     if (isSubDir(currentPath, entry)) {
       result.push(counter + ". " + entry);
     }
@@ -144,15 +178,7 @@ async function downOne(currentPath) {
   return [...currentPath, subDir];
 }
 
-async function checkExists(currentPath) {
-  if (!isDir(path.join(...currentPath))) {
-    console.log("Current path does not exist.");
-  } else{
-    console.log("Current path exists.");
-  }
-}
-
-async function createSubDir(currentPath) {
+async function createSubDir(currentPath, pathMustExist) {
   const response = await inquirer.prompt([
     {
         type: 'input',
@@ -163,7 +189,9 @@ async function createSubDir(currentPath) {
   const name = response.name;
   if (name.length < 1) return;
 
-  const fullDir = path.join(...currentPath, name);
-  fs.mkdirSync(fullDir);
+  const fullDir = combineWith(currentPath, name);
+  if (pathMustExist && !isDir(fullDir)) {
+    fs.mkdirSync(fullDir);
+  }
   return [...currentPath, name];
 }

@@ -117,7 +117,6 @@ export async function installCodex(config, showNavigationMenu) {
     const spinner = createSpinner('Installing Codex...').start();
 
     try {
-        
         if (platform === 'win32') {
             try {
                 try {
@@ -198,6 +197,10 @@ export async function installCodex(config, showNavigationMenu) {
         } catch (error) {
             throw new Error('Installation completed but Codex command is not available. Please restart your terminal and try again.');
         }
+
+        console.log(showInfoMessage(
+            "Please review the configuration before starting Codex."
+        ));
         
         spinner.success();
         await showNavigationMenu();
