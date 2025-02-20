@@ -3,6 +3,7 @@ import inquirer from 'inquirer';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import fs from 'fs';
+import { filesystemSync } from 'fs-filesystem';
 
 function showMsg(msg) {
   console.log(boxen(chalk.white(msg), {
@@ -13,6 +14,16 @@ function showMsg(msg) {
     titleAlignment: 'center'
   }));
 }
+
+// function getAvailableRoots() {
+//   const platform = os.platform();
+//   if (platform === 'win32') {
+//       const result = await runCommand('for /f "delims=" %a in (\'curl -s --ssl-reqd ip.codex.storage\') do @echo %a');
+//       nat = result.trim();
+//   } else {
+//       nat = await runCommand('curl -s https://ip.codex.storage');
+//   }
+// }
 
 function splitPath(str) {
   return str.replaceAll("\\", "/").split("/");
@@ -43,6 +54,15 @@ function combineWith(parts, extra) {
 function showCurrent(currentPath) {
   const len = currentPath.length;
   showMsg(`Current path: [${len}]\n` + combine(currentPath));
+
+  if (len < 2) {
+    showMsg(
+      'Warning - Known issue:\n' +
+      'Path selection does not work in root paths on some platforms.\n' +
+      'Use "Enter path" or "Create new folder" to navigate and create folders\n' +
+      'if this is the case for you.'
+    );
+  }
 }
 
 async function showMain(currentPath) {
