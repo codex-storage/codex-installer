@@ -15,15 +15,21 @@ function showMsg(msg) {
   }));
 }
 
-// function getAvailableRoots() {
-//   const platform = os.platform();
-//   if (platform === 'win32') {
-//       const result = await runCommand('for /f "delims=" %a in (\'curl -s --ssl-reqd ip.codex.storage\') do @echo %a');
-//       nat = result.trim();
-//   } else {
-//       nat = await runCommand('curl -s https://ip.codex.storage');
-//   }
-// }
+function getAvailableRoots() {
+  const devices = filesystemSync();
+  var mountPoints = [];
+  Object.keys(devices).forEach(function(key) {
+      var val = devices[key];
+      val.volumes.forEach(function(volume) {
+          mountPoints.push(volume.mountPoint);
+      });
+    });
+
+  if (mountPoints.length < 1) {
+    throw new Error("Failed to detect file system devices.");
+  }
+  return mountPoints;
+}
 
 function splitPath(str) {
   return str.replaceAll("\\", "/").split("/");
@@ -65,6 +71,19 @@ function showCurrent(currentPath) {
   }
 }
 
+function hasValidRoot(roots, checkPath) {
+  if (checkPath.length < 1) return false;
+  var result = false;
+  roots.forEach(function(root) {
+    if (root.toLowerCase() == checkPath[0].toLowerCase()) {
+      console.log("valid root: " + combine(checkPath));
+      result = true;
+    }
+  });
+  if (!result) console.log("invalid root: " + combine(checkPath));
+  return result;
+}
+
 async function showMain(currentPath) {
   showCurrent(currentPath);
   const { choice } = await inquirer.prompt([
@@ -92,23 +111,28 @@ async function showMain(currentPath) {
 }
 
 export async function showPathSelector(startingPath, pathMustExist) {
+  const roots = getAvailableRoots();
   var currentPath = splitPath(startingPath);
+  if (!hasValidRoot(roots, currentPath)) {
+    currentPath = [roots[0]];
+  }
 
   while (true) {
     const choice = await showMain(currentPath);
 
+    var newCurrentPath = currentPath;
     switch (choice.split('.')[0]) {
       case '1':
-          currentPath = await enterPath(currentPath, pathMustExist);
+          newCurrentPath = await enterPath(currentPath, pathMustExist);
           break;
       case '2':
-          currentPath = upOne(currentPath);
+          newCurrentPath = upOne(currentPath);
           break;
       case '3':
-          currentPath = await downOne(currentPath);
+          newCurrentPath = await downOne(currentPath);
           break;
       case '4':
-          currentPath = await createSubDir(currentPath, pathMustExist);
+          newCurrentPath = await createSubDir(currentPath, pathMustExist);
           break;
       case '5':
         if (pathMustExist && !isDir(combine(currentPath))) {
@@ -119,6 +143,12 @@ export async function showPathSelector(startingPath, pathMustExist) {
         }
       case '6':
           return combine(currentPath);
+    }
+
+    if (hasValidRoot(roots, newCurrentPath)) {
+      currentPath = newCurrentPath;
+    } else {
+      console.log("Selected path has no valid root.");
     }
   }
 }
@@ -158,17 +188,13 @@ function isSubDir(currentPath, entry) {
 
 function getSubDirOptions(currentPath) {
   const fullPath = combine(currentPath);
-  currentPath.forEach(function(part) {
-    console.log("part: '" + part + "'");
-  });
-  console.log("current: '" + fullPath + "'");
   const entries = fs.readdirSync(fullPath);
   var result = [];
   var counter = 1;
   entries.forEach(function(entry) {
-    console.log("entry: " + entry);
     if (isSubDir(currentPath, entry)) {
-      result.push(counter + ". " + entry);
+      result.push(counter + '. ' + entry);
+      counter = counter + 1;
     }
   });
   return result;
@@ -194,7 +220,7 @@ async function downOne(currentPath) {
     return currentPath;
   });
 
-  const subDir = choice.slice(3);
+  const subDir = choice.split('. ')[1];
   return [...currentPath, subDir];
 }
 

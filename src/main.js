@@ -11,7 +11,6 @@ import { runCodex, checkNodeStatus } from './handlers/nodeHandlers.js';
 import { showInfoMessage } from './utils/messages.js';
 import { loadConfig } from './services/config.js';
 import { showConfigMenu } from './configmenu.js';
-import {filesystemSync} from 'fs-filesystem';
 
 async function showNavigationMenu() {
     console.log('\n')
@@ -53,20 +52,6 @@ function handleExit() {
 }
 
 export async function main() {
-
-    const result = filesystemSync();
-    console.log('devices', JSON.stringify(result));
-
-    Object.keys(result).forEach(function(key) {
-        var val = result[key];
-        val.volumes.forEach(function(volume) {
-            console.log("mounting point: " + volume.mountPoint);
-        });
-      });
-
-    return;
-
-
     const commandArgs = parseCommandLineArgs();
     if (commandArgs) {
         switch (commandArgs.command) {
