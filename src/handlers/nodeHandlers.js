@@ -85,7 +85,9 @@ export async function runCodex(config, showNavigationMenu) {
             const executable = config.codexExe;
             const args = [
                 `--data-dir="${config.dataDir}"`,
+                `--log-level=DEBUG`,
                 `--log-file="${logFilePath}"`,
+                `--storage-quota="${config.storageQuota}"`,
                 `--disc-port=${discPort}`,
                 `--listen-addrs=/ip4/0.0.0.0/tcp/${listenPort}`,
                 `--nat=${nat}`,

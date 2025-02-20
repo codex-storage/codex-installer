@@ -3,7 +3,32 @@ import chalk from 'chalk';
 import { showErrorMessage, showInfoMessage } from './utils/messages.js';
 import { isDir, showPathSelector } from './utils/pathSelector.js';
 import { saveConfig } from './services/config.js';
+import { showNumberSelector } from './utils/numberSelector.js';
 import fs from 'fs-extra';
+
+function bytesAmountToString(numBytes) {
+  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  
+  var value = numBytes;
+  var index = 0;
+  while (value > 1024) {
+    index = index + 1;
+    value = value / 1024;
+  }
+
+  if (index == 0) return `${numBytes} Bytes`;
+  return `${numBytes} Bytes (${value} ${units[index]})`;
+}
+
+async function showStorageQuotaSelector(config) {
+  console.log(showInfoMessage('You can use: "GB" or "gb", etc.'));
+  const result = await showNumberSelector(config.storageQuota, "Storage quota", true);
+  if (result < (100 * 1024 * 1024)) {
+    console.log(showErrorMessage("Storage quote should be >= 100mb."));
+    return config.storageQuota;
+  }
+  return result;
+}
 
 export async function showConfigMenu(config) {
     var newDataDir = config.dataDir;
@@ -18,7 +43,7 @@ export async function showConfigMenu(config) {
                     choices: [
                         `1. Data path = "${newDataDir}"`,
                         `2. Logs path = "${config.logsDir}"`,
-                        '3. Storage quota = TODO',
+                        `3. Storage quota = ${bytesAmountToString(config.storageQuota)}`,
                         '4. Discovery port = TODO',
                         '5. P2P listen port = TODO',
                         '6. API port = TODO',
@@ -43,6 +68,7 @@ export async function showConfigMenu(config) {
                     config.logsDir = await showPathSelector(config.logsDir, true);
                     break;
                 case '3':
+                    config.storageQuota = await showStorageQuotaSelector(config);
                     break;
                 case '4':
                     break;

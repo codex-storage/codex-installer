@@ -81,10 +81,11 @@ export async function checkCodexInstallation(config, showNavigationMenu) {
     }
 }
 
-async function saveCodexExePathToConfig(config, codexExePath) {
+async function saveDefaultCodexConfig(config, codexExePath) {
     config.codexExe = codexExePath;
     config.dataDir = getCodexDataDirDefaultPath();
     config.logsDir = getCodexLogsPath();
+    config.storageQuota = 8 * 1024 * 1024 * 1024;
     if (!fs.existsSync(config.codexExe)) {
         console.log(showErrorMessage(`Codex executable not found in expected path: ${config.codexExe}`));
         throw new Error("Exe not found");
@@ -128,7 +129,7 @@ export async function installCodex(config, showNavigationMenu) {
                 await runCommand('curl -LO --ssl-no-revoke https://get.codex.storage/install.cmd');
                 await runCommand(`set "INSTALL_DIR=${installPath}" && "${process.cwd()}\\install.cmd"`);
                 
-                await saveCodexExePathToConfig(config, path.join(installPath, "codex.exe"));
+                await saveDefaultCodexConfig(config, path.join(installPath, "codex.exe"));
 
                 try {
                     await runCommand('del /f install.cmd');
@@ -170,7 +171,7 @@ export async function installCodex(config, showNavigationMenu) {
                     await runCommand(`INSTALL_DIR="${installPath}" timeout 120 bash install.sh`);
                 }
 
-                await saveCodexExePathToConfig(config, path.join(installPath, "codex"));
+                await saveDefaultCodexConfig(config, path.join(installPath, "codex"));
                 
             } catch (error) {
                 if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {

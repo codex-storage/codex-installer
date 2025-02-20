@@ -8,8 +8,8 @@ const defaultConfig = {
   // TODO:
   // Save user-selected config options. Use these when starting Codex.
   dataDir: "",
-  logsDir: ""
-  // storageQuota: 0,
+  logsDir: "",
+  storageQuota: 0,
   // ports: {
   //   discPort: 8090,
   //   listenPort: 8070,
