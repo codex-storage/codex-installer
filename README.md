@@ -1,6 +1,6 @@
-# Codex Storage CLI
+# Codex Installer
 
-A command-line interface for interacting with Codex Storage.
+A command-line interface for installing and interacting with Codex Storage.
 
 ## Features
 
