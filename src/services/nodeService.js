@@ -21,9 +21,9 @@ export async function getWalletAddress() {
     return currentWallet;
 }
 
-export async function isNodeRunning() {
+export async function isNodeRunning(config) {
     try {
-        const response = await axios.get('http://localhost:8080/api/codex/v1/debug/info');
+        const response = await axios.get(`http://localhost:${config.ports.apiPort}/api/codex/v1/debug/info`);
         return response.status === 200;
     } catch (error) {
         return false;
@@ -105,12 +105,12 @@ export async function checkDependencies() {
     return true;
 }
 
-export async function startPeriodicLogging() {
+export async function startPeriodicLogging(config) {
     const FIFTEEN_MINUTES = 15 * 60 * 1000; // 15 minutes in milliseconds
     
     const logNodeInfo = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/api/codex/v1/debug/info');
+            const response = await axios.get(`http://localhost:${config.ports.apiPort}/api/codex/v1/debug/info`);
             if (response.status === 200) {
                 await logToSupabase(response.data);
             }

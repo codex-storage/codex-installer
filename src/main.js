@@ -108,16 +108,16 @@ export async function main() {
                     await runCodex(config, showNavigationMenu);
                     return;
                 case '4':
-                    await checkNodeStatus(showNavigationMenu);
+                    await checkNodeStatus(config, showNavigationMenu);
                     break;
                 case '5':
-                    await uploadFile(null, handleCommandLineOperation, showNavigationMenu);
+                    await uploadFile(config, null, handleCommandLineOperation, showNavigationMenu);
                     break;
                 case '6':
-                    await downloadFile(null, handleCommandLineOperation, showNavigationMenu);
+                    await downloadFile(config, null, handleCommandLineOperation, showNavigationMenu);
                     break;
                 case '7':
-                    await showLocalFiles(showNavigationMenu);
+                    await showLocalFiles(config, showNavigationMenu);
                     break;
                 case '8':
                     await uninstallCodex(config, showNavigationMenu);
