@@ -44,9 +44,9 @@ export async function showConfigMenu(config) {
                         `1. Data path = "${newDataDir}"`,
                         `2. Logs path = "${config.logsDir}"`,
                         `3. Storage quota = ${bytesAmountToString(config.storageQuota)}`,
-                        '4. Discovery port = TODO',
-                        '5. P2P listen port = TODO',
-                        '6. API port = TODO',
+                        `4. Discovery port = ${config.ports.discPort}`,
+                        `5. P2P listen port = ${config.ports.listenPort}`,
+                        `6. API port = ${config.ports.apiPort}`,
                         '7. Save changes and exit',
                         '8. Discard changes and exit'
                     ],
@@ -71,10 +71,13 @@ export async function showConfigMenu(config) {
                     config.storageQuota = await showStorageQuotaSelector(config);
                     break;
                 case '4':
+                    config.ports.discPort = await showNumberSelector(config.ports.discPort, "Discovery Port (UDP)", false);
                     break;
                 case '5':
+                    config.ports.listenPort = await showNumberSelector(config.ports.listenPort, "Listen Port (TCP)", false);
                     break;
                 case '6':
+                    config.ports.apiPort = await showNumberSelector(config.ports.apiPort, "API Port (TCP)", false);
                     break;
                 case '7':
                     // save changes, back to main menu

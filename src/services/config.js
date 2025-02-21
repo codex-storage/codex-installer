@@ -5,17 +5,15 @@ import { getCodexDataDirDefaultPath, getCodexLogsDefaultPath } from '../utils/ap
 
 const defaultConfig = {
   codexExe: "",
-  
-  // TODO:
-  // Save user-selected config options. Use these when starting Codex.
+  // User-selected config options:
   dataDir: getCodexDataDirDefaultPath(),
   logsDir: getCodexLogsDefaultPath(),
-  storageQuota: 8 * 1024 * 1024 * 1024
-  // ports: {
-  //   discPort: 8090,
-  //   listenPort: 8070,
-  //   apiPort: 8080
-  // }
+  storageQuota: 8 * 1024 * 1024 * 1024,
+  ports: {
+    discPort: 8090,
+    listenPort: 8070,
+    apiPort: 8080
+  }
 };
 
 function getConfigFilename() {
