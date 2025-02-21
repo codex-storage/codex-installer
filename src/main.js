@@ -6,7 +6,7 @@ import boxen from 'boxen';
 import { ASCII_ART } from './constants/ascii.js';
 import { handleCommandLineOperation, parseCommandLineArgs } from './cli/commandParser.js';
 import { uploadFile, downloadFile, showLocalFiles } from './handlers/fileHandlers.js';
-import { checkCodexInstallation, installCodex, uninstallCodex } from './handlers/installationHandlers.js';
+import { installCodex, uninstallCodex } from './handlers/installationHandlers.js';
 import { runCodex, checkNodeStatus } from './handlers/nodeHandlers.js';
 import { showInfoMessage } from './utils/messages.js';
 import { loadConfig } from './services/config.js';
@@ -99,7 +99,7 @@ export async function main() {
  
             switch (choice.split('.')[0]) {
                 case '1':
-                    await checkCodexInstallation(config, showNavigationMenu);
+                    await installCodex(config, showNavigationMenu);
                     break;
                 case '2':
                     await showConfigMenu(config);
