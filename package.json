@@ -25,6 +25,7 @@
     "mime-types": "^2.1.35",
     "nanospinner": "^1.1.0",
     "fs-extra": "^11.3.0",
-    "fs-filesystem": "^2.1.2"
+    "fs-filesystem": "^2.1.2",
+    "open": "^10.1.0"
   }
 }

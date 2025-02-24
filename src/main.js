@@ -11,6 +11,7 @@ import { runCodex, checkNodeStatus } from './handlers/nodeHandlers.js';
 import { showInfoMessage } from './utils/messages.js';
 import { loadConfig } from './services/config.js';
 import { showConfigMenu } from './configmenu.js';
+import { openCodexApp } from './services/codexapp.js';
 
 async function showNavigationMenu() {
     console.log('\n')
@@ -81,15 +82,16 @@ export async function main() {
                         '1. Download and install Codex',
                         '2. Edit Codex configuration',
                         '3. Run Codex node',
-                        '4. Check node status',
-                        '5. Upload a file',
-                        '6. Download a file',
-                        '7. Show local data',
-                        '8. Uninstall Codex node',
-                        '9. Submit feedback',
-                        '10. Exit'
+                        '4. Open Codex App',
+                        '5. Check node status',
+                        '6. Upload a file',
+                        '7. Download a file',
+                        '8. Show local data',
+                        '9. Uninstall Codex node',
+                        '10. Submit feedback',
+                        '11. Exit'
                     ],
-                    pageSize: 10,
+                    pageSize: 11,
                     loop: true
                 }
             ]).catch(() => {
@@ -111,28 +113,31 @@ export async function main() {
                     await runCodex(config, showNavigationMenu);
                     return;
                 case '4':
-                    await checkNodeStatus(config, showNavigationMenu);
+                    openCodexApp(config);
                     break;
                 case '5':
-                    await uploadFile(config, null, handleCommandLineOperation, showNavigationMenu);
+                    await checkNodeStatus(config, showNavigationMenu);
                     break;
                 case '6':
-                    await downloadFile(config, null, handleCommandLineOperation, showNavigationMenu);
+                    await uploadFile(config, null, handleCommandLineOperation, showNavigationMenu);
                     break;
                 case '7':
-                    await showLocalFiles(config, showNavigationMenu);
+                    await downloadFile(config, null, handleCommandLineOperation, showNavigationMenu);
                     break;
                 case '8':
-                    await uninstallCodex(config, showNavigationMenu);
+                    await showLocalFiles(config, showNavigationMenu);
                     break;
                 case '9':
+                    await uninstallCodex(config, showNavigationMenu);
+                    break;
+                case '10':
                     const { exec } = await import('child_process');
                     const url = 'https://docs.google.com/forms/d/1U21xp6shfDkJWzJSKHhUjwIE7fsYk94gmLUKAbxUMcw/edit';
                     const command = process.platform === 'win32' ? `start ${url}` : process.platform === 'darwin' ? `open ${url}` : `xdg-open ${url}`;
                     exec(command);
                     console.log(showInfoMessage('Opening feedback form in your browser...'));
                     break;
-                case '10':
+                case '11':
                     handleExit();
                     return;
             }
