@@ -6,10 +6,11 @@ import boxen from 'boxen';
 import { ASCII_ART } from './constants/ascii.js';
 import { handleCommandLineOperation, parseCommandLineArgs } from './cli/commandParser.js';
 import { uploadFile, downloadFile, showLocalFiles } from './handlers/fileHandlers.js';
-import { checkCodexInstallation, installCodex, uninstallCodex } from './handlers/installationHandlers.js';
+import { installCodex, uninstallCodex } from './handlers/installationHandlers.js';
 import { runCodex, checkNodeStatus } from './handlers/nodeHandlers.js';
 import { showInfoMessage } from './utils/messages.js';
 import { loadConfig } from './services/config.js';
+import { showConfigMenu } from './configmenu.js';
 
 async function showNavigationMenu() {
     console.log('\n')
@@ -78,57 +79,62 @@ export async function main() {
                     message: 'Select an option:',
                     choices: [
                         '1. Download and install Codex',
-                        '2. Run Codex node',
-                        '3. Check node status',
-                        '4. Upload a file',
-                        '5. Download a file',
-                        '6. Show local data',
-                        '7. Uninstall Codex node',
-                        '8. Submit feedback',
-                        '9. Exit'
+                        '2. Edit Codex configuration',
+                        '3. Run Codex node',
+                        '4. Check node status',
+                        '5. Upload a file',
+                        '6. Download a file',
+                        '7. Show local data',
+                        '8. Uninstall Codex node',
+                        '9. Submit feedback',
+                        '10. Exit'
                     ],
-                    pageSize: 9,
+                    pageSize: 10,
                     loop: true
                 }
             ]).catch(() => {
                 handleExit();
-                return { choice: '9' };
+                return;
             });
-
-            if (choice.startsWith('9')) {
-                handleExit();
-                break;
-            }
-
+ 
             switch (choice.split('.')[0]) {
                 case '1':
-                    await checkCodexInstallation(config, showNavigationMenu);
+                    const installed = await installCodex(config, showNavigationMenu);
+                    if (installed) {
+                        await showConfigMenu(config);
+                    }
                     break;
                 case '2':
+                    await showConfigMenu(config);
+                    break;
+                case '3':
                     await runCodex(config, showNavigationMenu);
                     return;
-                case '3':
-                    await checkNodeStatus(showNavigationMenu);
-                    break;
                 case '4':
-                    await uploadFile(null, handleCommandLineOperation, showNavigationMenu);
+                    await checkNodeStatus(config, showNavigationMenu);
                     break;
                 case '5':
-                    await downloadFile(null, handleCommandLineOperation, showNavigationMenu);
+                    await uploadFile(config, null, handleCommandLineOperation, showNavigationMenu);
                     break;
                 case '6':
-                    await showLocalFiles(showNavigationMenu);
+                    await downloadFile(config, null, handleCommandLineOperation, showNavigationMenu);
                     break;
                 case '7':
-                    await uninstallCodex(config, showNavigationMenu);
+                    await showLocalFiles(config, showNavigationMenu);
                     break;
                 case '8':
+                    await uninstallCodex(config, showNavigationMenu);
+                    break;
+                case '9':
                     const { exec } = await import('child_process');
                     const url = 'https://docs.google.com/forms/d/1U21xp6shfDkJWzJSKHhUjwIE7fsYk94gmLUKAbxUMcw/edit';
                     const command = process.platform === 'win32' ? `start ${url}` : process.platform === 'darwin' ? `open ${url}` : `xdg-open ${url}`;
                     exec(command);
                     console.log(showInfoMessage('Opening feedback form in your browser...'));
                     break;
+                case '10':
+                    handleExit();
+                    return;
             }
 
             console.log('\n');

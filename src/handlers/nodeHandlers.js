@@ -43,27 +43,12 @@ export async function runCodex(config, showNavigationMenu) {
         return;
     }
 
-    const nodeAlreadyRunning = await isNodeRunning();
+    const nodeAlreadyRunning = await isNodeRunning(config);
 
     if (nodeAlreadyRunning) {
         console.log(showInfoMessage('A Codex node is already running.'));
         await showNavigationMenu();
     } else {
-        const { discPort, listenPort } = await inquirer.prompt([
-            {
-                type: 'number',
-                name: 'discPort',
-                message: 'Enter the discovery port (default is 8090):',
-                default: 8090
-            },
-            {
-                type: 'number',
-                name: 'listenPort',
-                message: 'Enter the listening port (default is 8070):',
-                default: 8070
-            }
-        ]);
-
         try {
             let nat;
             if (platform === 'win32') {
@@ -79,15 +64,19 @@ export async function runCodex(config, showNavigationMenu) {
 
             console.log(showInfoMessage(
                 `Data location: ${config.dataDir}\n` +
-                `Logs: ${logFilePath}`
+                `Logs: ${logFilePath}\n` +
+                `API port: ${config.ports.apiPort}`
             ));
 
             const executable = config.codexExe;
             const args = [
                 `--data-dir="${config.dataDir}"`,
+                `--log-level=DEBUG`,
                 `--log-file="${logFilePath}"`,
-                `--disc-port=${discPort}`,
-                `--listen-addrs=/ip4/0.0.0.0/tcp/${listenPort}`,
+                `--storage-quota="${config.storageQuota}"`,
+                `--disc-port=${config.ports.discPort}`,
+                `--listen-addrs=/ip4/0.0.0.0/tcp/${config.ports.listenPort}`,
+                `--api-port=${config.ports.apiPort}`,
                 `--nat=${nat}`,
                 `--api-cors-origin="*"`,
                 `--bootstrap-node=spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P`
@@ -108,7 +97,7 @@ export async function runCodex(config, showNavigationMenu) {
             await new Promise(resolve => setTimeout(resolve, 5000));
 
             try {
-                const response = await axios.get('http://localhost:8080/api/codex/v1/debug/info');
+                const response = await axios.get(`http://localhost:${config.ports.apiPort}/api/codex/v1/debug/info`);
                 if (response.status === 200) {
                     // Check if wallet exists
                     try {
@@ -126,7 +115,7 @@ export async function runCodex(config, showNavigationMenu) {
                     }
 
                     // Start periodic logging
-                    const stopLogging = await startPeriodicLogging();
+                    const stopLogging = await startPeriodicLogging(config);
                     
                     nodeProcess.on('exit', () => {
                         stopLogging();
@@ -260,13 +249,13 @@ async function showNodeDetails(data, showNavigationMenu) {
     }
 }
 
-export async function checkNodeStatus(showNavigationMenu) {
+export async function checkNodeStatus(config, showNavigationMenu) {
     try {
-        const nodeRunning = await isNodeRunning();
+        const nodeRunning = await isNodeRunning(config);
 
         if (nodeRunning) {
             const spinner = createSpinner('Checking node status...').start();
-            const response = await runCommand('curl http://localhost:8080/api/codex/v1/debug/info');
+            const response = await runCommand(`curl http://localhost:${config.ports.apiPort}/api/codex/v1/debug/info`);
             spinner.success();
             
             const data = JSON.parse(response);

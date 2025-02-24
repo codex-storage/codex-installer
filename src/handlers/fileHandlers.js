@@ -10,8 +10,8 @@ import path from 'path';
 import mime from 'mime-types';
 import axios from 'axios';
 
-export async function uploadFile(filePath = null, handleCommandLineOperation, showNavigationMenu) {
-    const nodeRunning = await isNodeRunning();
+export async function uploadFile(config, filePath = null, handleCommandLineOperation, showNavigationMenu) {
+    const nodeRunning = await isNodeRunning(config);
     if (!nodeRunning) {
         console.log(showErrorMessage('Codex node is not running. Try again after starting the node'));
         return handleCommandLineOperation() ? process.exit(1) : showNavigationMenu();
@@ -51,7 +51,7 @@ export async function uploadFile(filePath = null, handleCommandLineOperation, sh
         const spinner = createSpinner('Uploading file').start();
         try {
             const result = await runCommand(
-                `curl -X POST http://localhost:8080/api/codex/v1/data ` +
+                `curl -X POST http://localhost:${config.ports.apiPort}/api/codex/v1/data ` +
                 `-H 'Content-Type: ${contentType}' ` +
                 `-H 'Content-Disposition: attachment; filename="${filename}"' ` +
                 `-w '\\n' -T "${fileToUpload}"`
@@ -71,8 +71,8 @@ export async function uploadFile(filePath = null, handleCommandLineOperation, sh
     return handleCommandLineOperation() ? process.exit(0) : showNavigationMenu();
 }
 
-export async function downloadFile(cid = null, handleCommandLineOperation, showNavigationMenu) {
-    const nodeRunning = await isNodeRunning();
+export async function downloadFile(config, cid = null, handleCommandLineOperation, showNavigationMenu) {
+    const nodeRunning = await isNodeRunning(config);
     if (!nodeRunning) {
         console.log(showErrorMessage('Codex node is not running. Try again after starting the node'));
         return handleCommandLineOperation() ? process.exit(1) : showNavigationMenu();
@@ -95,7 +95,7 @@ export async function downloadFile(cid = null, handleCommandLineOperation, showN
         const spinner = createSpinner('Fetching file metadata...').start();
         try {
             // First, get the file metadata
-            const metadataResponse = await axios.post(`http://localhost:8080/api/codex/v1/data/${cidToDownload}/network`);
+            const metadataResponse = await axios.post(`http://localhost:${config.ports.apiPort}/api/codex/v1/data/${cidToDownload}/network`);
             const { manifest } = metadataResponse.data;
             const { filename, mimetype } = manifest;
 
@@ -103,7 +103,7 @@ export async function downloadFile(cid = null, handleCommandLineOperation, showN
             spinner.start('Downloading file...');
 
             // Then download the file with the correct filename
-            await runCommand(`curl "http://localhost:8080/api/codex/v1/data/${cidToDownload}/network/stream" -o "${filename}"`);
+            await runCommand(`curl "http://localhost:${config.ports.apiPort}/api/codex/v1/data/${cidToDownload}/network/stream" -o "${filename}"`);
             
             spinner.success();
             console.log(showSuccessMessage(
@@ -144,8 +144,8 @@ export async function downloadFile(cid = null, handleCommandLineOperation, showN
     return handleCommandLineOperation() ? process.exit(0) : showNavigationMenu();
 }
 
-export async function showLocalFiles(showNavigationMenu) {
-    const nodeRunning = await isNodeRunning();
+export async function showLocalFiles(config, showNavigationMenu) {
+    const nodeRunning = await isNodeRunning(config);
     if (!nodeRunning) {
         console.log(showErrorMessage('Codex node is not running. Try again after starting the node'));
         await showNavigationMenu();
@@ -154,11 +154,10 @@ export async function showLocalFiles(showNavigationMenu) {
 
     try {
         const spinner = createSpinner('Fetching local files...').start();
-        const filesResponse = await runCommand('curl http://localhost:8080/api/codex/v1/data -w \'\\n\'');
+        const filesResponse = await axios.get(`http://localhost:${config.ports.apiPort}/api/codex/v1/data`);
+        const filesData = filesResponse.data;
         spinner.success();
 
-        const filesData = JSON.parse(filesResponse);
-        
         if (filesData.content && filesData.content.length > 0) {
             console.log(showInfoMessage(`Found ${filesData.content.length} local file(s)`));
 
@@ -187,6 +186,8 @@ export async function showLocalFiles(showNavigationMenu) {
                     }
                 ));
             });
+        } else {
+            console.log(showInfoMessage("Node contains no datasets."));
         }
     } catch (error) {
         console.log(showErrorMessage(`Failed to fetch local files: ${error.message}`));

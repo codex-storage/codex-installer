@@ -9,7 +9,7 @@ import { runCommand } from '../utils/command.js';
 import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
 import { checkDependencies } from '../services/nodeService.js';
 import { saveConfig } from '../services/config.js';
-import { getCodexRootPath, getCodexBinPath, getCodexDataDirDefaultPath, getCodexLogsPath } from '../utils/appdata.js';
+import { getCodexRootPath, getCodexBinPath } from '../utils/appdata.js';
 
 const platform = os.platform();
 
@@ -68,23 +68,22 @@ export async function getCodexVersion(config) {
     }
 }
 
-export async function checkCodexInstallation(config, showNavigationMenu) {
+export async function installCodex(config, showNavigationMenu) {
     const version = await getCodexVersion(config);
 
     if (version.length > 0) {
         console.log(chalk.green('Codex is already installed. Version:'));
         console.log(chalk.green(version));
         await showNavigationMenu();
+        return false;
     } else {
         console.log(chalk.cyanBright('Codex is not installed, proceeding with installation...'));
-        await installCodex(config, showNavigationMenu);
+        return await performInstall(config);
     }
 }
 
-async function saveCodexExePathToConfig(config, codexExePath) {
+async function saveCodexExePath(config, codexExePath) {
     config.codexExe = codexExePath;
-    config.dataDir = getCodexDataDirDefaultPath();
-    config.logsDir = getCodexLogsPath();
     if (!fs.existsSync(config.codexExe)) {
         console.log(showErrorMessage(`Codex executable not found in expected path: ${config.codexExe}`));
         throw new Error("Exe not found");
@@ -98,17 +97,14 @@ async function saveCodexExePathToConfig(config, codexExePath) {
 
 async function clearCodexExePathFromConfig(config) {
     config.codexExe = "";
-    config.dataDir = "";
-    config.logsDir = "";
     saveConfig(config);
 }
 
-export async function installCodex(config, showNavigationMenu) {
+async function performInstall(config) {
     const agreed = await showPrivacyDisclaimer();
     if (!agreed) {
         console.log(showInfoMessage('You can find manual setup instructions at docs.codex.storage'));
         process.exit(0);
-        return;
     }
 
     const installPath = getCodexBinPath();
@@ -117,7 +113,6 @@ export async function installCodex(config, showNavigationMenu) {
     const spinner = createSpinner('Installing Codex...').start();
 
     try {
-        
         if (platform === 'win32') {
             try {
                 try {
@@ -129,7 +124,7 @@ export async function installCodex(config, showNavigationMenu) {
                 await runCommand('curl -LO --ssl-no-revoke https://get.codex.storage/install.cmd');
                 await runCommand(`set "INSTALL_DIR=${installPath}" && "${process.cwd()}\\install.cmd"`);
                 
-                await saveCodexExePathToConfig(config, path.join(installPath, "codex.exe"));
+                await saveCodexExePath(config, path.join(installPath, "codex.exe"));
 
                 try {
                     await runCommand('del /f install.cmd');
@@ -171,7 +166,7 @@ export async function installCodex(config, showNavigationMenu) {
                     await runCommand(`INSTALL_DIR="${installPath}" timeout 120 bash install.sh`);
                 }
 
-                await saveCodexExePathToConfig(config, path.join(installPath, "codex"));
+                await saveCodexExePath(config, path.join(installPath, "codex"));
                 
             } catch (error) {
                 if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {
@@ -190,21 +185,28 @@ export async function installCodex(config, showNavigationMenu) {
         
         try {
             const version = await getCodexVersion(config);
+            console.log(chalk.green(version));
+
             console.log(showSuccessMessage(
                 'Codex is successfully installed!\n' +
                 `Install path: "${config.codexExe}"\n\n` +
-                `Version: ${version}`
+                'The default configuration should work for most platforms.\n' +
+                'Please review the configuration before starting Codex.\n'
             ));
         } catch (error) {
             throw new Error('Installation completed but Codex command is not available. Please restart your terminal and try again.');
         }
+
+        console.log(showInfoMessage(
+            "Please review the configuration before starting Codex."
+        ));
         
         spinner.success();
-        await showNavigationMenu();
+        return true;
     } catch (error) {
         spinner.error();
         console.log(showErrorMessage(`Failed to install Codex: ${error.message}`));
-        await showNavigationMenu();
+        return false;
     }
 }
 

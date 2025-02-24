@@ -19,7 +19,7 @@ export function getCodexDataDirDefaultPath() {
   return path.join(appData("codex"), "datadir");
 }
 
-export function getCodexLogsPath() {
+export function getCodexLogsDefaultPath() {
   return ensureExists(path.join(appData("codex"), "logs"));
 }
 
