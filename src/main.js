@@ -80,10 +80,10 @@ export async function main() {
                     message: 'Select an option:',
                     choices: [
                         '1. Download and install Codex',
-                        '2. Edit Codex configuration',
-                        '3. Run Codex node',
-                        '4. Open Codex App',
-                        '5. Check node status',
+                        '2. Run Codex node',
+                        '3. Check node status',
+                        '4. Edit Codex configuration',
+                        '5. Open Codex App',
                         '6. Upload a file',
                         '7. Download a file',
                         '8. Show local data',
@@ -107,16 +107,16 @@ export async function main() {
                     }
                     break;
                 case '2':
-                    await showConfigMenu(config);
-                    break;
-                case '3':
                     await runCodex(config, showNavigationMenu);
                     return;
+                case '3':
+                    await checkNodeStatus(config, showNavigationMenu);
+                    break;
                 case '4':
-                    openCodexApp(config);
+                    await showConfigMenu(config);
                     break;
                 case '5':
-                    await checkNodeStatus(config, showNavigationMenu);
+                    openCodexApp(config);
                     break;
                 case '6':
                     await uploadFile(config, null, handleCommandLineOperation, showNavigationMenu);
@@ -132,7 +132,7 @@ export async function main() {
                     break;
                 case '10':
                     const { exec } = await import('child_process');
-                    const url = 'https://docs.google.com/forms/d/1U21xp6shfDkJWzJSKHhUjwIE7fsYk94gmLUKAbxUMcw/edit';
+                    const url = 'https://tally.so/r/w2DlXb';
                     const command = process.platform === 'win32' ? `start ${url}` : process.platform === 'darwin' ? `open ${url}` : `xdg-open ${url}`;
                     exec(command);
                     console.log(showInfoMessage('Opening feedback form in your browser...'));
