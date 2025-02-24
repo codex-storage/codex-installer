@@ -64,7 +64,8 @@ export async function runCodex(config, showNavigationMenu) {
 
             console.log(showInfoMessage(
                 `Data location: ${config.dataDir}\n` +
-                `Logs: ${logFilePath}`
+                `Logs: ${logFilePath}\n` +
+                `API port: ${config.ports.apiPort}`
             ));
 
             const executable = config.codexExe;

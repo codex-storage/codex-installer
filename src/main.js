@@ -99,7 +99,10 @@ export async function main() {
  
             switch (choice.split('.')[0]) {
                 case '1':
-                    await installCodex(config, showNavigationMenu);
+                    const installed = await installCodex(config, showNavigationMenu);
+                    if (installed) {
+                        await showConfigMenu(config);
+                    }
                     break;
                 case '2':
                     await showConfigMenu(config);

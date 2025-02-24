@@ -75,9 +75,10 @@ export async function installCodex(config, showNavigationMenu) {
         console.log(chalk.green('Codex is already installed. Version:'));
         console.log(chalk.green(version));
         await showNavigationMenu();
+        return false;
     } else {
         console.log(chalk.cyanBright('Codex is not installed, proceeding with installation...'));
-        await performInstall(config, showNavigationMenu);
+        return await performInstall(config);
     }
 }
 
@@ -99,12 +100,11 @@ async function clearCodexExePathFromConfig(config) {
     saveConfig(config);
 }
 
-async function performInstall(config, showNavigationMenu) {
+async function performInstall(config) {
     const agreed = await showPrivacyDisclaimer();
     if (!agreed) {
         console.log(showInfoMessage('You can find manual setup instructions at docs.codex.storage'));
         process.exit(0);
-        return;
     }
 
     const installPath = getCodexBinPath();
@@ -202,11 +202,11 @@ async function performInstall(config, showNavigationMenu) {
         ));
         
         spinner.success();
-        await showNavigationMenu();
+        return true;
     } catch (error) {
         spinner.error();
         console.log(showErrorMessage(`Failed to install Codex: ${error.message}`));
-        await showNavigationMenu();
+        return false;
     }
 }
 
