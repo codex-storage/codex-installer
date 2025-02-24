@@ -154,11 +154,10 @@ export async function showLocalFiles(config, showNavigationMenu) {
 
     try {
         const spinner = createSpinner('Fetching local files...').start();
-        const filesResponse = await runCommand(`curl http://localhost:${config.ports.apiPort}/api/codex/v1/data -w \'\\n\'`);
+        const filesResponse = await axios.get(`http://localhost:${config.ports.apiPort}/api/codex/v1/data`);
+        const filesData = filesResponse.data;
         spinner.success();
 
-        const filesData = JSON.parse(filesResponse);
-        
         if (filesData.content && filesData.content.length > 0) {
             console.log(showInfoMessage(`Found ${filesData.content.length} local file(s)`));
 
@@ -187,6 +186,8 @@ export async function showLocalFiles(config, showNavigationMenu) {
                     }
                 ));
             });
+        } else {
+            console.log(showInfoMessage("Node contains no datasets."));
         }
     } catch (error) {
         console.log(showErrorMessage(`Failed to fetch local files: ${error.message}`));
