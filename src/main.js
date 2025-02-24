@@ -9,6 +9,7 @@ import { uploadFile, downloadFile, showLocalFiles } from './handlers/fileHandler
 import { checkCodexInstallation, installCodex, uninstallCodex } from './handlers/installationHandlers.js';
 import { runCodex, checkNodeStatus } from './handlers/nodeHandlers.js';
 import { showInfoMessage } from './utils/messages.js';
+import { loadConfig } from './services/config.js';
 
 async function showNavigationMenu() {
     console.log('\n')
@@ -67,9 +68,9 @@ export async function main() {
     process.on('SIGQUIT', handleExit);
     
     try {
+        const config = loadConfig();
         while (true) {
             console.log('\n' + chalk.cyanBright(ASCII_ART));
-
             const { choice } = await inquirer.prompt([
                 {
                     type: 'list',
@@ -101,10 +102,10 @@ export async function main() {
 
             switch (choice.split('.')[0]) {
                 case '1':
-                    await checkCodexInstallation(showNavigationMenu);
+                    await checkCodexInstallation(config, showNavigationMenu);
                     break;
                 case '2':
-                    await runCodex(showNavigationMenu);
+                    await runCodex(config, showNavigationMenu);
                     return;
                 case '3':
                     await checkNodeStatus(showNavigationMenu);
@@ -119,7 +120,7 @@ export async function main() {
                     await showLocalFiles(showNavigationMenu);
                     break;
                 case '7':
-                    await uninstallCodex(showNavigationMenu);
+                    await uninstallCodex(config, showNavigationMenu);
                     break;
                 case '8':
                     const { exec } = await import('child_process');

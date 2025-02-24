@@ -2,6 +2,7 @@ import axios from 'axios';
 import { runCommand } from '../utils/command.js';
 import { showErrorMessage, showInfoMessage, showSuccessMessage } from '../utils/messages.js';
 import os from 'os';
+import { getCodexVersion } from '../handlers/installationHandlers.js';
 
 const platform = os.platform();
 
@@ -29,10 +30,10 @@ export async function isNodeRunning() {
     }
 }
 
-export async function isCodexInstalled() {
+export async function isCodexInstalled(config) {
     try {
-        await runCommand('codex --version');
-        return true;
+        const version = await getCodexVersion(config);
+        return version.length > 0;
     } catch (error) {
         return false;
     }
