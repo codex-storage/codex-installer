@@ -229,15 +229,54 @@ async function performInstall(config) {
 
             // Configure shell PATH
             const pathConfigured = await configureShellPath(installPath);
+            spinner.success();
+            
             if (pathConfigured) {
-                console.log(showSuccessMessage(
-                    'Codex is successfully installed!\n' +
-                    `Install path: "${config.codexExe}"\n\n` +
-                    'PATH has been configured automatically.\n' +
-                    'Please restart your terminal for the changes to take effect.\n\n' +
-                    'The default configuration should work for most platforms.\n' +
-                    'Please review the configuration before starting Codex.\n'
+                console.log(boxen(
+                    chalk.green('Codex is installed successfully!\n\n') +
+                    chalk.cyan('Current configuration:\n') +
+                    `${chalk.white('Data path')}     = ${config.dataDir}\n` +
+                    `${chalk.white('Logs path')}     = ${config.logsDir}\n` +
+                    `${chalk.white('Storage quota')} = ${config.storageQuota} Bytes\n` +
+                    `${chalk.white('Discovery port')} = ${config.ports.discPort}\n` +
+                    `${chalk.white('P2P Listen port')} = ${config.ports.listenPort}\n` +
+                    `${chalk.white('API Port')}      = ${config.ports.apiPort}\n\n` +
+                    chalk.gray('You can modify the above configuration from the main menu.'),
+                    {
+                        padding: 1,
+                        margin: 1,
+                        borderStyle: 'round',
+                        borderColor: 'green',
+                        title: '✅ Installation Complete',
+                        titleAlignment: 'center'
+                    }
                 ));
+
+                const { choice } = await inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'choice',
+                        message: 'What would you like to do?',
+                        choices: [
+                            '1. Run the node',
+                            '2. Return to main menu',
+                            '3. Exit'
+                        ],
+                        pageSize: 3,
+                        loop: true
+                    }
+                ]);
+
+                switch (choice.split('.')[0].trim()) {
+                    case '1':
+                        await runCodex(config, showNavigationMenu);
+                        break;
+                    case '2':
+                        await showNavigationMenu();
+                        break;
+                    case '3':
+                        process.exit(0);
+                }
             } else {
                 console.log(showInfoMessage(
                     'Codex is installed but PATH configuration failed.\n' +
@@ -252,7 +291,6 @@ async function performInstall(config) {
             "Please review the configuration before starting Codex."
         ));
         
-        spinner.success();
         return true;
     } catch (error) {
         spinner.error();
