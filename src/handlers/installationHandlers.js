@@ -100,6 +100,46 @@ async function clearCodexExePathFromConfig(config) {
     saveConfig(config);
 }
 
+async function configureShellPath(installPath) {
+    try {
+        const homedir = os.homedir();
+        let shellConfigFile;
+        let exportLine = `export PATH="${installPath}:$PATH"`;
+
+        if (platform === 'win32') {
+            // For Windows, update the User PATH environment variable
+            const currentPath = process.env.PATH || '';
+            if (!currentPath.includes(installPath)) {
+                await runCommand(`setx PATH "${installPath};%PATH%"`);
+            }
+            return true;
+        } else {
+            // For Unix-like systems (macOS and Linux)
+            if (platform === 'darwin') {
+                // Check for zsh first (default on modern macOS)
+                if (fs.existsSync(path.join(homedir, '.zshrc'))) {
+                    shellConfigFile = path.join(homedir, '.zshrc');
+                } else {
+                    shellConfigFile = path.join(homedir, '.bash_profile');
+                }
+            } else {
+                // Linux
+                shellConfigFile = path.join(homedir, '.bashrc');
+            }
+
+            // Check if PATH is already configured
+            const fileContent = fs.existsSync(shellConfigFile) ? fs.readFileSync(shellConfigFile, 'utf8') : '';
+            if (!fileContent.includes(installPath)) {
+                fs.appendFileSync(shellConfigFile, `\n${exportLine}\n`);
+            }
+            return true;
+        }
+    } catch (error) {
+        console.log(showErrorMessage(`Failed to configure PATH: ${error.message}`));
+        return false;
+    }
+}
+
 async function performInstall(config) {
     const agreed = await showPrivacyDisclaimer();
     if (!agreed) {
@@ -187,12 +227,23 @@ async function performInstall(config) {
             const version = await getCodexVersion(config);
             console.log(chalk.green(version));
 
-            console.log(showSuccessMessage(
-                'Codex is successfully installed!\n' +
-                `Install path: "${config.codexExe}"\n\n` +
-                'The default configuration should work for most platforms.\n' +
-                'Please review the configuration before starting Codex.\n'
-            ));
+            // Configure shell PATH
+            const pathConfigured = await configureShellPath(installPath);
+            if (pathConfigured) {
+                console.log(showSuccessMessage(
+                    'Codex is successfully installed!\n' +
+                    `Install path: "${config.codexExe}"\n\n` +
+                    'PATH has been configured automatically.\n' +
+                    'Please restart your terminal for the changes to take effect.\n\n' +
+                    'The default configuration should work for most platforms.\n' +
+                    'Please review the configuration before starting Codex.\n'
+                ));
+            } else {
+                console.log(showInfoMessage(
+                    'Codex is installed but PATH configuration failed.\n' +
+                    `Please manually add "${installPath}" to your PATH.\n`
+                ));
+            }
         } catch (error) {
             throw new Error('Installation completed but Codex command is not available. Please restart your terminal and try again.');
         }
