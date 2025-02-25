@@ -1,4 +1,4 @@
-import inquirer from 'inquirer';
+import inquirer from "inquirer";
 
 function getMetricsMult(valueStr, allowMetricPostfixes) {
   if (!allowMetricPostfixes) return 1;
@@ -27,14 +27,19 @@ function getNumericValue(valueStr) {
 async function promptForValueStr(promptMessage) {
   const response = await inquirer.prompt([
     {
-        type: 'input',
-        name: 'valueStr',
-        message: promptMessage
-    }]);
+      type: "input",
+      name: "valueStr",
+      message: promptMessage,
+    },
+  ]);
   return response.valueStr;
 }
 
-export async function showNumberSelector(currentValue, promptMessage, allowMetricPostfixes) {
+export async function showNumberSelector(
+  currentValue,
+  promptMessage,
+  allowMetricPostfixes,
+) {
   try {
     var valueStr = await promptForValueStr(promptMessage);
     valueStr = valueStr.replaceAll(" ", "");

@@ -8,13 +8,19 @@
     "codexstorage": "./index.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write ./src"
   },
   "keywords": [
     "codex",
     "storage",
     "cli"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "author": "Codex Storage",
   "license": "MIT",
   "dependencies": {
@@ -27,5 +33,9 @@
     "fs-extra": "^11.3.0",
     "fs-filesystem": "^2.1.2",
     "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "vitest": "^3.0.5"
   }
 }

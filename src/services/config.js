@@ -1,7 +1,10 @@
-import fs from 'fs';
-import path from 'path';
-import { getAppDataDir } from '../utils/appdata.js';
-import { getCodexDataDirDefaultPath, getCodexLogsDefaultPath } from '../utils/appdata.js';
+import fs from "fs";
+import path from "path";
+import { getAppDataDir } from "../utils/appdata.js";
+import {
+  getCodexDataDirDefaultPath,
+  getCodexLogsDefaultPath,
+} from "../utils/appdata.js";
 
 const defaultConfig = {
   codexExe: "",
@@ -12,8 +15,8 @@ const defaultConfig = {
   ports: {
     discPort: 8090,
     listenPort: 8070,
-    apiPort: 8080
-  }
+    apiPort: 8080,
+  },
 };
 
 function getConfigFilename() {
@@ -25,7 +28,9 @@ export function saveConfig(config) {
   try {
     fs.writeFileSync(filePath, JSON.stringify(config));
   } catch (error) {
-    console.error(`Failed to save config file to '${filePath}' error: '${error}'.`);
+    console.error(
+      `Failed to save config file to '${filePath}' error: '${error}'.`,
+    );
     throw error;
   }
 }
@@ -39,7 +44,9 @@ export function loadConfig() {
     }
     return JSON.parse(fs.readFileSync(filePath));
   } catch (error) {
-    console.error(`Failed to load config file from '${filePath}' error: '${error}'.`);
+    console.error(
+      `Failed to load config file from '${filePath}' error: '${error}'.`,
+    );
     throw error;
   }
 }

@@ -1,29 +1,31 @@
-import path from 'path';
-import inquirer from 'inquirer';
-import boxen from 'boxen';
-import chalk from 'chalk';
-import fs from 'fs';
-import { filesystemSync } from 'fs-filesystem';
+import path from "path";
+import inquirer from "inquirer";
+import boxen from "boxen";
+import chalk from "chalk";
+import fs from "fs";
+import { filesystemSync } from "fs-filesystem";
 
 function showMsg(msg) {
-  console.log(boxen(chalk.white(msg), {
-    padding: 1,
-    margin: 1,
-    borderStyle: 'round',
-    borderColor: 'white',
-    titleAlignment: 'center'
-  }));
+  console.log(
+    boxen(chalk.white(msg), {
+      padding: 1,
+      margin: 1,
+      borderStyle: "round",
+      borderColor: "white",
+      titleAlignment: "center",
+    }),
+  );
 }
 
 function getAvailableRoots() {
   const devices = filesystemSync();
   var mountPoints = [];
-  Object.keys(devices).forEach(function(key) {
-      var val = devices[key];
-      val.volumes.forEach(function(volume) {
-          mountPoints.push(volume.mountPoint);
-      });
+  Object.keys(devices).forEach(function (key) {
+    var val = devices[key];
+    val.volumes.forEach(function (volume) {
+      mountPoints.push(volume.mountPoint);
     });
+  });
 
   if (mountPoints.length < 1) {
     throw new Error("Failed to detect file system devices.");
@@ -37,11 +39,11 @@ function splitPath(str) {
 
 function dropEmptyParts(parts) {
   var result = [];
-  parts.forEach(function(part) {
+  parts.forEach(function (part) {
     if (part.length > 0) {
       result.push(part);
     }
-  })
+  });
   return result;
 }
 
@@ -63,10 +65,10 @@ function showCurrent(currentPath) {
 
   if (len < 2) {
     showMsg(
-      'Warning - Known issue:\n' +
-      'Path selection does not work in root paths on some platforms.\n' +
-      'Use "Enter path" or "Create new folder" to navigate and create folders\n' +
-      'if this is the case for you.'
+      "Warning - Known issue:\n" +
+        "Path selection does not work in root paths on some platforms.\n" +
+        'Use "Enter path" or "Create new folder" to navigate and create folders\n' +
+        "if this is the case for you.",
     );
   }
 }
@@ -74,7 +76,7 @@ function showCurrent(currentPath) {
 function hasValidRoot(roots, checkPath) {
   if (checkPath.length < 1) return false;
   var result = false;
-  roots.forEach(function(root) {
+  roots.forEach(function (root) {
     if (root.toLowerCase() == checkPath[0].toLowerCase()) {
       console.log("valid root: " + combine(checkPath));
       result = true;
@@ -86,26 +88,28 @@ function hasValidRoot(roots, checkPath) {
 
 async function showMain(currentPath) {
   showCurrent(currentPath);
-  const { choice } = await inquirer.prompt([
-    {
-        type: 'list',
-        name: 'choice',
-        message: 'Select an option:',
+  const { choice } = await inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "choice",
+        message: "Select an option:",
         choices: [
-            '1. Enter path',
-            '2. Go up one',
-            '3. Go down one',
-            '4. Create new folder here',
-            '5. Select this path',
-            '6. Cancel'
+          "1. Enter path",
+          "2. Go up one",
+          "3. Go down one",
+          "4. Create new folder here",
+          "5. Select this path",
+          "6. Cancel",
         ],
         pageSize: 6,
-        loop: true
-    }
-  ]).catch(() => {
-    handleExit();
-    return { choice: '6' };
-  });
+        loop: true,
+      },
+    ])
+    .catch(() => {
+      handleExit();
+      return { choice: "6" };
+    });
 
   return choice;
 }
@@ -121,28 +125,28 @@ export async function showPathSelector(startingPath, pathMustExist) {
     const choice = await showMain(currentPath);
 
     var newCurrentPath = currentPath;
-    switch (choice.split('.')[0]) {
-      case '1':
-          newCurrentPath = await enterPath(currentPath, pathMustExist);
-          break;
-      case '2':
-          newCurrentPath = upOne(currentPath);
-          break;
-      case '3':
-          newCurrentPath = await downOne(currentPath);
-          break;
-      case '4':
-          newCurrentPath = await createSubDir(currentPath, pathMustExist);
-          break;
-      case '5':
+    switch (choice.split(".")[0]) {
+      case "1":
+        newCurrentPath = await enterPath(currentPath, pathMustExist);
+        break;
+      case "2":
+        newCurrentPath = upOne(currentPath);
+        break;
+      case "3":
+        newCurrentPath = await downOne(currentPath);
+        break;
+      case "4":
+        newCurrentPath = await createSubDir(currentPath, pathMustExist);
+        break;
+      case "5":
         if (pathMustExist && !isDir(combine(currentPath))) {
           console.log("Current path does not exist.");
           break;
         } else {
           return combine(currentPath);
         }
-      case '6':
-          return combine(currentPath);
+      case "6":
+        return combine(currentPath);
     }
 
     if (hasValidRoot(roots, newCurrentPath)) {
@@ -156,10 +160,11 @@ export async function showPathSelector(startingPath, pathMustExist) {
 async function enterPath(currentPath, pathMustExist) {
   const response = await inquirer.prompt([
     {
-        type: 'input',
-        name: 'path',
-        message: 'Enter Path:'
-    }]);
+      type: "input",
+      name: "path",
+      message: "Enter Path:",
+    },
+  ]);
 
   const newPath = response.path;
   if (pathMustExist && !isDir(newPath)) {
@@ -191,9 +196,9 @@ function getSubDirOptions(currentPath) {
   const entries = fs.readdirSync(fullPath);
   var result = [];
   var counter = 1;
-  entries.forEach(function(entry) {
+  entries.forEach(function (entry) {
     if (isSubDir(currentPath, entry)) {
-      result.push(counter + '. ' + entry);
+      result.push(counter + ". " + entry);
       counter = counter + 1;
     }
   });
@@ -207,30 +212,33 @@ async function downOne(currentPath) {
     return currentPath;
   }
 
-  const { choice } = await inquirer.prompt([
-    {
-        type: 'list',
-        name: 'choice',
-        message: 'Select an subdir:',
+  const { choice } = await inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "choice",
+        message: "Select an subdir:",
         choices: options,
         pageSize: options.length,
-        loop: true
-    }
-  ]).catch(() => {
-    return currentPath;
-  });
+        loop: true,
+      },
+    ])
+    .catch(() => {
+      return currentPath;
+    });
 
-  const subDir = choice.split('. ')[1];
+  const subDir = choice.split(". ")[1];
   return [...currentPath, subDir];
 }
 
 async function createSubDir(currentPath, pathMustExist) {
   const response = await inquirer.prompt([
     {
-        type: 'input',
-        name: 'name',
-        message: 'Enter name:'
-    }]);
+      type: "input",
+      name: "name",
+      message: "Enter name:",
+    },
+  ]);
 
   const name = response.name;
   if (name.length < 1) return;
