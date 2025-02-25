@@ -92,7 +92,7 @@ export async function main() {
   const uiService = new UiService();
   const mainMenu = new MainMenu(uiService);
 
-  mainMenu.show();
+  await mainMenu.show();
   return;
 
   try {

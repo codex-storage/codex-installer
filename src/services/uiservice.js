@@ -1,5 +1,8 @@
 import boxen from "boxen";
 import chalk from "chalk";
+import inquirer from "inquirer";
+
+import { ASCII_ART } from "../constants/ascii.js";
 
 function show(msg) {
   console.log(msg);
@@ -32,7 +35,7 @@ export class UiService {
     );
   };
 
-  showInfoMessage(message) {
+  showInfoMessage = (message) => {
     show(
       boxen(chalk.cyan(message), {
         padding: 1,
@@ -43,5 +46,34 @@ export class UiService {
         titleAlignment: "center",
       }),
     );
-  }
+  };
+
+  showLogo = () => {
+    console.log("\n" + chalk.cyanBright(ASCII_ART));
+  };
+
+  askMultipleChoice = async (message, choices) => {
+    var counter = 1;
+    var promptChoices = [];
+    choices.forEach(function(choice) {
+      promptChoices.push(`${counter}. ${choice.label}`);
+      counter++;
+    });
+
+    const { choice } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "choice",
+        message: message,
+        choices: promptChoices,
+        pageSize: counter - 1,
+        loop: true
+      }
+    ]);
+
+    const selectStr = choice.split(".")[0];
+    const selectIndex = parseInt(selectStr) - 1;
+
+    await choices[selectIndex].action();
+  };
 }
