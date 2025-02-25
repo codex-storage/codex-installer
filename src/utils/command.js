@@ -11,4 +11,4 @@ export async function runCommand(command) {
         console.error('Error:', error.message);
         throw error;
     }
-} 
+}
