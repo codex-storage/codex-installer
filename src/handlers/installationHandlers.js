@@ -123,7 +123,7 @@ async function performInstall(config) {
 
                 await runCommand('curl -LO --ssl-no-revoke https://get.codex.storage/install.cmd');
                 await runCommand(`set "INSTALL_DIR=${installPath}" && "${process.cwd()}\\install.cmd"`);
-                
+
                 await saveCodexExePath(config, path.join(installPath, "codex.exe"));
 
                 try {
@@ -150,24 +150,10 @@ async function performInstall(config) {
 
                 const downloadCommand = 'curl -# --connect-timeout 10 --max-time 60 -L https://get.codex.storage/install.sh -o install.sh && chmod +x install.sh';
                 await runCommand(downloadCommand);
-                
-                if (platform === 'darwin') {
-                    const timeoutCommand = `perl -e '
-                        eval {
-                            local $SIG{ALRM} = sub { die "timeout\\n" };
-                            alarm(120);
-                            system("INSTALL_DIR=\\"${installPath}\\" bash install.sh");
-                            alarm(0);
-                        };
-                        die if $@;
-                    '`;
-                    await runCommand(timeoutCommand);
-                } else {
-                    await runCommand(`INSTALL_DIR="${installPath}" timeout 120 bash install.sh`);
-                }
 
+                await runCommand(`INSTALL_DIR="${installPath}" timeout 120 bash install.sh`);
                 await saveCodexExePath(config, path.join(installPath, "codex"));
-                
+
             } catch (error) {
                 if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {
                     throw new Error('Installation failed. Please check your internet connection and try again.');
@@ -182,7 +168,7 @@ async function performInstall(config) {
                 await runCommand('rm -f install.sh').catch(() => {});
             }
         }
-        
+
         try {
             const version = await getCodexVersion(config);
             console.log(chalk.green(version));
@@ -200,7 +186,7 @@ async function performInstall(config) {
         console.log(showInfoMessage(
             "Please review the configuration before starting Codex."
         ));
-        
+
         spinner.success();
         return true;
     } catch (error) {
