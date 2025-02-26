@@ -71,6 +71,7 @@ export async function runCodex(config, showNavigationMenu) {
             const executable = config.codexExe;
             const args = [
                 `--data-dir="${config.dataDir}"`,
+                `--api-cors-origin="*"`,
                 `--log-level=DEBUG`,
                 `--log-file="${logFilePath}"`,
                 `--storage-quota="${config.storageQuota}"`,
