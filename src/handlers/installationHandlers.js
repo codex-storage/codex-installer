@@ -258,23 +258,19 @@ async function performInstall(config) {
                         name: 'choice',
                         message: 'What would you like to do?',
                         choices: [
-                            '1. Run the node',
-                            '2. Return to main menu',
-                            '3. Exit'
+                            '1. Return to main menu',
+                            '2. Exit',
                         ],
-                        pageSize: 3,
+                        pageSize: 2,
                         loop: true
                     }
                 ]);
 
                 switch (choice.split('.')[0].trim()) {
                     case '1':
-                        await runCodex(config, showNavigationMenu);
-                        break;
-                    case '2':
                         await showNavigationMenu();
                         break;
-                    case '3':
+                    case '2':
                         process.exit(0);
                 }
             } else {
