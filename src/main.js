@@ -24,6 +24,7 @@ import { showConfigMenu } from "./configmenu.js";
 import { openCodexApp } from "./services/codexapp.js";
 
 import { MainMenu } from "./ui/mainmenu.js";
+import { InstallMenu } from "./ui/installmenu.js";
 import { UiService } from "./services/uiservice.js";
 
 async function showNavigationMenu() {
@@ -89,14 +90,15 @@ export async function main() {
   process.on("SIGTERM", handleExit);
   process.on("SIGQUIT", handleExit);
 
+  const config = loadConfig();
   const uiService = new UiService();
-  const mainMenu = new MainMenu(uiService);
+  const installMenu = new InstallMenu(uiService, config);
+  const mainMenu = new MainMenu(uiService, installMenu);
 
   await mainMenu.show();
   return;
 
   try {
-    const config = loadConfig();
     while (true) {
       console.log("\n" + chalk.cyanBright(ASCII_ART));
       const { choice } = await inquirer

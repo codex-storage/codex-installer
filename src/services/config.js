@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { getAppDataDir } from "../utils/appdata.js";
 import {
+  getCodexBinPath,
   getCodexDataDirDefaultPath,
   getCodexLogsDefaultPath,
 } from "../utils/appdata.js";
@@ -9,6 +10,7 @@ import {
 const defaultConfig = {
   codexExe: "",
   // User-selected config options:
+  codexPath: getCodexBinPath(),
   dataDir: getCodexDataDirDefaultPath(),
   logsDir: getCodexLogsDefaultPath(),
   storageQuota: 8 * 1024 * 1024 * 1024,

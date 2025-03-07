@@ -55,7 +55,7 @@ export class UiService {
   askMultipleChoice = async (message, choices) => {
     var counter = 1;
     var promptChoices = [];
-    choices.forEach(function(choice) {
+    choices.forEach(function (choice) {
       promptChoices.push(`${counter}. ${choice.label}`);
       counter++;
     });
@@ -67,13 +67,24 @@ export class UiService {
         message: message,
         choices: promptChoices,
         pageSize: counter - 1,
-        loop: true
-      }
+        loop: true,
+      },
     ]);
 
     const selectStr = choice.split(".")[0];
     const selectIndex = parseInt(selectStr) - 1;
 
     await choices[selectIndex].action();
+  };
+
+  askPrompt = async (prompt) => {
+    const response = await inquirer.prompt([
+      {
+        type: "input",
+        name: "valueStr",
+        message: prompt,
+      },
+    ]);
+    return response.valueStr;
   };
 }
