@@ -12,10 +12,14 @@ describe("mainmenu", () => {
     show: vi.fn(),
   };
 
+  const mockConfigMenu = {
+    show: vi.fn(),
+  }
+
   beforeEach(() => {
     vi.resetAllMocks();
 
-    mainmenu = new MainMenu(mockUiService, mockInstallMenu);
+    mainmenu = new MainMenu(mockUiService, mockInstallMenu, mockConfigMenu);
 
     // Presents test getting stuck in main loop.
     const originalPrompt = mainmenu.promptMainMenu;
@@ -36,6 +40,7 @@ describe("mainmenu", () => {
       "Select an option",
       [
         { label: "Install Codex", action: mockInstallMenu.show },
+        { label: "Configure Codex", action: mockConfigMenu.show },
         { label: "Exit", action: mainmenu.closeMainMenu },
       ],
     );

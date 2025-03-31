@@ -1,7 +1,8 @@
 export class MainMenu {
-  constructor(uiService, installMenu) {
+  constructor(uiService, installMenu, configMenu) {
     this.ui = uiService;
     this.installMenu = installMenu;
+    this.configMenu = configMenu;
     this.running = true;
   }
 
@@ -21,6 +22,10 @@ export class MainMenu {
       {
         label: "Install Codex",
         action: this.installMenu.show,
+      },
+      {
+        label: "Configure Codex",
+        action: this.configMenu.show,
       },
       {
         label: "Exit",

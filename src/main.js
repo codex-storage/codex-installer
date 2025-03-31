@@ -22,9 +22,13 @@ import { showInfoMessage } from "./utils/messages.js";
 import { ConfigService } from "./services/configService.js";
 import { openCodexApp } from "./services/codexapp.js";
 
+import { UiService } from "./services/uiservice.js";
+import { FsService } from "./services/fsService.js";
 import { MainMenu } from "./ui/mainmenu.js";
 import { InstallMenu } from "./ui/installmenu.js";
-import { UiService } from "./services/uiservice.js";
+import { ConfigMenu } from "./ui/configmenu.js";
+import { PathSelector } from "./utils/pathSelector.js";
+import { NumberSelector } from "./utils/numberSelector.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -91,8 +95,12 @@ export async function main() {
 
   const configService = new ConfigService();
   const uiService = new UiService();
+  const fsService = new FsService();
+  const pathSelector = new PathSelector(uiService, fsService);
+  const numberSelector = new NumberSelector(uiService);
   const installMenu = new InstallMenu(uiService, configService);
-  const mainMenu = new MainMenu(uiService, installMenu);
+  const configMenu = new ConfigMenu(uiService, configService, pathSelector, numberSelector)
+  const mainMenu = new MainMenu(uiService, installMenu, configMenu);
 
   await mainMenu.show();
   return;

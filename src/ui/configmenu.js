@@ -21,7 +21,7 @@ export class ConfigMenu {
           action: this.editLogsDir,
         },
         {
-          label: `Storage quota = ${bytesAmountToString(this.config.storageQuota)}`,
+          label: `Storage quota = ${this.bytesAmountToString(this.config.storageQuota)}`,
           action: this.editStorageQuota,
         },
         {
