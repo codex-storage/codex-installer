@@ -41,36 +41,6 @@ export class PathSelector {
           action: this.cancel,
         },
       ]);
-      // var newCurrentPath = currentPath;
-      // switch (choice.split(".")[0]) {
-      //   case "1":
-      //     newCurrentPath = await enterPath(currentPath, pathMustExist);
-      //     break;
-      //   case "2":
-      //     newCurrentPath = upOne(currentPath);
-      //     break;
-      //   case "3":
-      //     newCurrentPath = await downOne(currentPath);
-      //     break;
-      //   case "4":
-      //     newCurrentPath = await createSubDir(currentPath, pathMustExist);
-      //     break;
-      //   case "5":
-      //     if (pathMustExist && !isDir(combine(currentPath))) {
-      //       console.log("Current path does not exist.");
-      //       break;
-      //     } else {
-      //       return combine(currentPath);
-      //     }
-      //   case "6":
-      //     return combine(currentPath);
-      // }
-
-      // if (hasValidRoot(roots, newCurrentPath)) {
-      //   currentPath = newCurrentPath;
-      // } else {
-      //   console.log("Selected path has no valid root.");
-      // }
     }
   };
 
@@ -175,45 +145,25 @@ export class PathSelector {
     }
 
     var selected = "";
-    const makeSelector = () => {
-
-    };
-
-    const { choice } = await inquirer
-      .prompt([
-        {
-          type: "list",
-          name: "choice",
-          message: "Select an subdir:",
-          choices: options,
-          pageSize: options.length,
-          loop: true,
+    var uiOptions = [];
+    options.foreach(function (option) {
+      uiOptions.push({
+        label: option,
+        action: () => {
+          selected = option;
         },
-      ])
-      .catch(() => {
-        return currentPath;
-      });
+      })
+    })
 
-    const subDir = choice.split(". ")[1];
-    return [...currentPath, subDir];
+    await this.ui.askMultipleChoice("Select an subdir", uiOptions);
+
+    if (selected.length < 1) return;
+    this.updateCurrentIfValidParts([...this.currentPath, selected]);
   };
 
-  createSubDir = async (currentPath, pathMustExist) => {
-    const response = await inquirer.prompt([
-      {
-        type: "input",
-        name: "name",
-        message: "Enter name:",
-      },
-    ]);
-
-    const name = response.name;
+  createSubDir = async () => {
+    const name = await this.ui.askPrompt("Enter name:");
     if (name.length < 1) return;
-
-    const fullDir = combineWith(currentPath, name);
-    if (pathMustExist && !isDir(fullDir)) {
-      // fs.mkdirSync(fullDir);
-    }
-    return [...currentPath, name];
+    this.updateCurrentIfValidParts([...currentPath, name]);
   };
 }
