@@ -3,7 +3,7 @@ export class NumberSelector {
     this.uiService = uiService;
   }
 
-  showNumberSelector = async (
+  show = async (
     currentValue,
     promptMessage,
     allowMetricPostfixes,

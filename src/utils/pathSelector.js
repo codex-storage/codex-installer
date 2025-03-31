@@ -6,14 +6,16 @@ export class PathSelector {
     this.pathMustExist = true;
   }
 
-  showPathSelector = async (startingPath, pathMustExist) => {
+  show = async (startingPath, pathMustExist) => {
+    this.running = true;
+    this.startingPath = startingPath;
     this.pathMustExist = pathMustExist;
     this.roots = this.fs.getAvailableRoots();
     this.currentPath = this.splitPath(startingPath);
     if (!this.hasValidRoot(this.currentPath)) {
       this.currentPath = [roots[0]];
     }
-    while (true) {
+    while (this.running) {
       this.showCurrent();
       this.ui.askMultiChoice("Select an option:", [
         {
@@ -42,6 +44,8 @@ export class PathSelector {
         },
       ]);
     }
+
+    return this.resultingPath;
   };
 
   splitPath = (str) => {
@@ -165,5 +169,15 @@ export class PathSelector {
     const name = await this.ui.askPrompt("Enter name:");
     if (name.length < 1) return;
     this.updateCurrentIfValidParts([...currentPath, name]);
+  };
+
+  selectThisPath = async () => {
+    this.resultingPath = this.combine(this.currentPath);
+    this.running = false;
+  }
+
+  cancel = async () => {
+    this.resultingPath = this.startingPath;
+    this.running = false;
   };
 }

@@ -19,8 +19,7 @@ import {
 } from "./handlers/installationHandlers.js";
 import { runCodex, checkNodeStatus } from "./handlers/nodeHandlers.js";
 import { showInfoMessage } from "./utils/messages.js";
-import { loadConfig } from "./services/config.js";
-import { showConfigMenu } from "./configmenu.js";
+import { ConfigService } from "./services/configService.js";
 import { openCodexApp } from "./services/codexapp.js";
 
 import { MainMenu } from "./ui/mainmenu.js";
@@ -90,9 +89,9 @@ export async function main() {
   process.on("SIGTERM", handleExit);
   process.on("SIGQUIT", handleExit);
 
-  const config = loadConfig();
+  const configService = new ConfigService();
   const uiService = new UiService();
-  const installMenu = new InstallMenu(uiService, config);
+  const installMenu = new InstallMenu(uiService, configService);
   const mainMenu = new MainMenu(uiService, installMenu);
 
   await mainMenu.show();

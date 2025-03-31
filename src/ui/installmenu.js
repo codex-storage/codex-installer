@@ -1,7 +1,7 @@
 export class InstallMenu {
-  constructor(uiService, config) {
+  constructor(uiService, configService) {
     this.ui = uiService;
-    this.config = config;
+    this.config = configService.get();
   }
 
   show = async () => {

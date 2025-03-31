@@ -12,7 +12,6 @@ import {
   showSuccessMessage,
 } from "../utils/messages.js";
 import { checkDependencies } from "../services/nodeService.js";
-import { saveConfig } from "../services/config.js";
 import { getCodexRootPath, getCodexBinPath } from "../utils/appdata.js";
 
 const platform = os.platform();
