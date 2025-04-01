@@ -1,18 +1,17 @@
 export class MainMenu {
-  constructor(uiService, installMenu, configMenu) {
+  constructor(uiService, menuLoop, installMenu, configMenu) {
     this.ui = uiService;
+    this.loop = menuLoop;
     this.installMenu = installMenu;
     this.configMenu = configMenu;
-    this.running = true;
+
+    this.loop.initialize(this.promptMainMenu);
   }
 
   show = async () => {
     this.ui.showLogo();
-    this.ui.showInfoMessage("hello");
 
-    while (this.running) {
-      await this.promptMainMenu();
-    }
+    await this.loop.showLoop();
 
     this.ui.showInfoMessage("K-THX-BYE");
   };
@@ -29,12 +28,8 @@ export class MainMenu {
       },
       {
         label: "Exit",
-        action: this.closeMainMenu,
+        action: this.loop.stopLoop,
       },
     ]);
-  };
-
-  closeMainMenu = async () => {
-    this.running = false;
   };
 }

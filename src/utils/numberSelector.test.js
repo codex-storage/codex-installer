@@ -16,7 +16,7 @@ describe("number selector", () => {
   });
 
   it("shows the prompt", async () => {
-    await numberSelector.showNumberSelector(0, prompt, false);
+    await numberSelector.show(0, prompt, false);
 
     expect(mockUiService.askPrompt).toHaveBeenCalledWith(prompt);
   });
@@ -24,7 +24,7 @@ describe("number selector", () => {
   it("returns a number given valid input", async () => {
     mockUiService.askPrompt.mockResolvedValue("123");
 
-    const number = await numberSelector.showNumberSelector(0, prompt, false);
+    const number = await numberSelector.show(0, prompt, false);
 
     expect(number).toEqual(123);
   });
@@ -34,7 +34,7 @@ describe("number selector", () => {
 
     mockUiService.askPrompt.mockResolvedValue("what?!");
 
-    const number = await numberSelector.showNumberSelector(
+    const number = await numberSelector.show(
       currentValue,
       prompt,
       false,
@@ -45,7 +45,7 @@ describe("number selector", () => {
 
   async function run(input) {
     mockUiService.askPrompt.mockResolvedValue(input);
-    return await numberSelector.showNumberSelector(0, prompt, true);
+    return await numberSelector.show(0, prompt, true);
   }
 
   it("allows for metric postfixes (k)", async () => {
