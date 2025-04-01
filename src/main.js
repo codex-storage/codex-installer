@@ -29,6 +29,7 @@ import { InstallMenu } from "./ui/installmenu.js";
 import { ConfigMenu } from "./ui/configmenu.js";
 import { PathSelector } from "./utils/pathSelector.js";
 import { NumberSelector } from "./utils/numberSelector.js";
+import { MenuLoop } from "./utils/menuLoop.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -101,11 +102,12 @@ export async function main() {
   const installMenu = new InstallMenu(uiService, configService);
   const configMenu = new ConfigMenu(
     uiService,
+    new MenuLoop(),
     configService,
     pathSelector,
     numberSelector,
   );
-  const mainMenu = new MainMenu(uiService, installMenu, configMenu);
+  const mainMenu = new MainMenu(uiService, new MenuLoop(), installMenu, configMenu);
 
   await mainMenu.show();
   return;
