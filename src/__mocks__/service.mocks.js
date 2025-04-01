@@ -5,7 +5,7 @@ export const mockUiService = {
   showInfoMessage: vi.fn(),
   showErrorMessage: vi.fn(),
   askMultipleChoice: vi.fn(),
-  askPrompt: vi.fn()
+  askPrompt: vi.fn(),
 };
 
 export const mockConfigService = {

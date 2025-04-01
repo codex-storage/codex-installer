@@ -3,11 +3,7 @@ export class NumberSelector {
     this.uiService = uiService;
   }
 
-  show = async (
-    currentValue,
-    promptMessage,
-    allowMetricPostfixes,
-  ) => {
+  show = async (currentValue, promptMessage, allowMetricPostfixes) => {
     try {
       var valueStr = await this.promptForValueStr(promptMessage);
       valueStr = valueStr.replaceAll(" ", "");

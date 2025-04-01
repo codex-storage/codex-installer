@@ -106,14 +106,14 @@ export class PathSelector {
       console.log("The path does not exist.");
     }
     this.updateCurrentIfValidParts(this.splitPath(newFullPath));
-  }
+  };
 
   updateCurrentIfValidParts = (newParts) => {
     if (!this.hasValidRoot(newParts)) {
       console.log("The path has no valid root.");
     }
     this.currentPath = newParts;
-  }
+  };
 
   enterPath = async () => {
     const newPath = await this.ui.askPrompt("Enter Path:");
@@ -156,8 +156,8 @@ export class PathSelector {
         action: () => {
           selected = option;
         },
-      })
-    })
+      });
+    });
 
     await this.ui.askMultipleChoice("Select an subdir", uiOptions);
 
@@ -174,7 +174,7 @@ export class PathSelector {
   selectThisPath = async () => {
     this.resultingPath = this.combine(this.currentPath);
     this.running = false;
-  }
+  };
 
   cancel = async () => {
     this.resultingPath = this.startingPath;

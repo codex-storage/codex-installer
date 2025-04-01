@@ -28,7 +28,7 @@ export class ConfigService {
 
   get = () => {
     return this.config;
-  }
+  };
 
   loadConfig = () => {
     const filePath = this.getConfigFilename();
@@ -44,7 +44,7 @@ export class ConfigService {
       );
       throw error;
     }
-  }
+  };
 
   saveConfig = () => {
     const filePath = this.getConfigFilename();
@@ -56,9 +56,9 @@ export class ConfigService {
       );
       throw error;
     }
-  }
-    
+  };
+
   getConfigFilename = () => {
     return path.join(getAppDataDir(), "config.json");
-  }
+  };
 }

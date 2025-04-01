@@ -10,11 +10,18 @@ describe("mainmenu", () => {
   beforeEach(() => {
     vi.resetAllMocks();
 
-    mainmenu = new MainMenu(mockUiService, mockMenuLoop, mockInstallMenu, mockConfigMenu);
+    mainmenu = new MainMenu(
+      mockUiService,
+      mockMenuLoop,
+      mockInstallMenu,
+      mockConfigMenu,
+    );
   });
 
   it("initializes the menu loop with the promptMainMenu function", () => {
-    expect(mockMenuLoop.initialize).toHaveBeenCalledWith(mainmenu.promptMainMenu);
+    expect(mockMenuLoop.initialize).toHaveBeenCalledWith(
+      mainmenu.promptMainMenu,
+    );
   });
 
   it("shows the logo", async () => {

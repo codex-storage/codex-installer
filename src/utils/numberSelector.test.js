@@ -34,11 +34,7 @@ describe("number selector", () => {
 
     mockUiService.askPrompt.mockResolvedValue("what?!");
 
-    const number = await numberSelector.show(
-      currentValue,
-      prompt,
-      false,
-    );
+    const number = await numberSelector.show(currentValue, prompt, false);
 
     expect(number).toEqual(currentValue);
   });
