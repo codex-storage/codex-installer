@@ -1,5 +1,5 @@
 import { describe, beforeEach, it, expect, vi } from "vitest";
-import { MainMenu } from "./mainmenu.js";
+import { MainMenu } from "./mainMenu.js";
 import { mockUiService } from "../__mocks__/service.mocks.js";
 import { mockInstallMenu, mockConfigMenu } from "../__mocks__/ui.mocks.js";
 import { mockMenuLoop } from "../__mocks__/utils.mocks.js";
