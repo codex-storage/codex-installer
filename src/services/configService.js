@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
-import { getAppDataDir } from "../utils/appDataa.js";
+import { getAppDataDir } from "../utils/appData.js";
 import {
   getCodexBinPath,
   getCodexDataDirDefaultPath,
   getCodexLogsDefaultPath,
-} from "../utils/appDataa.js";
+} from "../utils/appData.js";
 
 const defaultConfig = {
   codexExe: "",

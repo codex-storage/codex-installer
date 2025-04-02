@@ -24,9 +24,9 @@ import { openCodexApp } from "./services/codexApp.js";
 
 import { UiService } from "./services/uiService.js";
 import { FsService } from "./services/fsService.js";
-import { MainMenu } from "./ui/mainMenua.js";
-import { InstallMenu } from "./ui/installMenua.js";
-import { ConfigMenu } from "./ui/configMenua.js";
+import { MainMenu } from "./ui/mainMenu.js";
+import { InstallMenu } from "./ui/installMenu.js";
+import { ConfigMenu } from "./ui/configMenu.js";
 import { PathSelector } from "./utils/pathSelector.js";
 import { NumberSelector } from "./utils/numberSelector.js";
 import { MenuLoop } from "./utils/menuLoop.js";
