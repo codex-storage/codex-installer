@@ -12,11 +12,6 @@ export class PathSelector {
     this.startingPath = startingPath;
     this.pathMustExist = pathMustExist;
     this.roots = this.fs.getAvailableRoots();
-    console.log("Roots: " + this.roots.length);
-    this.roots.forEach(function (root) {
-      console.log("Root: " + root);
-    });
-
     this.currentPath = this.splitPath(startingPath);
     if (!this.hasValidRoot(this.currentPath)) {
       this.currentPath = [this.roots[0]];
@@ -58,7 +53,7 @@ export class PathSelector {
   };
 
   splitPath = (str) => {
-    var result = str.replaceAll("\\", "/").split("/");
+    var result = this.dropEmptyParts(str.replaceAll("\\", "/").split("/"));
     if (str.startsWith("/") && this.roots.includes("/")) {
       result = ["/", ...result]; 
     }
@@ -66,19 +61,16 @@ export class PathSelector {
   };
 
   dropEmptyParts = (parts) => {
-    var result = [];
-    parts.forEach(function (part) {
-      if (part.length > 0) {
-        result.push(part);
-      }
-    });
-    return result;
+    return parts.filter(part => part.length > 0);
   };
 
   combine = (parts) => {
     const toJoin = this.dropEmptyParts(parts);
     if (toJoin.length == 1) return toJoin[0];
-    const result = this.fs.pathJoin(toJoin);
+    var result = this.fs.pathJoin(toJoin);
+    if (result.startsWith("//")) {
+      result = result.substring(1);
+    }
     return result;
   };
 
