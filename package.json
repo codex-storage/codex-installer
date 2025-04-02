@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "vitest run",
-    "test:watch": "vitest",
+    "watch": "vitest",
     "format": "prettier --write ./src"
   },
   "keywords": [

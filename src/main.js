@@ -20,10 +20,10 @@ import {
 import { runCodex, checkNodeStatus } from "./handlers/nodeHandlers.js";
 import { showInfoMessage } from "./utils/messages.js";
 import { ConfigService } from "./services/configService.js";
-import { openCodexApp } from "./services/codexapp.js";
+import { openCodexApp } from "./services/codexAppa.js";
 
-import { UiService } from "./services/uiservice.js";
-import { FsService } from "./services/fsService.js";
+import { UiService } from "./services/uiServicea.js";
+import { FsService } from "./services/fsServicea.js";
 import { MainMenu } from "./ui/mainmenu.js";
 import { InstallMenu } from "./ui/installmenu.js";
 import { ConfigMenu } from "./ui/configmenu.js";
