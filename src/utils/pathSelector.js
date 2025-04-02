@@ -58,7 +58,11 @@ export class PathSelector {
   };
 
   splitPath = (str) => {
-    return str.replaceAll("\\", "/").split("/");
+    var result = str.replaceAll("\\", "/").split("/");
+    if (str.startsWith("/") && this.roots.includes("/")) {
+      result = ["/", ...result]; 
+    }
+    return result;
   };
 
   dropEmptyParts = (parts) => {
