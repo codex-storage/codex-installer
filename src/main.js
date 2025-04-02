@@ -97,7 +97,7 @@ export async function main() {
   const configService = new ConfigService();
   const uiService = new UiService();
   const fsService = new FsService();
-  const pathSelector = new PathSelector(uiService, fsService);
+  const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
   const numberSelector = new NumberSelector(uiService);
   const installMenu = new InstallMenu(uiService, configService);
   const configMenu = new ConfigMenu(
@@ -107,7 +107,12 @@ export async function main() {
     pathSelector,
     numberSelector,
   );
-  const mainMenu = new MainMenu(uiService, new MenuLoop(), installMenu, configMenu);
+  const mainMenu = new MainMenu(
+    uiService,
+    new MenuLoop(),
+    installMenu,
+    configMenu,
+  );
 
   await mainMenu.show();
   return;

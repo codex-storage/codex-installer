@@ -1,13 +1,14 @@
 export class PathSelector {
-  constructor(uiService, fsService) {
+  constructor(uiService, menuLoop, fsService) {
     this.ui = uiService;
+    this.loop = menuLoop;
     this.fs = fsService;
 
     this.pathMustExist = true;
+    this.loop.initialize(this.showPathSelector);
   }
 
   show = async (startingPath, pathMustExist) => {
-    this.running = true;
     this.startingPath = startingPath;
     this.pathMustExist = pathMustExist;
     this.roots = this.fs.getAvailableRoots();
@@ -15,37 +16,40 @@ export class PathSelector {
     if (!this.hasValidRoot(this.currentPath)) {
       this.currentPath = [roots[0]];
     }
-    while (this.running) {
-      this.showCurrent();
-      this.ui.askMultiChoice("Select an option:", [
-        {
-          label: "Enter path",
-          action: this.enterPath,
-        },
-        {
-          label: "Go up one",
-          action: this.upOne,
-        },
-        {
-          label: "Go down one",
-          action: this.downOne,
-        },
-        {
-          label: "Create new folder here",
-          action: this.createSubDir,
-        },
-        {
-          label: "Select this path",
-          action: this.selectThisPath,
-        },
-        {
-          label: "Cancel",
-          action: this.cancel,
-        },
-      ]);
-    }
+
+    await this.loop.showLoop();
 
     return this.resultingPath;
+  };
+
+  showPathSelector = async () => {
+    this.showCurrent();
+    await this.ui.askMultipleChoice("Select an option:", [
+      {
+        label: "Enter path",
+        action: this.enterPath,
+      },
+      {
+        label: "Go up one",
+        action: this.upOne,
+      },
+      {
+        label: "Go down one",
+        action: this.downOne,
+      },
+      {
+        label: "Create new folder here",
+        action: this.createSubDir,
+      },
+      {
+        label: "Select this path",
+        action: this.selectThisPath,
+      },
+      {
+        label: "Cancel",
+        action: this.cancel,
+      },
+    ]);
   };
 
   splitPath = (str) => {
@@ -65,13 +69,14 @@ export class PathSelector {
   combine = (parts) => {
     const toJoin = this.dropEmptyParts(parts);
     if (toJoin.length == 1) return toJoin[0];
-    return this.fs.pathJoin(...toJoin);
+    const result = this.fs.pathJoin(toJoin);
+    return result;
   };
 
   combineWith = (parts, extra) => {
     const toJoin = this.dropEmptyParts(parts);
-    if (toJoin.length == 1) return this.fs.pathJoin(toJoin[0], extra);
-    return this.fs.pathJoin(...toJoin, extra);
+    if (toJoin.length == 1) return this.fs.pathJoin([toJoin[0], extra]);
+    return this.fs.pathJoin([...toJoin, extra]);
   };
 
   showCurrent = () => {
@@ -103,14 +108,16 @@ export class PathSelector {
 
   updateCurrentIfValidFull = (newFullPath) => {
     if (this.pathMustExist && !this.fs.isDir(newFullPath)) {
-      console.log("The path does not exist.");
+      this.ui.showErrorMessage("The path does not exist.");
+      return;
     }
     this.updateCurrentIfValidParts(this.splitPath(newFullPath));
   };
 
   updateCurrentIfValidParts = (newParts) => {
     if (!this.hasValidRoot(newParts)) {
-      console.log("The path has no valid root.");
+      this.ui.showErrorMessage("The path has no valid root.");
+      return;
     }
     this.currentPath = newParts;
   };
@@ -133,24 +140,19 @@ export class PathSelector {
   getSubDirOptions = () => {
     const fullPath = this.combine(this.currentPath);
     const entries = this.fs.readDir(fullPath);
-    var result = [];
-    entries.forEach(function (entry) {
-      if (this.isSubDir(entry)) {
-        result.push(entry);
-      }
-    });
-    return result;
+    return entries.filter(entry => this.isSubDir(entry));
   };
 
   downOne = async () => {
     const options = this.getSubDirOptions();
     if (options.length == 0) {
-      console.log("There are no subdirectories here.");
+      this.ui.showInfoMessage("There are no subdirectories here.");
+      return;
     }
 
     var selected = "";
     var uiOptions = [];
-    options.foreach(function (option) {
+    options.forEach(function (option) {
       uiOptions.push({
         label: option,
         action: () => {
@@ -168,16 +170,20 @@ export class PathSelector {
   createSubDir = async () => {
     const name = await this.ui.askPrompt("Enter name:");
     if (name.length < 1) return;
-    this.updateCurrentIfValidParts([...currentPath, name]);
+    const newPath = [...this.currentPath, name];
+    if (this.pathMustExist) {
+      this.fs.makeDir(this.combine(newPath));
+    }
+    this.updateCurrentIfValidParts(newPath);
   };
 
   selectThisPath = async () => {
     this.resultingPath = this.combine(this.currentPath);
-    this.running = false;
+    this.loop.stopLoop();
   };
 
   cancel = async () => {
     this.resultingPath = this.startingPath;
-    this.running = false;
+    this.loop.stopLoop();
   };
 }
