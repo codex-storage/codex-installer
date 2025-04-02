@@ -12,7 +12,7 @@ import {
   showSuccessMessage,
 } from "../utils/messages.js";
 import { checkDependencies } from "../services/nodeService.js";
-import { getCodexRootPath, getCodexBinPath } from "../utils/appdata.js";
+import { getCodexRootPath, getCodexBinPath } from "../utils/appDataa.js";
 
 const platform = os.platform();
 

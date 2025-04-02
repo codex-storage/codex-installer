@@ -20,13 +20,13 @@ import {
 import { runCodex, checkNodeStatus } from "./handlers/nodeHandlers.js";
 import { showInfoMessage } from "./utils/messages.js";
 import { ConfigService } from "./services/configService.js";
-import { openCodexApp } from "./services/codexAppa.js";
+import { openCodexApp } from "./services/codexApp.js";
 
-import { UiService } from "./services/uiServicea.js";
-import { FsService } from "./services/fsServicea.js";
-import { MainMenu } from "./ui/mainmenu.js";
-import { InstallMenu } from "./ui/installmenu.js";
-import { ConfigMenu } from "./ui/configmenu.js";
+import { UiService } from "./services/uiService.js";
+import { FsService } from "./services/fsService.js";
+import { MainMenu } from "./ui/mainMenua.js";
+import { InstallMenu } from "./ui/installMenua.js";
+import { ConfigMenu } from "./ui/configMenua.js";
 import { PathSelector } from "./utils/pathSelector.js";
 import { NumberSelector } from "./utils/numberSelector.js";
 import { MenuLoop } from "./utils/menuLoop.js";
