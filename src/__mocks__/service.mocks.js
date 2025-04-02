@@ -13,3 +13,11 @@ export const mockConfigService = {
   saveConfig: vi.fn(),
   loadConfig: vi.fn(),
 };
+
+export const mockFsService = {
+  getAvailableRoots: vi.fn(),
+  pathJoin: vi.fn(),
+  isDir: vi.fn(),
+  readDir: vi.fn(),
+  makeDir: vi.fn(),
+};

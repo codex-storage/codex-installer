@@ -12,9 +12,14 @@ export class PathSelector {
     this.startingPath = startingPath;
     this.pathMustExist = pathMustExist;
     this.roots = this.fs.getAvailableRoots();
+    console.log("Roots: " + this.roots.length);
+    this.roots.forEach(function (root) {
+      console.log("Root: " + root);
+    });
+
     this.currentPath = this.splitPath(startingPath);
     if (!this.hasValidRoot(this.currentPath)) {
-      this.currentPath = [roots[0]];
+      this.currentPath = [this.roots[0]];
     }
 
     await this.loop.showLoop();

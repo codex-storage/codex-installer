@@ -114,7 +114,9 @@ export async function main() {
     configMenu,
   );
 
-  await mainMenu.show();
+  // await mainMenu.show();
+  const pathResult = await pathSelector.show(configService.get().codexPath, true);
+  console.log("Selected path: " + pathResult);
   return;
 
   try {
