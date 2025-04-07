@@ -1,16 +1,16 @@
 export class InstallMenu {
-  constructor(uiService, configService) {
+  constructor(uiService, configService, pathSelector) {
     this.ui = uiService;
+    this.configService = configService;
     this.config = configService.get();
+    this.pathSelector = pathSelector;
   }
 
   show = async () => {
     await this.ui.askMultipleChoice("Configure your Codex installation", [
       {
         label: "Install path: " + this.config.codexPath,
-        action: async function () {
-          console.log("run path selector");
-        },
+        action: this.selectInstallPath,
       },
       {
         label: "Storage provider module: Disabled (todo)",
@@ -22,9 +22,17 @@ export class InstallMenu {
       },
       {
         label: "Cancel",
-        action: async function () {},
+        action: this.doNothing,
       },
     ]);
+  };
+
+  selectInstallPath = async () => {
+    this.config.codexPath = await this.pathSelector.show(
+      this.config.codexPath,
+      false,
+    );
+    this.configService.saveConfig();
   };
 
   storageProviderOption = async () => {
@@ -32,7 +40,7 @@ export class InstallMenu {
     await this.show();
   };
 
-  performInstall = async () => {
-    console.log("todo");
-  };
+  performInstall = async () => {};
+
+  doNothing = async () => {};
 }

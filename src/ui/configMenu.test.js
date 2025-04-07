@@ -6,6 +6,7 @@ import {
   mockPathSelector,
   mockNumberSelector,
   mockMenuLoop,
+  mockDataDirMover,
 } from "../__mocks__/utils.mocks.js";
 
 describe("ConfigMenu", () => {
@@ -31,6 +32,7 @@ describe("ConfigMenu", () => {
       mockConfigService,
       mockPathSelector,
       mockNumberSelector,
+      mockDataDirMover,
     );
   });
 
@@ -55,6 +57,11 @@ describe("ConfigMenu", () => {
   it("sets the config field", async () => {
     await configMenu.show();
     expect(configMenu.config).toEqual(config);
+  });
+
+  it("sets the original datadir field", async () => {
+    await configMenu.show();
+    expect(configMenu.originalDataDir).toEqual(config.dataDir);
   });
 
   describe("config menu options", () => {
@@ -101,6 +108,15 @@ describe("ConfigMenu", () => {
           },
         ],
       );
+    });
+
+    it("edits the logs directory", async () => {
+      const originalPath = config.dataDir;
+      mockPathSelector.show.mockResolvedValue("/new-data");
+      await configMenu.editDataDir();
+
+      expect(mockPathSelector.show).toHaveBeenCalledWith(originalPath, false);
+      expect(configMenu.config.dataDir).toEqual("/new-data");
     });
 
     it("edits the logs directory", async () => {
@@ -219,8 +235,11 @@ describe("ConfigMenu", () => {
       );
       expect(configMenu.config.ports.apiPort).toEqual(originalPort);
     });
+  });
 
+  describe("save and discard changes", () => {
     it("saves changes and exits", async () => {
+      await configMenu.show();
       await configMenu.saveChangesAndExit();
 
       expect(mockConfigService.saveConfig).toHaveBeenCalled();
@@ -228,6 +247,19 @@ describe("ConfigMenu", () => {
         "Configuration changes saved.",
       );
       expect(mockMenuLoop.stopLoop).toHaveBeenCalled();
+    });
+
+    it("calls the dataDirMover when the new datadir is not equal to the original dataDir when saving changes", async () => {
+      config.dataDir = "/original-data";
+      await configMenu.show();
+
+      configMenu.config.dataDir = "/new-data";
+      await configMenu.saveChangesAndExit();
+
+      expect(mockDataDirMover.moveDataDir).toHaveBeenCalledWith(
+        configMenu.originalDataDir,
+        configMenu.config.dataDir,
+      );
     });
 
     it("discards changes and exits", async () => {

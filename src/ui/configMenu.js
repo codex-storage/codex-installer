@@ -5,18 +5,21 @@ export class ConfigMenu {
     configService,
     pathSelector,
     numberSelector,
+    dataDirMover,
   ) {
     this.ui = uiService;
     this.loop = menuLoop;
     this.configService = configService;
     this.pathSelector = pathSelector;
     this.numberSelector = numberSelector;
+    this.dataDirMover = dataDirMover;
 
     this.loop.initialize(this.showConfigMenu);
   }
 
   show = async () => {
     this.config = this.configService.get();
+    this.originalDataDir = this.config.dataDir;
     this.ui.showInfoMessage("Codex Configuration");
     await this.loop.showLoop();
   };
@@ -76,46 +79,10 @@ export class ConfigMenu {
   };
 
   editDataDir = async () => {
-    // todo
-    // function updateDataDir(config, newDataDir) {
-    //   if (config.dataDir == newDataDir) return config;
-    //   // The Codex dataDir is a little strange:
-    //   // If the old one is empty: The new one should not exist, so that codex creates it
-    //   // with the correct security permissions.
-    //   // If the old one does exist: We move it.
-    //   if (isDir(config.dataDir)) {
-    //     console.log(
-    //       showInfoMessage(
-    //         "Moving Codex data folder...\n" +
-    //           `From: "${config.dataDir}"\n` +
-    //           `To: "${newDataDir}"`,
-    //       ),
-    //     );
-    //     try {
-    //       fs.moveSync(config.dataDir, newDataDir);
-    //     } catch (error) {
-    //       console.log(
-    //         showErrorMessage("Error while moving dataDir: " + error.message),
-    //       );
-    //       throw error;
-    //     }
-    //   } else {
-    //     // Old data dir does not exist.
-    //     if (isDir(newDataDir)) {
-    //       console.log(
-    //         showInfoMessage(
-    //           "Warning: the selected data path already exists.\n" +
-    //             `New data path = "${newDataDir}"\n` +
-    //             "Codex may overwrite data in this folder.\n" +
-    //             "Codex will fail to start if this folder does not have the required\n" +
-    //             "security permissions.",
-    //         ),
-    //       );
-    //     }
-    //   }
-    //   config.dataDir = newDataDir;
-    //   return config;
-    // }
+    this.config.dataDir = await this.pathSelector.show(
+      this.config.dataDir,
+      false,
+    );
   };
 
   editLogsDir = async () => {
@@ -181,6 +148,15 @@ export class ConfigMenu {
   };
 
   saveChangesAndExit = async () => {
+    if (this.config.dataDir !== this.originalDataDir) {
+      // The Codex data-dir is a little special.
+      // Use a dedicated module to move it.
+      await this.dataDirMover.moveDataDir(
+        this.originalDataDir,
+        this.config.dataDir,
+      );
+    }
+
     this.configService.saveConfig();
     this.ui.showInfoMessage("Configuration changes saved.");
     this.loop.stopLoop();

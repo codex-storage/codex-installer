@@ -99,7 +99,7 @@ export async function main() {
   const fsService = new FsService();
   const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
   const numberSelector = new NumberSelector(uiService);
-  const installMenu = new InstallMenu(uiService, configService);
+  const installMenu = new InstallMenu(uiService, configService, pathSelector);
   const configMenu = new ConfigMenu(
     uiService,
     new MenuLoop(),
@@ -112,6 +112,7 @@ export async function main() {
     new MenuLoop(),
     installMenu,
     configMenu,
+    new DataDirMover(fsService, uiService)
   );
 
   await mainMenu.show();

@@ -14,3 +14,7 @@ export const mockMenuLoop = {
   showLoop: vi.fn(),
   stopLoop: vi.fn(),
 };
+
+export const mockDataDirMover = {
+  moveDataDir: vi.fn(),
+};

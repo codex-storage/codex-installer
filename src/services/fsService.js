@@ -38,4 +38,8 @@ export class FsService {
   makeDir = (dir) => {
     fs.mkdirSync(dir);
   };
+
+  moveDir = (oldPath, newPath) => {
+    fs.moveSync(oldPath, newPath);
+  };
 }

@@ -20,7 +20,9 @@ describe("PathSelector", () => {
 
   describe("initialization", () => {
     it("initializes the menu loop", () => {
-      expect(mockMenuLoop.initialize).toHaveBeenCalledWith(pathSelector.showPathSelector);
+      expect(mockMenuLoop.initialize).toHaveBeenCalledWith(
+        pathSelector.showPathSelector,
+      );
     });
   });
 
@@ -92,9 +94,9 @@ describe("PathSelector", () => {
     it("shows down directory navigation", async () => {
       mockFsService.readDir.mockReturnValue(["subdir1", "subdir2"]);
       mockFsService.isDir.mockReturnValue(true);
-      
+
       await pathSelector.downOne();
-      
+
       expect(mockUiService.askMultipleChoice).toHaveBeenCalled();
       expect(mockFsService.readDir).toHaveBeenCalledWith(mockStartPath);
     });
@@ -106,7 +108,7 @@ describe("PathSelector", () => {
         options[0].action(); // Select the first option
       });
       await pathSelector.downOne();
-      
+
       expect(pathSelector.currentPath).toEqual(["/", "home", "user", subdir]);
     });
 
@@ -114,9 +116,11 @@ describe("PathSelector", () => {
       const newDir = "newdir";
       mockUiService.askPrompt.mockResolvedValue(newDir);
       await pathSelector.createSubDir();
-      
+
       expect(mockUiService.askPrompt).toHaveBeenCalledWith("Enter name:");
-      expect(mockFsService.makeDir).toHaveBeenCalled(mockStartPath + "/" + newDir);
+      expect(mockFsService.makeDir).toHaveBeenCalled(
+        mockStartPath + "/" + newDir,
+      );
       expect(pathSelector.currentPath).toEqual(["/", "home", "user", newDir]);
     });
   });
@@ -135,7 +139,9 @@ describe("PathSelector", () => {
     it("validates full paths", () => {
       mockFsService.isDir.mockReturnValue(false);
       pathSelector.updateCurrentIfValidFull("/invalid/path");
-      expect(mockUiService.showErrorMessage).toHaveBeenCalledWith("The path does not exist.");
+      expect(mockUiService.showErrorMessage).toHaveBeenCalledWith(
+        "The path does not exist.",
+      );
     });
   });
 

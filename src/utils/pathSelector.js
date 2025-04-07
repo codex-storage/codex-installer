@@ -55,13 +55,13 @@ export class PathSelector {
   splitPath = (str) => {
     var result = this.dropEmptyParts(str.replaceAll("\\", "/").split("/"));
     if (str.startsWith("/") && this.roots.includes("/")) {
-      result = ["/", ...result]; 
+      result = ["/", ...result];
     }
     return result;
   };
 
   dropEmptyParts = (parts) => {
-    return parts.filter(part => part.length > 0);
+    return parts.filter((part) => part.length > 0);
   };
 
   combine = (parts) => {
@@ -141,7 +141,7 @@ export class PathSelector {
   getSubDirOptions = () => {
     const fullPath = this.combine(this.currentPath);
     const entries = this.fs.readDir(fullPath);
-    return entries.filter(entry => this.isSubDir(entry));
+    return entries.filter((entry) => this.isSubDir(entry));
   };
 
   downOne = async () => {
