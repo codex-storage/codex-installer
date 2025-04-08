@@ -6,7 +6,7 @@ import { mockPathSelector } from "../__mocks__/utils.mocks.js";
 
 describe("InstallMenu", () => {
   const config = {
-    codexPath: "/codex",
+    codexInstallPath: "/codex",
   };
   let installMenu;
 
@@ -27,7 +27,7 @@ describe("InstallMenu", () => {
       "Configure your Codex installation",
       [
         {
-          label: "Install path: " + config.codexPath,
+          label: "Install path: " + config.codexInstallPath,
           action: installMenu.selectInstallPath,
         },
         {
@@ -47,14 +47,14 @@ describe("InstallMenu", () => {
   });
 
   it("allows selecting the install path", async () => {
-    const originalPath = config.codexPath;
+    const originalPath = config.codexInstallPath;
     const newPath = "/new/path";
     mockPathSelector.show.mockResolvedValue(newPath);
 
     await installMenu.selectInstallPath();
 
     expect(mockPathSelector.show).toHaveBeenCalledWith(originalPath, false);
-    expect(config.codexPath).toBe(newPath);
+    expect(config.codexInstallPath).toBe(newPath);
     expect(mockConfigService.saveConfig).toHaveBeenCalled();
   });
 

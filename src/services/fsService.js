@@ -31,6 +31,14 @@ export class FsService {
     }
   };
 
+  isFile = (path) => {
+    try {
+      return fs.lstatSync(path).isFile();
+    } catch {
+      return false;
+    }
+  };
+
   readDir = (dir) => {
     return fs.readdirSync(dir);
   };

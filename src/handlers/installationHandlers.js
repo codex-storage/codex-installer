@@ -135,14 +135,6 @@ async function performInstall(config) {
   try {
     if (platform === "win32") {
       try {
-        try {
-          await runCommand("curl --version");
-        } catch (error) {
-          throw new Error(
-            "curl is not available. Please install curl or update your Windows version.",
-          );
-        }
-
         await runCommand(
           "curl -LO --ssl-no-revoke https://get.codex.storage/install.cmd",
         );

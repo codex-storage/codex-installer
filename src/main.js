@@ -112,7 +112,7 @@ export async function main() {
     new MenuLoop(),
     installMenu,
     configMenu,
-    new DataDirMover(fsService, uiService)
+    new DataDirMover(fsService, uiService),
   );
 
   await mainMenu.show();

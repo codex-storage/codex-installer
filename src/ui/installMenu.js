@@ -9,7 +9,7 @@ export class InstallMenu {
   show = async () => {
     await this.ui.askMultipleChoice("Configure your Codex installation", [
       {
-        label: "Install path: " + this.config.codexPath,
+        label: "Install path: " + this.config.codexInstallPath,
         action: this.selectInstallPath,
       },
       {
@@ -28,8 +28,8 @@ export class InstallMenu {
   };
 
   selectInstallPath = async () => {
-    this.config.codexPath = await this.pathSelector.show(
-      this.config.codexPath,
+    this.config.codexInstallPath = await this.pathSelector.show(
+      this.config.codexInstallPath,
       false,
     );
     this.configService.saveConfig();
