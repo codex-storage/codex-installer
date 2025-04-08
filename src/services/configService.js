@@ -10,7 +10,7 @@ import {
 const defaultConfig = {
   codexExe: "",
   // User-selected config options:
-  codexPath: getCodexBinPath(),
+  codexInstallPath: getCodexBinPath(),
   dataDir: getCodexDataDirDefaultPath(),
   logsDir: getCodexLogsDefaultPath(),
   storageQuota: 8 * 1024 * 1024 * 1024,

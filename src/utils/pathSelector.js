@@ -140,8 +140,13 @@ export class PathSelector {
 
   getSubDirOptions = () => {
     const fullPath = this.combine(this.currentPath);
-    const entries = this.fs.readDir(fullPath);
-    return entries.filter((entry) => this.isSubDir(entry));
+    try {
+      const entries = this.fs.readDir(fullPath);
+      return entries.filter((entry) => this.isSubDir(entry));
+    }
+    catch {
+      return [];
+    }
   };
 
   downOne = async () => {

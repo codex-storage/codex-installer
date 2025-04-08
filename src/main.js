@@ -30,6 +30,7 @@ import { ConfigMenu } from "./ui/configMenu.js";
 import { PathSelector } from "./utils/pathSelector.js";
 import { NumberSelector } from "./utils/numberSelector.js";
 import { MenuLoop } from "./utils/menuLoop.js";
+import { DataDirMover } from "./utils/dataDirMover.js";
 
 async function showNavigationMenu() {
   console.log("\n");

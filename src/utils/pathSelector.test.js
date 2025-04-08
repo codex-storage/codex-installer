@@ -101,6 +101,16 @@ describe("PathSelector", () => {
       expect(mockFsService.readDir).toHaveBeenCalledWith(mockStartPath);
     });
 
+    it("handles non-existing paths", async () => {
+      mockFsService.readDir.mockImplementationOnce(() => { throw new Error("A!"); });
+      
+      await pathSelector.downOne();
+
+      expect(mockUiService.showInfoMessage).toHaveBeenCalledWith(
+        "There are no subdirectories here."
+      );
+    });
+
     it("can navigate to a subdirectory", async () => {
       const subdir = "subdir1";
       mockFsService.readDir.mockReturnValue([subdir]);
