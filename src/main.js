@@ -34,6 +34,7 @@ import { DataDirMover } from "./utils/dataDirMover.js";
 import { Installer } from "./handlers/installer.js";
 import { ShellService } from "./services/shellService.js";
 import { OsService } from "./services/osService.js";
+import { ProcessControl } from "./handlers/processControl.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -132,8 +133,14 @@ export async function main() {
     new DataDirMover(fsService, uiService),
   );
 
+  const processControl = new ProcessControl(configService, shellService, osService, fsService);
+  await processControl.doThing();
+  return;
+
   await mainMenu.show();
   return;
+
+
 
   try {
     while (true) {
