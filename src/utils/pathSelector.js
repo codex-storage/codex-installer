@@ -143,8 +143,7 @@ export class PathSelector {
     try {
       const entries = this.fs.readDir(fullPath);
       return entries.filter((entry) => this.isSubDir(entry));
-    }
-    catch {
+    } catch {
       return [];
     }
   };

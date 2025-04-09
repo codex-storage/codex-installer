@@ -6,6 +6,9 @@ export const mockUiService = {
   showErrorMessage: vi.fn(),
   askMultipleChoice: vi.fn(),
   askPrompt: vi.fn(),
+  createAndStartSpinner: vi.fn(),
+  stopSpinnerSuccess: vi.fn(),
+  stopSpinnerError: vi.fn(),
 };
 
 export const mockConfigService = {
@@ -21,6 +24,7 @@ export const mockFsService = {
   isFile: vi.fn(),
   readDir: vi.fn(),
   makeDir: vi.fn(),
+  deleteDir: vi.fn(),
 };
 
 export const mockShellService = {

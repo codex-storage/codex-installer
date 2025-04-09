@@ -105,8 +105,18 @@ export async function main() {
   const numberSelector = new NumberSelector(uiService);
   const shellService = new ShellService();
   const osService = new OsService();
-  const installer = new Installer(configService, shellService, osService, fsService);
-  const installMenu = new InstallMenu(uiService, configService, pathSelector, installer);
+  const installer = new Installer(
+    configService,
+    shellService,
+    osService,
+    fsService,
+  );
+  const installMenu = new InstallMenu(
+    uiService,
+    configService,
+    pathSelector,
+    installer,
+  );
   const configMenu = new ConfigMenu(
     uiService,
     new MenuLoop(),

@@ -91,7 +91,7 @@ export class UiService {
 
   createAndStartSpinner = (message) => {
     return createSpinner(message).start();
-  }
+  };
 
   stopSpinnerSuccess = (spinner) => {
     if (spinner == undefined) return;

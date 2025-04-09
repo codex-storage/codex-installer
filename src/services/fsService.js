@@ -50,4 +50,8 @@ export class FsService {
   moveDir = (oldPath, newPath) => {
     fs.moveSync(oldPath, newPath);
   };
+
+  deleteDir = (dir) => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  };
 }

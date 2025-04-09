@@ -39,6 +39,11 @@ export class Installer {
     processCallbacks.installSuccessful();
   };
 
+  uninstallCodex = () => {
+    this.fs.deleteDir(this.config.codexInstallPath);
+    this.fs.deleteDir(this.config.dataDir);
+  };
+
   arePrerequisitesCorrect = async (processCallbacks) => {
     if (await this.isCodexInstalled()) {
       processCallbacks.warn("Codex is already installed.");
@@ -74,7 +79,7 @@ export class Installer {
   };
 
   installCodexUnix = async (processCallbacks) => {
-    if (!await this.ensureUnixDependencies(processCallbacks)) return;
+    if (!(await this.ensureUnixDependencies(processCallbacks))) return;
     await this.shell.run(
       "curl -# --connect-timeout 10 --max-time 60 -L https://get.codex.storage/install.sh -o install.sh && chmod +x install.sh",
     );

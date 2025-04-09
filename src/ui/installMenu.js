@@ -13,20 +13,7 @@ export class InstallMenu {
     } else {
       await this.showInstallMenu();
     }
-  }
-
-  showUninstallMenu = async () => {
-    await this.ui.askMultipleChoice("Codex is installed", [
-      {
-        label: "Uninstall",
-        action: this.performUninstall,
-      },
-      {
-        label: "Cancel",
-        action: this.doNothing,
-      },
-    ]);
-  }
+  };
 
   showInstallMenu = async () => {
     await this.ui.askMultipleChoice("Configure your Codex installation", [
@@ -49,6 +36,41 @@ export class InstallMenu {
     ]);
   };
 
+  showUninstallMenu = async () => {
+    await this.ui.askMultipleChoice("Codex is installed", [
+      {
+        label: "Uninstall",
+        action: this.showConfirmUninstall,
+      },
+      {
+        label: "Cancel",
+        action: this.doNothing,
+      },
+    ]);
+  };
+
+  showConfirmUninstall = async () => {
+    this.ui.showInfoMessage(
+      "You are about to:\n" +
+        " - Uninstall the Codex application\n" +
+        " - Delete the data stored in your Codex node",
+    );
+
+    await this.ui.askMultipleChoice(
+      "Are you sure you want to uninstall Codex?",
+      [
+        {
+          label: "No",
+          action: this.doNothing,
+        },
+        {
+          label: "Yes",
+          action: this.performUninstall,
+        },
+      ],
+    );
+  };
+
   selectInstallPath = async () => {
     this.config.codexInstallPath = await this.pathSelector.show(
       this.config.codexInstallPath,
@@ -66,7 +88,9 @@ export class InstallMenu {
     await this.installer.installCodex(this);
   };
 
-  performUninstall = async () => {};
+  performUninstall = async () => {
+    this.installer.uninstallCodex();
+  };
 
   doNothing = async () => {};
 
@@ -77,12 +101,12 @@ export class InstallMenu {
 
   downloadSuccessful = () => {
     this.ui.showInfoMessage("Download successful...");
-  }
+  };
 
   installSuccessful = () => {
     this.ui.showInfoMessage("Installation successful!");
     this.ui.stopSpinnerSuccess(this.installSpinner);
-  }
+  };
 
   warn = (message) => {
     this.ui.showErrorMessage(message);

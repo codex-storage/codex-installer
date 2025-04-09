@@ -102,12 +102,14 @@ describe("PathSelector", () => {
     });
 
     it("handles non-existing paths", async () => {
-      mockFsService.readDir.mockImplementationOnce(() => { throw new Error("A!"); });
-      
+      mockFsService.readDir.mockImplementationOnce(() => {
+        throw new Error("A!");
+      });
+
       await pathSelector.downOne();
 
       expect(mockUiService.showInfoMessage).toHaveBeenCalledWith(
-        "There are no subdirectories here."
+        "There are no subdirectories here.",
       );
     });
 

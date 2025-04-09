@@ -241,7 +241,9 @@ describe("Installer", () => {
 
       it("ensures unix dependencies", async () => {
         await installer.installCodexUnix(processCallbacks);
-        expect(installer.ensureUnixDependencies).toHaveBeenCalled(processCallbacks);
+        expect(installer.ensureUnixDependencies).toHaveBeenCalled(
+          processCallbacks,
+        );
       });
 
       it("returns early if unix dependencies are not met", async () => {
@@ -255,9 +257,9 @@ describe("Installer", () => {
       });
 
       describe("when dependencies are met", () => {
-        beforeEach(() =>{
+        beforeEach(() => {
           installer.ensureUnixDependencies.mockResolvedValue(true);
-        })
+        });
 
         it("runs the curl command to download the installer", async () => {
           await installer.installCodexUnix(processCallbacks);
@@ -383,6 +385,22 @@ describe("Installer", () => {
       mockFsService.isFile.mockReturnValue(true);
       await installer.saveCodexInstallPath(codexExe);
       expect(mockConfigService.saveConfig).toHaveBeenCalled();
+    });
+  });
+
+  describe("uninstallCodex", () => {
+    it("deletes the codex install path", () => {
+      installer.uninstallCodex();
+
+      expect(mockFsService.deleteDir).toHaveBeenCalledWith(
+        config.codexInstallPath,
+      );
+    });
+
+    it("deletes the codex data path", () => {
+      installer.uninstallCodex();
+
+      expect(mockFsService.deleteDir).toHaveBeenCalledWith(config.dataDir);
     });
   });
 });
