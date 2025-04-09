@@ -31,6 +31,9 @@ import { PathSelector } from "./utils/pathSelector.js";
 import { NumberSelector } from "./utils/numberSelector.js";
 import { MenuLoop } from "./utils/menuLoop.js";
 import { DataDirMover } from "./utils/dataDirMover.js";
+import { Installer } from "./handlers/installer.js";
+import { ShellService } from "./services/shellService.js";
+import { OsService } from "./services/osService.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -100,7 +103,10 @@ export async function main() {
   const fsService = new FsService();
   const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
   const numberSelector = new NumberSelector(uiService);
-  const installMenu = new InstallMenu(uiService, configService, pathSelector);
+  const shellService = new ShellService();
+  const osService = new OsService();
+  const installer = new Installer(configService, shellService, osService, fsService);
+  const installMenu = new InstallMenu(uiService, configService, pathSelector, installer);
   const configMenu = new ConfigMenu(
     uiService,
     new MenuLoop(),

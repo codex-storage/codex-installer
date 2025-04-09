@@ -1,6 +1,7 @@
 import boxen from "boxen";
 import chalk from "chalk";
 import inquirer from "inquirer";
+import { createSpinner } from "nanospinner";
 
 import { ASCII_ART } from "../constants/ascii.js";
 
@@ -86,5 +87,19 @@ export class UiService {
       },
     ]);
     return response.valueStr;
+  };
+
+  createAndStartSpinner = (message) => {
+    return createSpinner(message).start();
+  }
+
+  stopSpinnerSuccess = (spinner) => {
+    if (spinner == undefined) return;
+    spinner.stop();
+  };
+
+  stopSpinnerError = (spinner) => {
+    if (spinner == undefined) return;
+    spinner.error();
   };
 }

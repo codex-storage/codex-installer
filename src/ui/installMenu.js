@@ -1,12 +1,34 @@
 export class InstallMenu {
-  constructor(uiService, configService, pathSelector) {
+  constructor(uiService, configService, pathSelector, installer) {
     this.ui = uiService;
     this.configService = configService;
     this.config = configService.get();
     this.pathSelector = pathSelector;
+    this.installer = installer;
   }
 
   show = async () => {
+    if (await this.installer.isCodexInstalled()) {
+      await this.showUninstallMenu();
+    } else {
+      await this.showInstallMenu();
+    }
+  }
+
+  showUninstallMenu = async () => {
+    await this.ui.askMultipleChoice("Codex is installed", [
+      {
+        label: "Uninstall",
+        action: this.performUninstall,
+      },
+      {
+        label: "Cancel",
+        action: this.doNothing,
+      },
+    ]);
+  }
+
+  showInstallMenu = async () => {
     await this.ui.askMultipleChoice("Configure your Codex installation", [
       {
         label: "Install path: " + this.config.codexInstallPath,
@@ -40,7 +62,30 @@ export class InstallMenu {
     await this.show();
   };
 
-  performInstall = async () => {};
+  performInstall = async () => {
+    await this.installer.installCodex(this);
+  };
+
+  performUninstall = async () => {};
 
   doNothing = async () => {};
+
+  // Progress callbacks from installer module:
+  installStarts = () => {
+    this.installSpinner = this.ui.createAndStartSpinner("Installing...");
+  };
+
+  downloadSuccessful = () => {
+    this.ui.showInfoMessage("Download successful...");
+  }
+
+  installSuccessful = () => {
+    this.ui.showInfoMessage("Installation successful!");
+    this.ui.stopSpinnerSuccess(this.installSpinner);
+  }
+
+  warn = (message) => {
+    this.ui.showErrorMessage(message);
+    this.ui.stopSpinnerError(this.installSpinner);
+  };
 }

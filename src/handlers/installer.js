@@ -74,7 +74,7 @@ export class Installer {
   };
 
   installCodexUnix = async (processCallbacks) => {
-    await this.ensureUnixDependencies();
+    if (!await this.ensureUnixDependencies(processCallbacks)) return;
     await this.shell.run(
       "curl -# --connect-timeout 10 --max-time 60 -L https://get.codex.storage/install.sh -o install.sh && chmod +x install.sh",
     );

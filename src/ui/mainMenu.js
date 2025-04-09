@@ -19,7 +19,7 @@ export class MainMenu {
   promptMainMenu = async () => {
     await this.ui.askMultipleChoice("Select an option", [
       {
-        label: "Install Codex",
+        label: "Install/uninstall Codex",
         action: this.installMenu.show,
       },
       {

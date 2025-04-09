@@ -239,43 +239,59 @@ describe("Installer", () => {
         installer.runInstallerLinux = vi.fn();
       });
 
-      it("ensures Unix dependencies", async () => {
+      it("ensures unix dependencies", async () => {
         await installer.installCodexUnix(processCallbacks);
-        expect(installer.ensureUnixDependencies).toHaveBeenCalled();
+        expect(installer.ensureUnixDependencies).toHaveBeenCalled(processCallbacks);
       });
 
-      it("runs the curl command to download the installer", async () => {
+      it("returns early if unix dependencies are not met", async () => {
+        installer.ensureUnixDependencies.mockResolvedValue(false);
+
         await installer.installCodexUnix(processCallbacks);
-        expect(mockShellService.run).toHaveBeenCalledWith(
-          "curl -# --connect-timeout 10 --max-time 60 -L https://get.codex.storage/install.sh -o install.sh && chmod +x install.sh",
-        );
+
+        expect(processCallbacks.downloadSuccessful).not.toHaveBeenCalled();
+        expect(installer.runInstallerDarwin).not.toHaveBeenCalled();
+        expect(installer.runInstallerLinux).not.toHaveBeenCalled();
       });
 
-      it("calls downloadSuccessful", async () => {
-        await installer.installCodexUnix(processCallbacks);
-        expect(processCallbacks.downloadSuccessful).toHaveBeenCalled();
-      });
+      describe("when dependencies are met", () => {
+        beforeEach(() =>{
+          installer.ensureUnixDependencies.mockResolvedValue(true);
+        })
 
-      it("runs installer for darwin ", async () => {
-        mockOsService.isDarwin.mockReturnValue(true);
-        await installer.installCodexUnix(processCallbacks);
-        expect(installer.runInstallerDarwin).toHaveBeenCalled();
-      });
+        it("runs the curl command to download the installer", async () => {
+          await installer.installCodexUnix(processCallbacks);
+          expect(mockShellService.run).toHaveBeenCalledWith(
+            "curl -# --connect-timeout 10 --max-time 60 -L https://get.codex.storage/install.sh -o install.sh && chmod +x install.sh",
+          );
+        });
 
-      it("runs installer for linux", async () => {
-        mockOsService.isDarwin.mockReturnValue(false);
-        await installer.installCodexUnix(processCallbacks);
-        expect(installer.runInstallerLinux).toHaveBeenCalled();
-      });
+        it("calls downloadSuccessful", async () => {
+          await installer.installCodexUnix(processCallbacks);
+          expect(processCallbacks.downloadSuccessful).toHaveBeenCalled();
+        });
 
-      it("saves the codex install path", async () => {
-        await installer.installCodexUnix(processCallbacks);
-        expect(installer.saveCodexInstallPath).toHaveBeenCalledWith("codex");
-      });
+        it("runs installer for darwin ", async () => {
+          mockOsService.isDarwin.mockReturnValue(true);
+          await installer.installCodexUnix(processCallbacks);
+          expect(installer.runInstallerDarwin).toHaveBeenCalled();
+        });
 
-      it("deletes the installer script", async () => {
-        await installer.installCodexUnix(processCallbacks);
-        expect(mockShellService.run).toHaveBeenCalledWith("rm -f install.sh");
+        it("runs installer for linux", async () => {
+          mockOsService.isDarwin.mockReturnValue(false);
+          await installer.installCodexUnix(processCallbacks);
+          expect(installer.runInstallerLinux).toHaveBeenCalled();
+        });
+
+        it("saves the codex install path", async () => {
+          await installer.installCodexUnix(processCallbacks);
+          expect(installer.saveCodexInstallPath).toHaveBeenCalledWith("codex");
+        });
+
+        it("deletes the installer script", async () => {
+          await installer.installCodexUnix(processCallbacks);
+          expect(mockShellService.run).toHaveBeenCalledWith("rm -f install.sh");
+        });
       });
     });
 

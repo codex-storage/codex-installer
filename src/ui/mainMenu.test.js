@@ -47,7 +47,7 @@ describe("mainmenu", () => {
     expect(mockUiService.askMultipleChoice).toHaveBeenCalledWith(
       "Select an option",
       [
-        { label: "Install Codex", action: mockInstallMenu.show },
+        { label: "Install/uninstall Codex", action: mockInstallMenu.show },
         { label: "Configure Codex", action: mockConfigMenu.show },
         { label: "Exit", action: mockMenuLoop.stopLoop },
       ],
