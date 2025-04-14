@@ -5,7 +5,7 @@ export class ProcessControl {
     this.shell = shellService;
     this.os = osService;
     this.fs = fsService;
-    this.codexGlobals;
+    this.codexGlobals = codexGlobals;
   }
 
   getCodexProcesses = async () => {
@@ -31,8 +31,8 @@ export class ProcessControl {
   };
 
   startCodexProcess = async () => {
-    this.saveCodexConfigFile();
-    this.startCodex();
+    await this.saveCodexConfigFile();
+    await this.startCodex();
   };
 
   saveCodexConfigFile = async () => {

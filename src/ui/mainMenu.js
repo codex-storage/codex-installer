@@ -1,9 +1,18 @@
 export class MainMenu {
-  constructor(uiService, menuLoop, installMenu, configMenu) {
+  constructor(
+    uiService,
+    menuLoop,
+    installMenu,
+    configMenu,
+    installer,
+    processControl,
+  ) {
     this.ui = uiService;
     this.loop = menuLoop;
     this.installMenu = installMenu;
     this.configMenu = configMenu;
+    this.installer = installer;
+    this.processControl = processControl;
 
     this.loop.initialize(this.promptMainMenu);
   }
@@ -17,14 +26,64 @@ export class MainMenu {
   };
 
   promptMainMenu = async () => {
-    await this.ui.askMultipleChoice("Select an option", [
+    if ((await this.processControl.getNumberOfCodexProcesses) > 0) {
+      await this.showRunningMenu();
+    } else {
+      if (await this.installer.isCodexInstalled()) {
+        await this.showCodexNotRunningMenu();
+      } else {
+        await this.showNotInstalledMenu();
+      }
+    }
+  };
+
+  showNotInstalledMenu = async () => {
+    await this.ui.askMultipleChoice("Codex is not installed", [
       {
-        label: "Install/uninstall Codex",
+        label: "Install Codex",
         action: this.installMenu.show,
       },
       {
-        label: "Configure Codex",
+        label: "Exit",
+        action: this.loop.stopLoop,
+      },
+    ]);
+  };
+
+  showRunningMenu = async () => {
+    await this.ui.askMultipleChoice("Codex is running", [
+      {
+        label: "Stop Codex",
+        action: this.processControl.stopCodexProcess,
+      },
+      {
+        label: "Open Codex app",
+        action: this.openCodexApp,
+      },
+      {
+        label: "Exit",
+        action: this.loop.stopLoop,
+      },
+    ]);
+  };
+
+  openCodexApp = async () => {
+    console.log("todo!");
+  };
+
+  showCodexNotRunningMenu = async () => {
+    await this.ui.askMultipleChoice("Codex is not running", [
+      {
+        label: "Start Codex",
+        action: this.processControl.startCodexProcess,
+      },
+      {
+        label: "Edit Codex config",
         action: this.configMenu.show,
+      },
+      {
+        label: "Uninstall Codex",
+        action: this.installMenu.show,
       },
       {
         label: "Exit",

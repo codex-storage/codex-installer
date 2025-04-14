@@ -100,6 +100,7 @@ export async function main() {
   process.on("SIGTERM", handleExit);
   process.on("SIGQUIT", handleExit);
 
+  const codexGlobals = new CodexGlobals();
   const uiService = new UiService();
   const fsService = new FsService();
   const configService = new ConfigService(fsService);
@@ -125,30 +126,23 @@ export async function main() {
     configService,
     pathSelector,
     numberSelector,
+    new DataDirMover(fsService, uiService),
+  );
+  const processControl = new ProcessControl(
+    configService,
+    shellService,
+    osService,
+    fsService,
+    codexGlobals,
   );
   const mainMenu = new MainMenu(
     uiService,
     new MenuLoop(),
     installMenu,
     configMenu,
-    new DataDirMover(fsService, uiService),
+    installer,
+    processControl,
   );
-
-  const codexGlobals = new CodexGlobals();
-
-  const processControl = new ProcessControl(
-    configService,
-    shellService,
-    osService,
-    fsService,
-  );
-
-  console.log("ip: " + (await codexGlobals.getPublicIp()));
-  console.log("spr: " + (await codexGlobals.getTestnetSprs()));
-
-  //await processControl.doThing();
-  // await processControl.detectThing();
-  return;
 
   await mainMenu.show();
   return;
