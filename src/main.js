@@ -35,6 +35,7 @@ import { Installer } from "./handlers/installer.js";
 import { ShellService } from "./services/shellService.js";
 import { OsService } from "./services/osService.js";
 import { ProcessControl } from "./handlers/processControl.js";
+import { CodexGlobals } from "./services/codexGlobals.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -133,14 +134,20 @@ export async function main() {
     new DataDirMover(fsService, uiService),
   );
 
+  const codexGlobals = new CodexGlobals();
+
   const processControl = new ProcessControl(
     configService,
     shellService,
     osService,
     fsService,
   );
+
+  console.log("ip: " + (await codexGlobals.getPublicIp()));
+  console.log("spr: " + (await codexGlobals.getTestnetSprs()));
+
   //await processControl.doThing();
-  await processControl.detectThing();
+  // await processControl.detectThing();
   return;
 
   await mainMenu.show();

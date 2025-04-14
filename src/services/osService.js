@@ -1,4 +1,5 @@
 import os from "os";
+import psList from "ps-list";
 
 export class OsService {
   constructor() {
@@ -19,5 +20,9 @@ export class OsService {
 
   getWorkingDir = () => {
     return process.cwd();
+  };
+
+  listProcesses = async () => {
+    await psList();
   };
 }

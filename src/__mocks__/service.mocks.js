@@ -15,6 +15,7 @@ export const mockConfigService = {
   get: vi.fn(),
   saveConfig: vi.fn(),
   loadConfig: vi.fn(),
+  writeCodexConfigFile: vi.fn(),
 };
 
 export const mockFsService = {
@@ -32,6 +33,7 @@ export const mockFsService = {
 
 export const mockShellService = {
   run: vi.fn(),
+  spawnDetachedProcess: vi.fn(),
 };
 
 export const mockOsService = {
@@ -39,4 +41,10 @@ export const mockOsService = {
   isDarwin: vi.fn(),
   isLinux: vi.fn(),
   getWorkingDir: vi.fn(),
+  listProcesses: vi.fn(),
+};
+
+export const mockCodexGlobals = {
+  getPublicIp: vi.fn(),
+  getTestnetSPRs: vi.fn(),
 };

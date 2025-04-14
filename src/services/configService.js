@@ -77,7 +77,23 @@ export class ConfigService {
     return this.fs.pathJoin([this.config.logsDir, "codex.log"]);
   };
 
+  missing = (name) => {
+    throw new Error(`Missing config value: ${name}`);
+  };
+
+  validateConfiguration = () => {
+    if (this.config.codexExe.length < 1) this.missing("codexExe");
+    if (this.config.codexConfigFilePath.length < 1)
+      this.missing("codexConfigFilePath");
+    if (this.config.dataDir.length < 1) this.missing("dataDir");
+    if (this.config.logsDir.length < 1) this.missing("logsDir");
+    if (this.config.storageQuota < 1024 * 1024 * 100)
+      throw new Error("Storage quota must be at least 100MB");
+  };
+
   writeCodexConfigFile = (publicIp, bootstrapNodes) => {
+    this.validateConfiguration();
+
     const nl = "\n";
     const bootNodes = bootstrapNodes.map((v) => `"${v}"`).join(",");
 
