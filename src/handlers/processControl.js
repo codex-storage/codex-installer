@@ -1,3 +1,6 @@
+import fs from "fs";
+import { spawn, exec } from "child_process";
+
 export class ProcessControl {
   constructor(configService, shellService, osService, fsService) {
     this.config = configService.get();
@@ -38,52 +41,33 @@ export class ProcessControl {
 
     console.log("nat: " + await this.getPublicIp());
     console.log("logs dir: " + this.getLogFile());
+    console.log("data dir: " + this.config.dataDir);
+    console.log("api port: " + this.config.ports.apiPort);
+    console.log("codex exe: " + this.config.codexExe);
+    console.log("quota: " + this.config.storageQuota);
 
-    try {
-      
+    const executable = this.config.codexExe;
+    const args = [
+      `--data-dir=${this.config.dataDir}`,
+      // `--log-level=DEBUG`,
+      // `--log-file="${this.getLogFile()}"`,
+      `--storage-quota=${this.config.storageQuota}`,
+      `--disc-port=${this.config.ports.discPort}`,
+      `--listen-addrs=/ip4/0.0.0.0/tcp/${this.config.ports.listenPort}`,
+      `--api-port=${this.config.ports.apiPort}`,
+      `--nat=extip:${await this.getPublicIp()}`,
+      `--api-cors-origin="*"`,
+      `--bootstrap-node=spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P`,
+    ];
 
+    const command = `"${executable}" ${args.join(" ")}`;
+    console.log("command: " + command);
+    console.log("\n\n");
 
-      console.log(
-        showInfoMessage(
-          `Data location: ${config.dataDir}\n` +
-            `Logs: ${logFilePath}\n` +
-            `API port: ${config.ports.apiPort}`,
-        ),
-      );
+    var child = spawn(executable, args, { detached: true, stdio: ['ignore', 'ignore', 'ignore']});
+    child.unref();
 
-      const executable = config.codexExe;
-      const args = [
-        `--data-dir="${config.dataDir}"`,
-        `--log-level=DEBUG`,
-        `--log-file="${logFilePath}"`,
-        `--storage-quota="${config.storageQuota}"`,
-        `--disc-port=${config.ports.discPort}`,
-        `--listen-addrs=/ip4/0.0.0.0/tcp/${config.ports.listenPort}`,
-        `--api-port=${config.ports.apiPort}`,
-        `--nat=${nat}`,
-        `--api-cors-origin="*"`,
-        `--bootstrap-node=spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P`,
-      ];
-
-      const command = `"${executable}" ${args.join(" ")}`;
-
-      console.log(
-        showInfoMessage(
-          "🚀 Codex node is running...\n\n" +
-            "If your firewall ask, be sure to allow Codex to receive connections. \n" +
-            "Please keep this terminal open. Start a new terminal to interact with the node.\n\n" +
-            "Press CTRL+C to stop the node",
-        ),
-      );
-
-      const nodeProcess = exec(command);
-
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-        
-      }
-      catch 
-      {
-
-      }
-    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return;
+  }
 }
