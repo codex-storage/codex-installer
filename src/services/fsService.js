@@ -54,4 +54,17 @@ export class FsService {
   deleteDir = (dir) => {
     fs.rmSync(dir, { recursive: true, force: true });
   };
+
+  readJsonFile = (filePath) => {
+    return JSON.parse(fs.readFileSync(filePath));
+  };
+
+  writeJsonFile = (filePath, jsonObject) => {
+    fs.writeFileSync(filePath, JSON.stringify(jsonObject));
+  };
+
+  writeFile = (filePath, content) => {
+    console.log("filepath: " + filePath);
+    fs.writeFileSync(filePath, content);
+  };
 }

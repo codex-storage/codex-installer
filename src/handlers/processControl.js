@@ -3,6 +3,7 @@ import { spawn, exec } from "child_process";
 
 export class ProcessControl {
   constructor(configService, shellService, osService, fsService) {
+    this.configService = configService;
     this.config = configService.get();
     this.shell = shellService;
     this.os = osService;
@@ -18,28 +19,17 @@ export class ProcessControl {
     } else {
       return await this.shell.run("curl -s https://ip.codex.storage");
     }
-  }
-
-  getLogFile = () =>{
-    // function getCurrentLogFile(config) {
-    //   const timestamp = new Date()
-    //     .toISOString()
-    //     .replaceAll(":", "-")
-    //     .replaceAll(".", "-");
-    //   return path.join(config.logsDir, `codex_${timestamp}.log`);
-    // }
-    // todo, maybe use timestamp
-
-    return this.fs.pathJoin([this.config.logsDir, "codex.log"]);
-  }
+  };
 
   doThing = async () => {
-    if (this.config.dataDir.length < 1) throw new Error("Missing config: dataDir");
-    if (this.config.logsDir.length < 1) throw new Error("Missing config: logsDir");
+    if (this.config.dataDir.length < 1)
+      throw new Error("Missing config: dataDir");
+    if (this.config.logsDir.length < 1)
+      throw new Error("Missing config: logsDir");
 
     console.log("start a codex detached");
 
-    console.log("nat: " + await this.getPublicIp());
+    console.log("nat: " + (await this.getPublicIp()));
     console.log("logs dir: " + this.getLogFile());
     console.log("data dir: " + this.config.dataDir);
     console.log("api port: " + this.config.ports.apiPort);
@@ -64,10 +54,15 @@ export class ProcessControl {
     console.log("command: " + command);
     console.log("\n\n");
 
-    var child = spawn(executable, args, { detached: true, stdio: ['ignore', 'ignore', 'ignore']});
+    this.configService.writeCodexConfigFile();
+
+    var child = spawn(executable, args, {
+      detached: true,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
     child.unref();
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return;
-  }
+  };
 }

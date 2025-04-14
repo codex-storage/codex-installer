@@ -99,9 +99,9 @@ export async function main() {
   process.on("SIGTERM", handleExit);
   process.on("SIGQUIT", handleExit);
 
-  const configService = new ConfigService();
   const uiService = new UiService();
   const fsService = new FsService();
+  const configService = new ConfigService(fsService);
   const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
   const numberSelector = new NumberSelector(uiService);
   const shellService = new ShellService();
@@ -133,14 +133,17 @@ export async function main() {
     new DataDirMover(fsService, uiService),
   );
 
-  const processControl = new ProcessControl(configService, shellService, osService, fsService);
+  const processControl = new ProcessControl(
+    configService,
+    shellService,
+    osService,
+    fsService,
+  );
   await processControl.doThing();
   return;
 
   await mainMenu.show();
   return;
-
-
 
   try {
     while (true) {

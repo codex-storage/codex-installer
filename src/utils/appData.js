@@ -13,6 +13,10 @@ export function getCodexBinPath() {
   return ensureExists(path.join(appData("codex"), "bin"));
 }
 
+export function getCodexConfigFilePath() {
+  return path.join(appData("codex"), "bin", "config.toml");
+}
+
 export function getCodexDataDirDefaultPath() {
   // This path does not exist on first startup. That's good: Codex will
   // create it with the required access permissions.

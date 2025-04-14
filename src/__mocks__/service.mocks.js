@@ -25,6 +25,9 @@ export const mockFsService = {
   readDir: vi.fn(),
   makeDir: vi.fn(),
   deleteDir: vi.fn(),
+  readJsonFile: vi.fn(),
+  writeJsonFile: vi.fn(),
+  writeFile: vi.fn(),
 };
 
 export const mockShellService = {
