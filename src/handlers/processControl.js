@@ -1,5 +1,6 @@
 import fs from "fs";
 import { spawn, exec } from "child_process";
+import psList from 'ps-list';
 
 export class ProcessControl {
   constructor(configService, shellService, osService, fsService) {
@@ -20,6 +21,33 @@ export class ProcessControl {
       return await this.shell.run("curl -s https://ip.codex.storage");
     }
   };
+
+  detectThing = async () => {
+    console.log("detecting...");
+
+    const processes = await psList();
+    const codexProcesses = processes.filter((p) => p.name === "codex.exe");
+    if (codexProcesses.length > 0) {
+      console.log("Codex is already running.");
+      codexProcesses.forEach((p) => {
+        console.log(`PID: ${JSON.stringify(p)}`);
+      });
+
+      console.log("Stopping codex...");
+      await this.stopThing(codexProcesses[0].pid);
+      await this.detectThing();
+    } else {
+      console.log("Codex is not running.");
+    }
+  }
+
+  stopThing = async (pid) => {
+    console.log("stopping process...");
+
+    process.kill(pid, "SIGINT");
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
 
   doThing = async () => {
     if (this.config.dataDir.length < 1)

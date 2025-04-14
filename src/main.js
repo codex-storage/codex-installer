@@ -139,7 +139,8 @@ export async function main() {
     osService,
     fsService,
   );
-  await processControl.doThing();
+  //await processControl.doThing();
+  await processControl.detectThing();
   return;
 
   await mainMenu.show();

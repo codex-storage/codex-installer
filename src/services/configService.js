@@ -92,7 +92,7 @@ export class ConfigService {
         `api-port=${this.config.ports.apiPort}${nl}` +
         `nat="extip:${publicIp}"${nl}` +
         `api-cors-origin="*"${nl}` +
-        `bootstrap-node=[${bootNodes}]`,
+        `bootstrap-node=[${bootNodes}]${nl}`,
     );
   };
 
