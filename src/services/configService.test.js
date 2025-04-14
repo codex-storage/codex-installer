@@ -114,15 +114,19 @@ describe("ConfigService", () => {
       expect(mockFsService.writeFile).toHaveBeenCalledWith(
         expectedDefaultConfig.codexConfigFilePath,
         `data-dir=\"${formatPath(expectedDefaultConfig.dataDir)}"${newLine}` +
-          `log-level=DEBUG${newLine}` +
+          `log-level="DEBUG"${newLine}` +
           `log-file="${formatPath(logsPath)}"${newLine}` +
           `storage-quota=${expectedDefaultConfig.storageQuota}${newLine}` +
           `disc-port=${expectedDefaultConfig.ports.discPort}${newLine}` +
-          `listen-addrs=/ip4/0.0.0.0/tcp/${expectedDefaultConfig.ports.listenPort}${newLine}` +
+          `listen-addrs=["/ip4/0.0.0.0/tcp/${expectedDefaultConfig.ports.listenPort}"]${newLine}` +
           `api-port=${expectedDefaultConfig.ports.apiPort}${newLine}` +
-          `nat=extip:${publicIp}${newLine}` +
+          `nat="extip:${publicIp}"${newLine}` +
           `api-cors-origin="*"${newLine}` +
-          `bootstrap-node=[${bootstrapNodes.join(",")}]`,
+          `bootstrap-node=[${bootstrapNodes
+            .map((v) => {
+              return '"' + v + '"';
+            })
+            .join(",")}]`,
       );
     });
   });

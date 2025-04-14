@@ -29,37 +29,36 @@ export class ProcessControl {
 
     console.log("start a codex detached");
 
-    console.log("nat: " + (await this.getPublicIp()));
-    console.log("logs dir: " + this.getLogFile());
-    console.log("data dir: " + this.config.dataDir);
-    console.log("api port: " + this.config.ports.apiPort);
-    console.log("codex exe: " + this.config.codexExe);
-    console.log("quota: " + this.config.storageQuota);
-
     const executable = this.config.codexExe;
-    const args = [
-      `--data-dir=${this.config.dataDir}`,
-      // `--log-level=DEBUG`,
-      // `--log-file="${this.getLogFile()}"`,
-      `--storage-quota=${this.config.storageQuota}`,
-      `--disc-port=${this.config.ports.discPort}`,
-      `--listen-addrs=/ip4/0.0.0.0/tcp/${this.config.ports.listenPort}`,
-      `--api-port=${this.config.ports.apiPort}`,
-      `--nat=extip:${await this.getPublicIp()}`,
-      `--api-cors-origin="*"`,
-      `--bootstrap-node=spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P`,
+    const args = [`--config-file=${this.config.codexConfigFilePath}`];
+    const bootstrapNodes = [
+      "spr:CiUIAhIhAiJvIcA_ZwPZ9ugVKDbmqwhJZaig5zKyLiuaicRcCGqLEgIDARo8CicAJQgCEiECIm8hwD9nA9n26BUoNuarCEllqKDnMrIuK5qJxFwIaosQ3d6esAYaCwoJBJ_f8zKRAnU6KkYwRAIgM0MvWNJL296kJ9gWvfatfmVvT-A7O2s8Mxp8l9c8EW0CIC-h-H-jBVSgFjg3Eny2u33qF7BDnWFzo7fGfZ7_qc9P",
     ];
+    const publicIp = await this.getPublicIp();
+
+    this.configService.writeCodexConfigFile(publicIp, bootstrapNodes);
 
     const command = `"${executable}" ${args.join(" ")}`;
     console.log("command: " + command);
     console.log("\n\n");
 
-    this.configService.writeCodexConfigFile();
-
     var child = spawn(executable, args, {
       detached: true,
-      stdio: ["ignore", "ignore", "ignore"],
+      //stdio: ["ignore", "ignore", "ignore"],
     });
+
+    child.stdout.on("data", (data) => {
+      console.log(`stdout: ${data}`);
+    });
+
+    child.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    child.on("close", (code) => {
+      console.log(`child process exited with code ${code}`);
+    });
+
     child.unref();
 
     await new Promise((resolve) => setTimeout(resolve, 2000));

@@ -79,18 +79,18 @@ export class ConfigService {
 
   writeCodexConfigFile = (publicIp, bootstrapNodes) => {
     const nl = "\n";
-    const bootNodes = bootstrapNodes.join(",");
+    const bootNodes = bootstrapNodes.map((v) => `"${v}"`).join(",");
 
     this.fs.writeFile(
       this.config.codexConfigFilePath,
       `data-dir="${this.format(this.config.dataDir)}"${nl}` +
-        `log-level=DEBUG${nl}` +
+        `log-level="DEBUG"${nl}` +
         `log-file="${this.format(this.getLogFilePath())}"${nl}` +
         `storage-quota=${this.config.storageQuota}${nl}` +
         `disc-port=${this.config.ports.discPort}${nl}` +
-        `listen-addrs=/ip4/0.0.0.0/tcp/${this.config.ports.listenPort}${nl}` +
+        `listen-addrs=["/ip4/0.0.0.0/tcp/${this.config.ports.listenPort}"]${nl}` +
         `api-port=${this.config.ports.apiPort}${nl}` +
-        `nat=extip:${publicIp}${nl}` +
+        `nat="extip:${publicIp}"${nl}` +
         `api-cors-origin="*"${nl}` +
         `bootstrap-node=[${bootNodes}]`,
     );
