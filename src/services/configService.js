@@ -6,6 +6,8 @@ import {
   getCodexLogsDefaultPath,
 } from "../utils/appData.js";
 
+import path from "path";
+
 const defaultConfig = {
   codexExe: "",
   // User-selected config options:
@@ -99,7 +101,7 @@ export class ConfigService {
 
     this.fs.writeFile(
       this.config.codexConfigFilePath,
-      `data-dir="${this.format(this.config.dataDir)}"${nl}` +
+      `data-dir="${this.format(this.toRelative(this.config.dataDir))}"${nl}` +
         `log-level="DEBUG"${nl}` +
         `log-file="${this.format(this.getLogFilePath())}"${nl}` +
         `storage-quota=${this.config.storageQuota}${nl}` +
@@ -114,5 +116,10 @@ export class ConfigService {
 
   format = (str) => {
     return str.replaceAll("\\", "/");
+  };
+
+  toRelative = (str) => {
+    throw new Error("This code does not belong in this file. Move it.");
+    return path.relative(this.config.codexInstallPath, str);
   };
 }

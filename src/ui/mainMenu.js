@@ -6,6 +6,7 @@ export class MainMenu {
     configMenu,
     installer,
     processControl,
+    codexApp,
   ) {
     this.ui = uiService;
     this.loop = menuLoop;
@@ -13,6 +14,7 @@ export class MainMenu {
     this.configMenu = configMenu;
     this.installer = installer;
     this.processControl = processControl;
+    this.codexApp = codexApp;
 
     this.loop.initialize(this.promptMainMenu);
   }
@@ -54,7 +56,7 @@ export class MainMenu {
     await this.ui.askMultipleChoice("Codex is running", [
       {
         label: "Open Codex app",
-        action: this.openCodexApp,
+        action: this.codexApp.openCodexApp,
       },
       {
         label: "Stop Codex",
@@ -65,10 +67,6 @@ export class MainMenu {
         action: this.loop.stopLoop,
       },
     ]);
-  };
-
-  openCodexApp = async () => {
-    console.log("todo!");
   };
 
   showNotRunningMenu = async () => {

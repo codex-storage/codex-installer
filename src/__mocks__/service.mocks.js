@@ -48,3 +48,7 @@ export const mockCodexGlobals = {
   getPublicIp: vi.fn(),
   getTestnetSPRs: vi.fn(),
 };
+
+export const mockCodexApp = {
+  openCodexApp: vi.fn(),
+};

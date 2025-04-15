@@ -20,7 +20,6 @@ import {
 import { runCodex, checkNodeStatus } from "./handlers/nodeHandlers.js";
 import { showInfoMessage } from "./utils/messages.js";
 import { ConfigService } from "./services/configService.js";
-import { openCodexApp } from "./services/codexApp.js";
 
 import { UiService } from "./services/uiService.js";
 import { FsService } from "./services/fsService.js";
@@ -36,6 +35,7 @@ import { ShellService } from "./services/shellService.js";
 import { OsService } from "./services/osService.js";
 import { ProcessControl } from "./handlers/processControl.js";
 import { CodexGlobals } from "./services/codexGlobals.js";
+import { CodexApp } from "./services/codexApp.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -104,6 +104,7 @@ export async function main() {
   const uiService = new UiService();
   const fsService = new FsService();
   const configService = new ConfigService(fsService);
+  const codexApp = new CodexApp(configService);
   const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
   const numberSelector = new NumberSelector(uiService);
   const shellService = new ShellService();
@@ -142,6 +143,7 @@ export async function main() {
     configMenu,
     installer,
     processControl,
+    codexApp,
   );
 
   await mainMenu.show();

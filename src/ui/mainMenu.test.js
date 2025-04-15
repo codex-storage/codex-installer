@@ -1,6 +1,6 @@
 import { describe, beforeEach, it, expect, vi } from "vitest";
 import { MainMenu } from "./mainMenu.js";
-import { mockUiService } from "../__mocks__/service.mocks.js";
+import { mockUiService, mockCodexApp } from "../__mocks__/service.mocks.js";
 import { mockInstallMenu, mockConfigMenu } from "../__mocks__/ui.mocks.js";
 import {
   mockInstaller,
@@ -21,6 +21,7 @@ describe("mainmenu", () => {
       mockConfigMenu,
       mockInstaller,
       mockProcessControl,
+      mockCodexApp,
     );
   });
 
@@ -113,7 +114,7 @@ describe("mainmenu", () => {
       expect(mockUiService.askMultipleChoice).toHaveBeenCalledWith(
         "Codex is running",
         [
-          { label: "Open Codex app", action: mainmenu.openCodexApp },
+          { label: "Open Codex app", action: mockCodexApp.openCodexApp },
           { label: "Stop Codex", action: mockProcessControl.stopCodexProcess },
           { label: "Exit", action: mockMenuLoop.stopLoop },
         ],
