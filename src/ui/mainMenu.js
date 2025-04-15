@@ -26,11 +26,11 @@ export class MainMenu {
   };
 
   promptMainMenu = async () => {
-    if ((await this.processControl.getNumberOfCodexProcesses) > 0) {
+    if ((await this.processControl.getNumberOfCodexProcesses()) > 0) {
       await this.showRunningMenu();
     } else {
       if (await this.installer.isCodexInstalled()) {
-        await this.showCodexNotRunningMenu();
+        await this.showNotRunningMenu();
       } else {
         await this.showNotInstalledMenu();
       }
@@ -53,12 +53,12 @@ export class MainMenu {
   showRunningMenu = async () => {
     await this.ui.askMultipleChoice("Codex is running", [
       {
-        label: "Stop Codex",
-        action: this.processControl.stopCodexProcess,
-      },
-      {
         label: "Open Codex app",
         action: this.openCodexApp,
+      },
+      {
+        label: "Stop Codex",
+        action: this.processControl.stopCodexProcess,
       },
       {
         label: "Exit",
@@ -71,7 +71,7 @@ export class MainMenu {
     console.log("todo!");
   };
 
-  showCodexNotRunningMenu = async () => {
+  showNotRunningMenu = async () => {
     await this.ui.askMultipleChoice("Codex is not running", [
       {
         label: "Start Codex",

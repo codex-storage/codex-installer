@@ -27,12 +27,21 @@ export class ProcessControl {
 
     const pid = processes[0].pid;
     process.kill(pid, "SIGINT");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await this.sleep();
   };
 
   startCodexProcess = async () => {
     await this.saveCodexConfigFile();
     await this.startCodex();
+    await this.sleep();
+  };
+
+  sleep = async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
   };
 
   saveCodexConfigFile = async () => {

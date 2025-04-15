@@ -23,6 +23,6 @@ export class OsService {
   };
 
   listProcesses = async () => {
-    await psList();
+    return await psList();
   };
 }

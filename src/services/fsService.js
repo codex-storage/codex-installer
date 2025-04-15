@@ -64,7 +64,6 @@ export class FsService {
   };
 
   writeFile = (filePath, content) => {
-    console.log("filepath: " + filePath);
     fs.writeFileSync(filePath, content);
   };
 }

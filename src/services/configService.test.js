@@ -86,6 +86,28 @@ describe("ConfigService", () => {
     });
   });
 
+  describe("validateConfiguration", () => {
+    var configService;
+    var config;
+
+    beforeEach(() => {
+      config = expectedDefaultConfig;
+      
+      configService = new ConfigService(mockFsService);
+      configService.config = config;
+    });
+
+    it("throws when codexExe is not set", () => {
+      config.codexExe = "";
+
+      expect(configService.validateConfiguration).toThrow(
+        "Missing config value: codexExe",
+      );
+    });
+
+    
+  });
+
   describe("writecodexConfigFile", () => {
     const logsPath = "C:\\path\\codex.log";
     var configService;
@@ -95,6 +117,7 @@ describe("ConfigService", () => {
       mockFsService.isFile.mockReturnValue(false);
 
       configService = new ConfigService(mockFsService);
+      configService.validateConfiguration = vi.fn();
       configService.getLogFilePath = vi.fn();
       configService.getLogFilePath.mockReturnValue(logsPath);
     });
@@ -126,7 +149,7 @@ describe("ConfigService", () => {
             .map((v) => {
               return '"' + v + '"';
             })
-            .join(",")}]`,
+            .join(",")}]${newLine}`,
       );
     });
   });

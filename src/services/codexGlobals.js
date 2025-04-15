@@ -2,7 +2,8 @@ import axios from "axios";
 
 export class CodexGlobals {
   getPublicIp = async () => {
-    return (await axios.get(`https://ip.codex.storage`)).data;
+    const result = (await axios.get(`https://ip.codex.storage`)).data;
+    return result.replaceAll("\n", "");
   };
 
   getTestnetSPRs = async () => {

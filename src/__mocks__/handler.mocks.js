@@ -6,3 +6,9 @@ export const mockInstaller = {
   installCodex: vi.fn(),
   uninstallCodex: vi.fn(),
 };
+
+export const mockProcessControl = {
+  getNumberOfCodexProcesses: vi.fn(),
+  stopCodexProcess: vi.fn(),
+  startCodexProcess: vi.fn(),
+};
