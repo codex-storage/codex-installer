@@ -9,9 +9,8 @@ import {
   getCodexLogsDefaultPath,
 } from "../utils/appData.js";
 
-describe("ConfigService", () => {
-  const configPath = "/path/to/config.json";
-  const expectedDefaultConfig = {
+function getDefaultConfig() {
+  return {
     codexExe: "",
     codexInstallPath: getCodexBinPath(),
     codexConfigFilePath: getCodexConfigFilePath(),
@@ -24,9 +23,15 @@ describe("ConfigService", () => {
       apiPort: 8080,
     },
   };
+}
+
+describe("ConfigService", () => {
+  const configPath = "/path/to/config.json";
+  var expectedDefaultConfig = getDefaultConfig();
 
   beforeEach(() => {
     vi.resetAllMocks();
+    expectedDefaultConfig = getDefaultConfig();
 
     mockFsService.pathJoin.mockReturnValue(configPath);
   });
@@ -92,7 +97,8 @@ describe("ConfigService", () => {
 
     beforeEach(() => {
       config = expectedDefaultConfig;
-      
+      config.codexExe = "codex.exe";
+
       configService = new ConfigService(mockFsService);
       configService.config = config;
     });
@@ -105,7 +111,41 @@ describe("ConfigService", () => {
       );
     });
 
-    
+    it("throws when codexConfigFilePath is not set", () => {
+      config.codexConfigFilePath = "";
+
+      expect(configService.validateConfiguration).toThrow(
+        "Missing config value: codexConfigFilePath",
+      );
+    });
+
+    it("throws when dataDir is not set", () => {
+      config.dataDir = "";
+
+      expect(configService.validateConfiguration).toThrow(
+        "Missing config value: dataDir",
+      );
+    });
+
+    it("throws when logsDir is not set", () => {
+      config.logsDir = "";
+
+      expect(configService.validateConfiguration).toThrow(
+        "Missing config value: logsDir",
+      );
+    });
+
+    it("throws when storageQuota is less than 100 MB", () => {
+      config.storageQuota = 1024 * 1024 * 99;
+
+      expect(configService.validateConfiguration).toThrow(
+        "Storage quota must be at least 100MB",
+      );
+    });
+
+    it("passes validation for default config when codexExe is set", () => {
+      expect(configService.validateConfiguration).not.toThrow();
+    });
   });
 
   describe("writecodexConfigFile", () => {
