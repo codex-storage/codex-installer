@@ -119,7 +119,6 @@ export class ConfigService {
   };
 
   toRelative = (str) => {
-    throw new Error("This code does not belong in this file. Move it.");
-    return path.relative(this.config.codexInstallPath, str);
+    return this.fs.toRelativePath(this.config.codexInstallPath, str);
   };
 }

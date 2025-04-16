@@ -169,6 +169,9 @@ describe("ConfigService", () => {
     it("writes the config file values to the config TOML file", () => {
       const publicIp = "1.2.3.4";
       const bootstrapNodes = ["boot111", "boot222", "boot333"];
+      const relativeDataDirPath = "..\\../datadir";
+
+      mockFsService.toRelativePath.mockReturnValue(relativeDataDirPath);
 
       configService.writeCodexConfigFile(publicIp, bootstrapNodes);
 
@@ -176,7 +179,7 @@ describe("ConfigService", () => {
 
       expect(mockFsService.writeFile).toHaveBeenCalledWith(
         expectedDefaultConfig.codexConfigFilePath,
-        `data-dir=\"${formatPath(expectedDefaultConfig.dataDir)}"${newLine}` +
+        `data-dir=\"${formatPath(relativeDataDirPath)}"${newLine}` +
           `log-level="DEBUG"${newLine}` +
           `log-file="${formatPath(logsPath)}"${newLine}` +
           `storage-quota=${expectedDefaultConfig.storageQuota}${newLine}` +
@@ -190,6 +193,11 @@ describe("ConfigService", () => {
               return '"' + v + '"';
             })
             .join(",")}]${newLine}`,
+      );
+
+      expect(mockFsService.toRelativePath).toHaveBeenCalledWith(
+        expectedDefaultConfig.codexInstallPath,
+        expectedDefaultConfig.dataDir,
       );
     });
   });

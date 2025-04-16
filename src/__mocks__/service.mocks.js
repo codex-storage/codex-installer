@@ -29,6 +29,7 @@ export const mockFsService = {
   readJsonFile: vi.fn(),
   writeJsonFile: vi.fn(),
   writeFile: vi.fn(),
+  toRelativePath: vi.fn(),
 };
 
 export const mockShellService = {

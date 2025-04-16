@@ -66,4 +66,8 @@ export class FsService {
   writeFile = (filePath, content) => {
     fs.writeFileSync(filePath, content);
   };
+
+  toRelativePath = (from, to) => {
+    return path.relative(from, to);
+  };
 }

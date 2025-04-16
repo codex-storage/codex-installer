@@ -127,7 +127,7 @@ describe("mainmenu", () => {
       await mainmenu.showNotRunningMenu();
 
       expect(mockUiService.askMultipleChoice).toHaveBeenCalledWith(
-        "Codex is not running",
+        "Codex is installed but not running",
         [
           {
             label: "Start Codex",

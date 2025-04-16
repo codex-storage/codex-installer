@@ -70,7 +70,7 @@ export class MainMenu {
   };
 
   showNotRunningMenu = async () => {
-    await this.ui.askMultipleChoice("Codex is not running", [
+    await this.ui.askMultipleChoice("Codex is installed but not running", [
       {
         label: "Start Codex",
         action: this.processControl.startCodexProcess,
