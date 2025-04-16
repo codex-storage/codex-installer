@@ -60,7 +60,7 @@ export class MainMenu {
       },
       {
         label: "Stop Codex",
-        action: this.processControl.stopCodexProcess,
+        action: this.stopCodex,
       },
       {
         label: "Exit",
@@ -73,7 +73,7 @@ export class MainMenu {
     await this.ui.askMultipleChoice("Codex is installed but not running", [
       {
         label: "Start Codex",
-        action: this.processControl.startCodexProcess,
+        action: this.startCodex,
       },
       {
         label: "Edit Codex config",
@@ -88,5 +88,27 @@ export class MainMenu {
         action: this.loop.stopLoop,
       },
     ]);
+  };
+
+  startCodex = async () => {
+    const spinner = this.ui.createAndStartSpinner("Starting...");
+    try {
+      await this.processControl.startCodexProcess();
+      this.ui.stopSpinnerSuccess(spinner);
+    } catch (exception) {
+      this.ui.stopSpinnerError(spinner);
+      this.ui.showErrorMessage(`Failed to start Codex. "${exception}"`);
+    }
+  };
+
+  stopCodex = async () => {
+    const spinner = this.ui.createAndStartSpinner("Stopping...");
+    try {
+      await this.processControl.stopCodexProcess();
+      this.ui.stopSpinnerSuccess(spinner);
+    } catch (exception) {
+      this.ui.stopSpinnerError(spinner);
+      this.ui.showErrorMessage(`Failed to stop Codex. "${exception}"`);
+    }
   };
 }
