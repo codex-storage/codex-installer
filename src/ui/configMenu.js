@@ -1,39 +1,21 @@
 export class ConfigMenu {
-  constructor(
-    uiService,
-    menuLoop,
-    configService,
-    pathSelector,
-    numberSelector,
-    dataDirMover,
-  ) {
+  constructor(uiService, menuLoop, configService, numberSelector) {
     this.ui = uiService;
     this.loop = menuLoop;
     this.configService = configService;
-    this.pathSelector = pathSelector;
     this.numberSelector = numberSelector;
-    this.dataDirMover = dataDirMover;
 
     this.loop.initialize(this.showConfigMenu);
   }
 
   show = async () => {
     this.config = this.configService.get();
-    this.originalDataDir = this.config.dataDir;
     this.ui.showInfoMessage("Codex Configuration");
     await this.loop.showLoop();
   };
 
   showConfigMenu = async () => {
     await this.ui.askMultipleChoice("Select to edit:", [
-      {
-        label: `Data path = "${this.config.dataDir}"`,
-        action: this.editDataDir,
-      },
-      {
-        label: `Logs path = "${this.config.logsDir}"`,
-        action: this.editLogsDir,
-      },
       {
         label: `Storage quota = ${this.bytesAmountToString(this.config.storageQuota)}`,
         action: this.editStorageQuota,
@@ -76,20 +58,6 @@ export class ConfigMenu {
 
     if (index == 0) return `${numBytes} Bytes`;
     return `${numBytes} Bytes (${value} ${units[index]})`;
-  };
-
-  editDataDir = async () => {
-    this.config.dataDir = await this.pathSelector.show(
-      this.config.dataDir,
-      false,
-    );
-  };
-
-  editLogsDir = async () => {
-    this.config.logsDir = await this.pathSelector.show(
-      this.config.logsDir,
-      true,
-    );
   };
 
   editStorageQuota = async () => {
@@ -148,15 +116,6 @@ export class ConfigMenu {
   };
 
   saveChangesAndExit = async () => {
-    if (this.config.dataDir !== this.originalDataDir) {
-      // The Codex data-dir is a little special.
-      // Use a dedicated module to move it.
-      await this.dataDirMover.moveDataDir(
-        this.originalDataDir,
-        this.config.dataDir,
-      );
-    }
-
     this.configService.saveConfig();
     this.ui.showInfoMessage("Configuration changes saved.");
     this.loop.stopLoop();

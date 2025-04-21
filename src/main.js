@@ -29,7 +29,6 @@ import { ConfigMenu } from "./ui/configMenu.js";
 import { PathSelector } from "./utils/pathSelector.js";
 import { NumberSelector } from "./utils/numberSelector.js";
 import { MenuLoop } from "./utils/menuLoop.js";
-import { DataDirMover } from "./utils/dataDirMover.js";
 import { Installer } from "./handlers/installer.js";
 import { ShellService } from "./services/shellService.js";
 import { OsService } from "./services/osService.js";
@@ -125,9 +124,7 @@ export async function main() {
     uiService,
     new MenuLoop(),
     configService,
-    pathSelector,
     numberSelector,
-    new DataDirMover(fsService, uiService),
   );
   const processControl = new ProcessControl(
     configService,

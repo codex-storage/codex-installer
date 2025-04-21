@@ -3,10 +3,8 @@ import { ConfigMenu } from "./configMenu.js";
 import { mockUiService } from "../__mocks__/service.mocks.js";
 import { mockConfigService } from "../__mocks__/service.mocks.js";
 import {
-  mockPathSelector,
   mockNumberSelector,
   mockMenuLoop,
-  mockDataDirMover,
 } from "../__mocks__/utils.mocks.js";
 
 describe("ConfigMenu", () => {
@@ -30,9 +28,7 @@ describe("ConfigMenu", () => {
       mockUiService,
       mockMenuLoop,
       mockConfigService,
-      mockPathSelector,
       mockNumberSelector,
-      mockDataDirMover,
     );
   });
 
@@ -59,11 +55,6 @@ describe("ConfigMenu", () => {
     expect(configMenu.config).toEqual(config);
   });
 
-  it("sets the original datadir field", async () => {
-    await configMenu.show();
-    expect(configMenu.originalDataDir).toEqual(config.dataDir);
-  });
-
   describe("config menu options", () => {
     beforeEach(() => {
       configMenu.config = config;
@@ -74,14 +65,6 @@ describe("ConfigMenu", () => {
       expect(mockUiService.askMultipleChoice).toHaveBeenCalledWith(
         "Select to edit:",
         [
-          {
-            label: `Data path = "${mockConfigService.get().dataDir}"`,
-            action: configMenu.editDataDir,
-          },
-          {
-            label: `Logs path = "${mockConfigService.get().logsDir}"`,
-            action: configMenu.editLogsDir,
-          },
           {
             label: `Storage quota = 1073741824 Bytes (1024 MB)`,
             action: configMenu.editStorageQuota,
@@ -108,24 +91,6 @@ describe("ConfigMenu", () => {
           },
         ],
       );
-    });
-
-    it("edits the logs directory", async () => {
-      const originalPath = config.dataDir;
-      mockPathSelector.show.mockResolvedValue("/new-data");
-      await configMenu.editDataDir();
-
-      expect(mockPathSelector.show).toHaveBeenCalledWith(originalPath, false);
-      expect(configMenu.config.dataDir).toEqual("/new-data");
-    });
-
-    it("edits the logs directory", async () => {
-      const originalPath = config.logsDir;
-      mockPathSelector.show.mockResolvedValue("/new-logs");
-      await configMenu.editLogsDir();
-
-      expect(mockPathSelector.show).toHaveBeenCalledWith(originalPath, true);
-      expect(configMenu.config.logsDir).toEqual("/new-logs");
     });
 
     it("edits the storage quota", async () => {
@@ -247,19 +212,6 @@ describe("ConfigMenu", () => {
         "Configuration changes saved.",
       );
       expect(mockMenuLoop.stopLoop).toHaveBeenCalled();
-    });
-
-    it("calls the dataDirMover when the new datadir is not equal to the original dataDir when saving changes", async () => {
-      config.dataDir = "/original-data";
-      await configMenu.show();
-
-      configMenu.config.dataDir = "/new-data";
-      await configMenu.saveChangesAndExit();
-
-      expect(mockDataDirMover.moveDataDir).toHaveBeenCalledWith(
-        configMenu.originalDataDir,
-        configMenu.config.dataDir,
-      );
     });
 
     it("discards changes and exits", async () => {
