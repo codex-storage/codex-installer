@@ -33,4 +33,8 @@ export class OsService {
   terminateProcess = (pid) => {
     process.kill(pid, "SIGTERM");
   };
+
+  getUsername = () => {
+    return os.userInfo().username;
+  };
 }

@@ -77,8 +77,8 @@ export class ProcessControl {
       // Open issue: https://github.com/codex-storage/nim-codex/issues/1206
       // So we're setting them here.
       "persistence",
-      `--eth-provider=https://rpc.testnet.codex.storage`,
-      `--eth-private-key=eth.key`
+      `--eth-provider=${this.codexGlobals.getEthProvider()}`,
+      `--eth-private-key=eth.key`, // duplicated in configService.
     ];
     await this.shell.spawnDetachedProcess(executable, workingDir, args);
   };

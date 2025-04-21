@@ -13,5 +13,5 @@ export class CodexGlobals {
 
   getEthProvider = () => {
     return "https://rpc.testnet.codex.storage";
-  }
+  };
 }

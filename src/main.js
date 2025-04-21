@@ -109,7 +109,12 @@ export async function main() {
   const configService = new ConfigService(fsService, osService);
   const codexApp = new CodexApp(configService);
   const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
-  const ethersService = new EthersService(fsService, configService);
+  const ethersService = new EthersService(
+    fsService,
+    configService,
+    osService,
+    shellService,
+  );
   const marketplaceSetup = new MarketplaceSetup(
     uiService,
     configService,
