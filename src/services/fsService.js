@@ -11,7 +11,12 @@ export class FsService {
       val.volumes.forEach(function (volume) {
         const mount = volume.mountPoint;
         if (mount != null && mount != undefined && mount.length > 0) {
-          mountPoints.push(volume.mountPoint);
+          try {
+            if (!fs.lstatSync(mount).isFile()) {
+              mountPoints.push(mount);
+            }
+          } catch {
+          }
         }
       });
     });
