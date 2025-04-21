@@ -12,7 +12,8 @@ export class ProcessControl {
     if (this.os.isWindows()) {
       return processes.filter((p) => p.name === "codex.exe");
     } else {
-      return processes.filter((p) => p.name === "codex");
+      return processes.filter((p) => 
+        p.name === "codex" && !p.cmd.includes("<defunct>"));
     }
   };
 
