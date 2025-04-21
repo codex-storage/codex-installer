@@ -116,6 +116,7 @@ export async function main() {
   );
   const installMenu = new InstallMenu(
     uiService,
+    new MenuLoop(),
     configService,
     pathSelector,
     installer,

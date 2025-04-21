@@ -27,12 +27,12 @@ describe("ProcessControl", () => {
 
   describe("getCodexProcesses", () => {
     const processes = [
-      { id: 0, name: "a.exe" },
-      { id: 1, name: "aaa" },
-      { id: 2, name: "codex" },
-      { id: 3, name: "codex.exe" },
-      { id: 4, name: "notcodex" },
-      { id: 5, name: "alsonotcodex.exe" },
+      { id: 0, name: "a.exe", cmd: "" },
+      { id: 1, name: "codex", cmd: "<defunct>" },
+      { id: 2, name: "codex", cmd: "" },
+      { id: 3, name: "codex.exe", cmd: "<defunct>" },
+      { id: 4, name: "notcodex", cmd: "" },
+      { id: 5, name: "alsonotcodex.exe", cmd: "" },
     ];
 
     beforeEach(() => {
@@ -80,7 +80,7 @@ describe("ProcessControl", () => {
       );
     });
 
-    it("stops the first codex process", async () => {
+    it("calls stopProcess with pid of first codex process", async () => {
       const pid = 12345;
       processControl.getCodexProcesses.mockResolvedValue([
         { pid: pid },
@@ -88,20 +88,57 @@ describe("ProcessControl", () => {
         { pid: 222 },
       ]);
 
+      processControl.stopProcess = vi.fn();
       await processControl.stopCodexProcess();
+
+      expect(processControl.stopProcess).toHaveBeenCalledWith(pid);
+    });
+  });
+
+  describe("stopProcess", () => {
+    const pid = 234;
+    beforeEach(() => {
+      processControl.isProcessRunning = vi.fn();
+    });
+
+    it("stops the process", async () => {
+      processControl.isProcessRunning.mockResolvedValue(false);
+
+      await processControl.stopProcess(pid);
 
       expect(mockOsService.stopProcess).toHaveBeenCalledWith(pid);
     });
 
     it("sleeps", async () => {
-      processControl.getCodexProcesses.mockResolvedValue([
-        { pid: 111 },
-        { pid: 222 },
-      ]);
+      processControl.isProcessRunning.mockResolvedValue(false);
 
-      await processControl.stopCodexProcess();
+      await processControl.stopProcess(pid);
 
       expect(processControl.sleep).toHaveBeenCalled();
+    });
+
+    it("terminates process if it is running after stop", async () => {
+      processControl.isProcessRunning.mockResolvedValue(true);
+
+      await processControl.stopProcess(pid);
+
+      expect(mockOsService.terminateProcess).toHaveBeenCalledWith(pid);
+    });
+  });
+
+  describe("isProcessRunning", () => {
+    const pid = 345;
+
+    it("is true when process is in process list", async () => {
+      mockOsService.listProcesses.mockResolvedValue([{ pid: pid }]);
+
+      expect(await processControl.isProcessRunning(pid)).toBeTruthy();
+    });
+
+    it("is false when process is not in process list", async () => {
+      mockOsService.listProcesses.mockResolvedValue([{ pid: pid + 11 }]);
+
+      expect(await processControl.isProcessRunning(pid)).toBeFalsy();
     });
   });
 

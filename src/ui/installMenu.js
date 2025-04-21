@@ -1,13 +1,20 @@
 export class InstallMenu {
-  constructor(uiService, configService, pathSelector, installer) {
+  constructor(uiService, menuLoop, configService, pathSelector, installer) {
     this.ui = uiService;
+    this.loop = menuLoop;
     this.configService = configService;
     this.config = configService.get();
     this.pathSelector = pathSelector;
     this.installer = installer;
+
+    this.loop.initialize(this.showMenu);
   }
 
   show = async () => {
+    await this.loop.showLoop();
+  };
+
+  showMenu = async () => {
     if (await this.installer.isCodexInstalled()) {
       await this.showUninstallMenu();
     } else {
@@ -86,14 +93,18 @@ export class InstallMenu {
   };
 
   performInstall = async () => {
+    this.loop.stopLoop();
     await this.installer.installCodex(this);
   };
 
   performUninstall = async () => {
+    this.loop.stopLoop();
     this.installer.uninstallCodex();
   };
 
-  doNothing = async () => {};
+  doNothing = async () => {
+    this.loop.stopLoop();
+  };
 
   // Progress callbacks from installer module:
   installStarts = () => {

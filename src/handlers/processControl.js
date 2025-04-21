@@ -12,8 +12,9 @@ export class ProcessControl {
     if (this.os.isWindows()) {
       return processes.filter((p) => p.name === "codex.exe");
     } else {
-      return processes.filter((p) => 
-        p.name === "codex" && !p.cmd.includes("<defunct>"));
+      return processes.filter(
+        (p) => p.name === "codex" && !p.cmd.includes("<defunct>"),
+      );
     }
   };
 
@@ -37,14 +38,14 @@ export class ProcessControl {
       this.os.terminateProcess(pid);
       await this.sleep();
     }
-  }
+  };
 
   isProcessRunning = async (pid) => {
     const processes = await this.os.listProcesses();
     const p = processes.filter((p) => p.pid == pid);
     const result = p.length > 0;
     return result;
-  }
+  };
 
   startCodexProcess = async () => {
     await this.saveCodexConfigFile();

@@ -2,10 +2,7 @@ import { describe, beforeEach, it, expect, vi } from "vitest";
 import { ConfigMenu } from "./configMenu.js";
 import { mockUiService } from "../__mocks__/service.mocks.js";
 import { mockConfigService } from "../__mocks__/service.mocks.js";
-import {
-  mockNumberSelector,
-  mockMenuLoop,
-} from "../__mocks__/utils.mocks.js";
+import { mockNumberSelector, mockMenuLoop } from "../__mocks__/utils.mocks.js";
 
 describe("ConfigMenu", () => {
   const config = {

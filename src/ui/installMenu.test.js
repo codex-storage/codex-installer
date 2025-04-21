@@ -2,7 +2,7 @@ import { describe, beforeEach, it, expect, vi } from "vitest";
 import { InstallMenu } from "./installMenu.js";
 import { mockUiService } from "../__mocks__/service.mocks.js";
 import { mockConfigService } from "../__mocks__/service.mocks.js";
-import { mockPathSelector } from "../__mocks__/utils.mocks.js";
+import { mockMenuLoop, mockPathSelector } from "../__mocks__/utils.mocks.js";
 import { mockInstaller } from "../__mocks__/handler.mocks.js";
 
 describe("InstallMenu", () => {
@@ -17,13 +17,30 @@ describe("InstallMenu", () => {
 
     installMenu = new InstallMenu(
       mockUiService,
+      mockMenuLoop,
       mockConfigService,
       mockPathSelector,
       mockInstaller,
     );
   });
 
+  describe("constructor", () => {
+    it("initializes the menu loop with the showMenu function", () => {
+      expect(mockMenuLoop.initialize).toHaveBeenCalledWith(
+        installMenu.showMenu,
+      );
+    });
+  });
+
   describe("show", () => {
+    it("starts the menu loop", async () => {
+      await installMenu.show();
+
+      expect(mockMenuLoop.showLoop).toHaveBeenCalled();
+    });
+  });
+
+  describe("showMenu", () => {
     beforeEach(() => {
       installMenu.showInstallMenu = vi.fn();
       installMenu.showUninstallMenu = vi.fn();
@@ -32,7 +49,7 @@ describe("InstallMenu", () => {
     it("shows uninstall menu when codex is installed", async () => {
       mockInstaller.isCodexInstalled.mockResolvedValue(true);
 
-      await installMenu.show();
+      await installMenu.showMenu();
 
       expect(installMenu.showUninstallMenu).toHaveBeenCalled();
     });
@@ -40,7 +57,7 @@ describe("InstallMenu", () => {
     it("shows install menu when codex is not installed", async () => {
       mockInstaller.uninstallCodex.mockResolvedValue(false);
 
-      await installMenu.show();
+      await installMenu.showMenu();
 
       expect(installMenu.showInstallMenu).toHaveBeenCalled();
     });
@@ -140,12 +157,20 @@ describe("InstallMenu", () => {
     await installMenu.performInstall();
 
     expect(mockInstaller.installCodex).toHaveBeenCalledWith(installMenu);
+    expect(mockMenuLoop.stopLoop).toHaveBeenCalled();
   });
 
   it("calls installer for deinstallation", async () => {
     await installMenu.performUninstall();
 
     expect(mockInstaller.uninstallCodex).toHaveBeenCalled();
+    expect(mockMenuLoop.stopLoop).toHaveBeenCalled();
+  });
+
+  it("stops the menu loop when nothing is selected", async () => {
+    await installMenu.doNothing();
+
+    expect(mockMenuLoop.stopLoop).toHaveBeenCalled();
   });
 
   describe("process callback handling", () => {

@@ -15,8 +15,7 @@ export class FsService {
             if (!fs.lstatSync(mount).isFile()) {
               mountPoints.push(mount);
             }
-          } catch {
-          }
+          } catch {}
         }
       });
     });
@@ -24,7 +23,7 @@ export class FsService {
     if (mountPoints.length < 1) {
       // In certain containerized environments, the devices don't reveal any
       // useful mounts. We'll proceed under the assumption that '/' is valid here.
-      return ['/'];
+      return ["/"];
     }
     return mountPoints;
   };

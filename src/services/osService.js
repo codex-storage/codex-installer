@@ -32,5 +32,5 @@ export class OsService {
 
   terminateProcess = (pid) => {
     process.kill(pid, "SIGTERM");
-  }
+  };
 }
