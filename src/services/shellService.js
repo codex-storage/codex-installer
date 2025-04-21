@@ -16,8 +16,9 @@ export class ShellService {
     }
   };
 
-  spawnDetachedProcess = async (cmd, args) => {
+  spawnDetachedProcess = async (cmd, workingDir, args) => {
     var child = spawn(cmd, args, {
+      cwd: workingDir,
       detached: true,
       stdio: ["ignore", "ignore", "ignore"],
     });

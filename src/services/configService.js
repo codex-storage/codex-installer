@@ -1,20 +1,7 @@
-import {
-  getAppDataDir,
-  getCodexBinPath,
-  getCodexConfigFilePath,
-  getCodexDataDirDefaultPath,
-  getCodexLogsDefaultPath,
-} from "../utils/appData.js";
-
-import path from "path";
+import { getAppDataDir, getDefaultCodexRootPath } from "../utils/appData.js";
 
 const defaultConfig = {
-  codexExe: "",
-  // User-selected config options:
-  codexInstallPath: getCodexBinPath(),
-  codexConfigFilePath: getCodexConfigFilePath(),
-  dataDir: getCodexDataDirDefaultPath(),
-  logsDir: getCodexLogsDefaultPath(),
+  codexRoot: getDefaultCodexRootPath(),
   storageQuota: 8 * 1024 * 1024 * 1024,
   ports: {
     discPort: 8090,
@@ -23,14 +10,32 @@ const defaultConfig = {
   },
 };
 
+const datadir = "datadir";
+const codexLogFile = "codex.log";
+const codexConfigFile = "config.toml";
+
 export class ConfigService {
-  constructor(fsService) {
+  constructor(fsService, osService) {
     this.fs = fsService;
+    this.os = osService;
     this.loadConfig();
   }
 
   get = () => {
     return this.config;
+  };
+
+  getCodexExe = () => {
+    var codexExe = "codex";
+    if (this.os.isWindows()) {
+      codexExe = "codex.exe";
+    }
+
+    return this.fs.pathJoin([this.config.codexRoot, codexExe]);
+  };
+
+  getCodexConfigFilePath = () => {
+    return this.fs.pathJoin([this.config.codexRoot, codexConfigFile]);
   };
 
   loadConfig = () => {
@@ -66,29 +71,7 @@ export class ConfigService {
     return this.fs.pathJoin([getAppDataDir(), "config.json"]);
   };
 
-  getLogFilePath = () => {
-    // function getCurrentLogFile(config) {
-    //   const timestamp = new Date()
-    //     .toISOString()
-    //     .replaceAll(":", "-")
-    //     .replaceAll(".", "-");
-    //   return path.join(config.logsDir, `codex_${timestamp}.log`);
-    // }
-    // todo, maybe use timestamp
-
-    return this.fs.pathJoin([this.config.logsDir, "codex.log"]);
-  };
-
-  missing = (name) => {
-    throw new Error(`Missing config value: ${name}`);
-  };
-
   validateConfiguration = () => {
-    if (this.config.codexExe.length < 1) this.missing("codexExe");
-    if (this.config.codexConfigFilePath.length < 1)
-      this.missing("codexConfigFilePath");
-    if (this.config.dataDir.length < 1) this.missing("dataDir");
-    if (this.config.logsDir.length < 1) this.missing("logsDir");
     if (this.config.storageQuota < 1024 * 1024 * 100)
       throw new Error("Storage quota must be at least 100MB");
   };
@@ -100,10 +83,10 @@ export class ConfigService {
     const bootNodes = bootstrapNodes.map((v) => `"${v}"`).join(",");
 
     this.fs.writeFile(
-      this.config.codexConfigFilePath,
-      `data-dir="${this.format(this.toRelative(this.config.dataDir))}"${nl}` +
+      this.getCodexConfigFilePath(),
+      `data-dir="${datadir}"${nl}` +
         `log-level="DEBUG"${nl}` +
-        `log-file="${this.format(this.getLogFilePath())}"${nl}` +
+        `log-file="${codexLogFile}"${nl}` +
         `storage-quota=${this.config.storageQuota}${nl}` +
         `disc-port=${this.config.ports.discPort}${nl}` +
         `listen-addrs=["/ip4/0.0.0.0/tcp/${this.config.ports.listenPort}"]${nl}` +
@@ -112,13 +95,5 @@ export class ConfigService {
         `api-cors-origin="*"${nl}` +
         `bootstrap-node=[${bootNodes}]${nl}`,
     );
-  };
-
-  format = (str) => {
-    return str.replaceAll("\\", "/");
-  };
-
-  toRelative = (str) => {
-    return this.fs.toRelativePath(this.config.codexInstallPath, str);
   };
 }

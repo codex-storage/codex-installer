@@ -1,21 +1,11 @@
 import { describe, beforeEach, it, expect, vi } from "vitest";
 import { ConfigService } from "./configService.js";
-import { mockFsService } from "../__mocks__/service.mocks.js";
-import {
-  getAppDataDir,
-  getCodexBinPath,
-  getCodexConfigFilePath,
-  getCodexDataDirDefaultPath,
-  getCodexLogsDefaultPath,
-} from "../utils/appData.js";
+import { mockFsService, mockOsService } from "../__mocks__/service.mocks.js";
+import { getAppDataDir, getDefaultCodexRootPath } from "../utils/appData.js";
 
 function getDefaultConfig() {
   return {
-    codexExe: "",
-    codexInstallPath: getCodexBinPath(),
-    codexConfigFilePath: getCodexConfigFilePath(),
-    dataDir: getCodexDataDirDefaultPath(),
-    logsDir: getCodexLogsDefaultPath(),
+    codexRoot: getDefaultCodexRootPath(),
     storageQuota: 8 * 1024 * 1024 * 1024,
     ports: {
       discPort: 8090,
@@ -38,7 +28,7 @@ describe("ConfigService", () => {
 
   describe("constructor", () => {
     it("formats the config file path", () => {
-      new ConfigService(mockFsService);
+      new ConfigService(mockFsService, mockOsService);
 
       expect(mockFsService.pathJoin).toHaveBeenCalledWith([
         getAppDataDir(),
@@ -49,7 +39,7 @@ describe("ConfigService", () => {
     it("saves the default config when the config.json file does not exist", () => {
       mockFsService.isFile.mockReturnValue(false);
 
-      const service = new ConfigService(mockFsService);
+      const service = new ConfigService(mockFsService, mockOsService);
 
       expect(mockFsService.isFile).toHaveBeenCalledWith(configPath);
       expect(mockFsService.readJsonFile).not.toHaveBeenCalled();
@@ -67,7 +57,7 @@ describe("ConfigService", () => {
       };
       mockFsService.readJsonFile.mockReturnValue(savedConfig);
 
-      const service = new ConfigService(mockFsService);
+      const service = new ConfigService(mockFsService, mockOsService);
 
       expect(mockFsService.isFile).toHaveBeenCalledWith(configPath);
       expect(mockFsService.readJsonFile).toHaveBeenCalledWith(configPath);
@@ -76,17 +66,48 @@ describe("ConfigService", () => {
     });
   });
 
-  describe("getLogFilePath", () => {
-    it("joins the logsDir with the log filename", () => {
-      const service = new ConfigService(mockFsService);
+  describe("getCodexExe", () => {
+    var configService;
+    const result = "path/to/codex";
 
-      const result = "path/to/codex.log";
+    beforeEach(() => {
+      mockFsService.isFile.mockReturnValue(false);
       mockFsService.pathJoin.mockReturnValue(result);
+      configService = new ConfigService(mockFsService, mockOsService);
+    });
 
-      expect(service.getLogFilePath()).toBe(result);
+    it("joins the codex root with the non-Windows specific exe name", () => {
+      mockOsService.isWindows.mockReturnValue(false);
+
+      expect(configService.getCodexExe()).toBe(result);
       expect(mockFsService.pathJoin).toHaveBeenCalledWith([
-        expectedDefaultConfig.logsDir,
-        "codex.log",
+        expectedDefaultConfig.codexRoot,
+        "codex",
+      ]);
+    });
+
+    it("joins the codex root with the Windows specific exe name", () => {
+      mockOsService.isWindows.mockReturnValue(true);
+
+      expect(configService.getCodexExe()).toBe(result);
+      expect(mockFsService.pathJoin).toHaveBeenCalledWith([
+        expectedDefaultConfig.codexRoot,
+        "codex.exe",
+      ]);
+    });
+  });
+
+  describe("getCodexConfigFilePath", () => {
+    const result = "path/to/codex";
+
+    it("joins the codex root and codexConfigFile", () => {
+      mockFsService.pathJoin.mockReturnValue(result);
+      const configService = new ConfigService(mockFsService, mockOsService);
+
+      expect(configService.getCodexConfigFilePath()).toBe(result);
+      expect(mockFsService.pathJoin).toHaveBeenCalledWith([
+        expectedDefaultConfig.codexRoot,
+        "config.toml",
       ]);
     });
   });
@@ -99,40 +120,8 @@ describe("ConfigService", () => {
       config = expectedDefaultConfig;
       config.codexExe = "codex.exe";
 
-      configService = new ConfigService(mockFsService);
+      configService = new ConfigService(mockFsService, mockOsService);
       configService.config = config;
-    });
-
-    it("throws when codexExe is not set", () => {
-      config.codexExe = "";
-
-      expect(configService.validateConfiguration).toThrow(
-        "Missing config value: codexExe",
-      );
-    });
-
-    it("throws when codexConfigFilePath is not set", () => {
-      config.codexConfigFilePath = "";
-
-      expect(configService.validateConfiguration).toThrow(
-        "Missing config value: codexConfigFilePath",
-      );
-    });
-
-    it("throws when dataDir is not set", () => {
-      config.dataDir = "";
-
-      expect(configService.validateConfiguration).toThrow(
-        "Missing config value: dataDir",
-      );
-    });
-
-    it("throws when logsDir is not set", () => {
-      config.logsDir = "";
-
-      expect(configService.validateConfiguration).toThrow(
-        "Missing config value: logsDir",
-      );
     });
 
     it("throws when storageQuota is less than 100 MB", () => {
@@ -148,7 +137,7 @@ describe("ConfigService", () => {
     });
   });
 
-  describe("writecodexConfigFile", () => {
+  describe("writeCodexConfigFile", () => {
     const logsPath = "C:\\path\\codex.log";
     var configService;
 
@@ -156,32 +145,31 @@ describe("ConfigService", () => {
       // use the default config:
       mockFsService.isFile.mockReturnValue(false);
 
-      configService = new ConfigService(mockFsService);
+      configService = new ConfigService(mockFsService, mockOsService);
       configService.validateConfiguration = vi.fn();
       configService.getLogFilePath = vi.fn();
       configService.getLogFilePath.mockReturnValue(logsPath);
     });
 
-    function formatPath(str) {
-      return str.replaceAll("\\", "/");
-    }
-
     it("writes the config file values to the config TOML file", () => {
       const publicIp = "1.2.3.4";
       const bootstrapNodes = ["boot111", "boot222", "boot333"];
-      const relativeDataDirPath = "..\\../datadir";
+      const expectedDataDir = "datadir";
+      const expectedLogFile = "codex.log";
+      const codexConfigFilePath = "/path/to/config.toml";
 
-      mockFsService.toRelativePath.mockReturnValue(relativeDataDirPath);
+      configService.getCodexConfigFilePath = vi.fn();
+      configService.getCodexConfigFilePath.mockReturnValue(codexConfigFilePath);
 
       configService.writeCodexConfigFile(publicIp, bootstrapNodes);
 
       const newLine = "\n";
 
       expect(mockFsService.writeFile).toHaveBeenCalledWith(
-        expectedDefaultConfig.codexConfigFilePath,
-        `data-dir=\"${formatPath(relativeDataDirPath)}"${newLine}` +
+        codexConfigFilePath,
+        `data-dir=\"${expectedDataDir}"${newLine}` +
           `log-level="DEBUG"${newLine}` +
-          `log-file="${formatPath(logsPath)}"${newLine}` +
+          `log-file="${expectedLogFile}"${newLine}` +
           `storage-quota=${expectedDefaultConfig.storageQuota}${newLine}` +
           `disc-port=${expectedDefaultConfig.ports.discPort}${newLine}` +
           `listen-addrs=["/ip4/0.0.0.0/tcp/${expectedDefaultConfig.ports.listenPort}"]${newLine}` +
@@ -193,11 +181,6 @@ describe("ConfigService", () => {
               return '"' + v + '"';
             })
             .join(",")}]${newLine}`,
-      );
-
-      expect(mockFsService.toRelativePath).toHaveBeenCalledWith(
-        expectedDefaultConfig.codexInstallPath,
-        expectedDefaultConfig.dataDir,
       );
     });
   });

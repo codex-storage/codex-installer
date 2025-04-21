@@ -1,7 +1,6 @@
 export class ProcessControl {
   constructor(configService, shellService, osService, fsService, codexGlobals) {
     this.configService = configService;
-    this.config = configService.get();
     this.shell = shellService;
     this.os = osService;
     this.fs = fsService;
@@ -26,7 +25,7 @@ export class ProcessControl {
     if (processes.length < 1) throw new Error("No codex process found");
 
     const pid = processes[0].pid;
-    process.kill(pid, "SIGINT");
+    this.os.stopProcess(pid);
     await this.sleep();
   };
 
@@ -51,8 +50,11 @@ export class ProcessControl {
   };
 
   startCodex = async () => {
-    const executable = this.config.codexExe;
-    const args = [`--config-file=${this.config.codexConfigFilePath}`];
-    await this.shell.spawnDetachedProcess(executable, args);
+    const executable = this.configService.getCodexExe();
+    const workingDir = this.configService.get().codexRoot;
+    const args = [
+      `--config-file=${this.configService.getCodexConfigFilePath()}`,
+    ];
+    await this.shell.spawnDetachedProcess(executable, workingDir, args);
   };
 }

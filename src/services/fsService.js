@@ -67,7 +67,10 @@ export class FsService {
     fs.writeFileSync(filePath, content);
   };
 
-  toRelativePath = (from, to) => {
-    return path.relative(from, to);
+  ensureDirExists = (dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    return dir;
   };
 }

@@ -9,9 +9,10 @@ import { Installer } from "./installer.js";
 
 describe("Installer", () => {
   const config = {
-    codexInstallPath: "/install-codex",
+    codexRoot: "/codex-root",
   };
   const workingDir = "/working-dir";
+  const exe = "abc.exe";
   const processCallbacks = {
     installStarts: vi.fn(),
     downloadSuccessful: vi.fn(),
@@ -24,6 +25,7 @@ describe("Installer", () => {
     vi.resetAllMocks();
     mockConfigService.get.mockReturnValue(config);
     mockOsService.getWorkingDir.mockReturnValue(workingDir);
+    mockConfigService.getCodexExe.mockReturnValue(exe);
 
     installer = new Installer(
       mockConfigService,
@@ -34,15 +36,22 @@ describe("Installer", () => {
   });
 
   describe("getCodexVersion", () => {
-    it("throws when codex exe is not set", async () => {
-      config.codexExe = "";
+    it("checks if the codex exe file exists", async () => {
+      mockFsService.isFile.mockReturnValue(true);
+      mockShellService.run.mockResolvedValueOnce("a");
+      await installer.getCodexVersion();
+      expect(mockFsService.isFile).toHaveBeenCalledWith(exe);
+    });
+
+    it("throws when codex exe is not a file", async () => {
+      mockFsService.isFile.mockReturnValue(false);
       await expect(installer.getCodexVersion()).rejects.toThrow(
         "Codex not installed.",
       );
     });
 
     it("throws when version info is not found", async () => {
-      config.codexExe = "codex.exe";
+      mockFsService.isFile.mockReturnValue(true);
       mockShellService.run.mockResolvedValueOnce("");
       await expect(installer.getCodexVersion()).rejects.toThrow(
         "Version info not found.",
@@ -50,8 +59,8 @@ describe("Installer", () => {
     });
 
     it("returns version info", async () => {
+      mockFsService.isFile.mockReturnValue(true);
       const versionInfo = "versionInfo";
-      config.codexExe = "codex.exe";
       mockShellService.run.mockResolvedValueOnce(versionInfo);
       const version = await installer.getCodexVersion();
       expect(version).toBe(versionInfo);
@@ -78,6 +87,15 @@ describe("Installer", () => {
       installer.installCodexWindows = vi.fn();
       installer.installCodexUnix = vi.fn();
       installer.isCodexInstalled = vi.fn();
+    });
+
+    it("ensures codex root dir exists", async () => {
+      installer.arePrerequisitesCorrect.mockResolvedValue(false);
+      await installer.installCodex(processCallbacks);
+
+      expect(mockFsService.ensureDirExists).toHaveBeenCalledWith(
+        config.codexRoot,
+      );
     });
 
     it("returns early when prerequisites are not correct", async () => {
@@ -125,6 +143,16 @@ describe("Installer", () => {
         );
       });
 
+      it("warns user when codex is not installed after installation", async () => {
+        installer.isCodexInstalled.mockResolvedValue(false);
+        await expect(installer.installCodex(processCallbacks)).rejects.toThrow(
+          "Codex installation failed.",
+        );
+        expect(processCallbacks.warn).toHaveBeenCalledWith(
+          "Codex failed to install.",
+        );
+      });
+
       it("calls installSuccessful when installation is successful", async () => {
         await installer.installCodex(processCallbacks);
         expect(processCallbacks.installSuccessful).toHaveBeenCalled();
@@ -136,7 +164,6 @@ describe("Installer", () => {
     beforeEach(() => {
       installer.isCodexInstalled = vi.fn();
       installer.isCurlAvailable = vi.fn();
-      config.codexInstallPath = "/install-codex";
     });
 
     it("returns false when codex is already installed", async () => {
@@ -149,18 +176,26 @@ describe("Installer", () => {
       );
     });
 
-    it("returns false when install path is not set", async () => {
-      config.codexInstallPath = "";
+    it("checks if the root path exists", async () => {
+      expect(await installer.arePrerequisitesCorrect(processCallbacks)).toBe(
+        false,
+      );
+      expect(mockFsService.isDir).toHaveBeenCalledWith(config.codexRoot);
+    });
+
+    it("returns false when root path does not exist", async () => {
+      mockFsService.isDir.mockReturnValue(false);
       expect(await installer.arePrerequisitesCorrect(processCallbacks)).toBe(
         false,
       );
       expect(processCallbacks.warn).toHaveBeenCalledWith(
-        "Install path not set.",
+        "Root path doesn't exist.",
       );
     });
 
     it("returns false when curl is not available", async () => {
       installer.isCodexInstalled.mockResolvedValue(false);
+      mockFsService.isDir.mockReturnValue(true);
       installer.isCurlAvailable.mockResolvedValue(false);
       expect(await installer.arePrerequisitesCorrect(processCallbacks)).toBe(
         false,
@@ -172,6 +207,7 @@ describe("Installer", () => {
 
     it("returns true when all prerequisites are correct", async () => {
       installer.isCodexInstalled.mockResolvedValue(false);
+      mockFsService.isDir.mockReturnValue(true);
       installer.isCurlAvailable.mockResolvedValue(true);
       const result = await installer.arePrerequisitesCorrect(processCallbacks);
       expect(result).toBe(true);
@@ -215,14 +251,7 @@ describe("Installer", () => {
       it("runs installer script", async () => {
         await installer.installCodexWindows(processCallbacks);
         expect(mockShellService.run).toHaveBeenCalledWith(
-          `set "INSTALL_DIR=${config.codexInstallPath}" && "${workingDir}\\install.cmd"`,
-        );
-      });
-
-      it("saves the codex install path", async () => {
-        await installer.installCodexWindows(processCallbacks);
-        expect(installer.saveCodexInstallPath).toHaveBeenCalledWith(
-          "codex.exe",
+          `set "INSTALL_DIR=${config.codexRoot}" && "${workingDir}\\install.cmd"`,
         );
       });
 
@@ -285,11 +314,6 @@ describe("Installer", () => {
           expect(installer.runInstallerLinux).toHaveBeenCalled();
         });
 
-        it("saves the codex install path", async () => {
-          await installer.installCodexUnix(processCallbacks);
-          expect(installer.saveCodexInstallPath).toHaveBeenCalledWith("codex");
-        });
-
         it("deletes the installer script", async () => {
           await installer.installCodexUnix(processCallbacks);
           expect(mockShellService.run).toHaveBeenCalledWith("rm -f install.sh");
@@ -303,7 +327,7 @@ describe("Installer", () => {
     eval {
         local $SIG{ALRM} = sub { die "timeout\\n" };
         alarm(120);
-        system("INSTALL_DIR=\\"${config.codexInstallPath}\\" bash install.sh");
+        system("INSTALL_DIR=\\"${config.codexRoot}\\" bash install.sh");
         alarm(0);
     };
     die if $@;
@@ -317,7 +341,7 @@ describe("Installer", () => {
       it("runs the installer script using unix timeout command", async () => {
         await installer.runInstallerLinux();
         expect(mockShellService.run).toHaveBeenCalledWith(
-          `INSTALL_DIR="${config.codexInstallPath}" timeout 120 bash install.sh`,
+          `INSTALL_DIR="${config.codexRoot}" timeout 120 bash install.sh`,
         );
       });
     });
@@ -351,56 +375,11 @@ describe("Installer", () => {
     });
   });
 
-  describe("saveCodexInstallPath", () => {
-    const codexExe = "_codex_.exe";
-    const pathJointResult = "/path-to-codex/_codex_.exe";
-
-    beforeEach(() => {
-      mockFsService.pathJoin.mockReturnValue(pathJointResult);
-    });
-
-    it("combines the install path with the exe", async () => {
-      mockFsService.isFile.mockReturnValue(true);
-      await installer.saveCodexInstallPath(codexExe);
-      expect(mockFsService.pathJoin).toHaveBeenCalledWith([
-        config.codexInstallPath,
-        codexExe,
-      ]);
-    });
-
-    it("sets the codex exe path", async () => {
-      mockFsService.isFile.mockReturnValue(true);
-      await installer.saveCodexInstallPath(codexExe);
-      expect(config.codexExe).toBe(pathJointResult);
-    });
-
-    it("throws when file does not exist", async () => {
-      mockFsService.isFile.mockReturnValue(false);
-      await expect(installer.saveCodexInstallPath(codexExe)).rejects.toThrow(
-        "Codex executable not found.",
-      );
-    });
-
-    it("saves the config", async () => {
-      mockFsService.isFile.mockReturnValue(true);
-      await installer.saveCodexInstallPath(codexExe);
-      expect(mockConfigService.saveConfig).toHaveBeenCalled();
-    });
-  });
-
   describe("uninstallCodex", () => {
-    it("deletes the codex install path", () => {
+    it("deletes the codex root path", () => {
       installer.uninstallCodex();
 
-      expect(mockFsService.deleteDir).toHaveBeenCalledWith(
-        config.codexInstallPath,
-      );
-    });
-
-    it("deletes the codex data path", () => {
-      installer.uninstallCodex();
-
-      expect(mockFsService.deleteDir).toHaveBeenCalledWith(config.dataDir);
+      expect(mockFsService.deleteDir).toHaveBeenCalledWith(config.codexRoot);
     });
   });
 });

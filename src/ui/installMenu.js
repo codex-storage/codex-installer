@@ -18,7 +18,7 @@ export class InstallMenu {
   showInstallMenu = async () => {
     await this.ui.askMultipleChoice("Configure your Codex installation", [
       {
-        label: "Install path: " + this.config.codexInstallPath,
+        label: "Install path: " + this.config.codexRoot,
         action: this.selectInstallPath,
       },
       {
@@ -53,7 +53,8 @@ export class InstallMenu {
     this.ui.showInfoMessage(
       "You are about to:\n" +
         " - Uninstall the Codex application\n" +
-        " - Delete the data stored in your Codex node",
+        " - Delete the data stored in your Codex node\n" +
+        " - Delete the log files of your Codex node",
     );
 
     await this.ui.askMultipleChoice(
@@ -72,8 +73,8 @@ export class InstallMenu {
   };
 
   selectInstallPath = async () => {
-    this.config.codexInstallPath = await this.pathSelector.show(
-      this.config.codexInstallPath,
+    this.config.codexRoot = await this.pathSelector.show(
+      this.config.codexRoot,
       false,
     );
     this.configService.saveConfig();

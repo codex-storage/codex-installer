@@ -17,14 +17,15 @@ export class Installer {
   };
 
   getCodexVersion = async () => {
-    if (this.config.codexExe.length < 1)
-      throw new Error("Codex not installed.");
-    const version = await this.shell.run(`"${this.config.codexExe}" --version`);
+    const codexExe = this.configService.getCodexExe();
+    if (!this.fs.isFile(codexExe)) throw new Error("Codex not installed.");
+    const version = await this.shell.run(`"${codexExe}" --version`);
     if (version.length < 1) throw new Error("Version info not found.");
     return version;
   };
 
   installCodex = async (processCallbacks) => {
+    this.fs.ensureDirExists(this.config.codexRoot);
     if (!(await this.arePrerequisitesCorrect(processCallbacks))) return;
 
     processCallbacks.installStarts();
@@ -34,14 +35,15 @@ export class Installer {
       await this.installCodexUnix(processCallbacks);
     }
 
-    if (!(await this.isCodexInstalled()))
+    if (!(await this.isCodexInstalled())) {
+      processCallbacks.warn("Codex failed to install.");
       throw new Error("Codex installation failed.");
+    }
     processCallbacks.installSuccessful();
   };
 
   uninstallCodex = () => {
-    this.fs.deleteDir(this.config.codexInstallPath);
-    this.fs.deleteDir(this.config.dataDir);
+    this.fs.deleteDir(this.config.codexRoot);
   };
 
   arePrerequisitesCorrect = async (processCallbacks) => {
@@ -49,8 +51,8 @@ export class Installer {
       processCallbacks.warn("Codex is already installed.");
       return false;
     }
-    if (this.config.codexInstallPath.length < 1) {
-      processCallbacks.warn("Install path not set.");
+    if (!this.fs.isDir(this.config.codexRoot)) {
+      processCallbacks.warn("Root path doesn't exist.");
       return false;
     }
     if (!(await this.isCurlAvailable())) {
@@ -71,10 +73,9 @@ export class Installer {
     );
     processCallbacks.downloadSuccessful();
     await this.shell.run(
-      `set "INSTALL_DIR=${this.config.codexInstallPath}" && ` +
+      `set "INSTALL_DIR=${this.config.codexRoot}" && ` +
         `"${this.os.getWorkingDir()}\\install.cmd"`,
     );
-    await this.saveCodexInstallPath("codex.exe");
     await this.shell.run("del /f install.cmd");
   };
 
@@ -90,8 +91,6 @@ export class Installer {
     } else {
       await this.runInstallerLinux();
     }
-
-    await this.saveCodexInstallPath("codex");
     await this.shell.run("rm -f install.sh");
   };
 
@@ -100,7 +99,7 @@ export class Installer {
     eval {
         local $SIG{ALRM} = sub { die "timeout\\n" };
         alarm(120);
-        system("INSTALL_DIR=\\"${this.config.codexInstallPath}\\" bash install.sh");
+        system("INSTALL_DIR=\\"${this.config.codexRoot}\\" bash install.sh");
         alarm(0);
     };
     die if $@;
@@ -110,7 +109,7 @@ export class Installer {
 
   runInstallerLinux = async () => {
     await this.shell.run(
-      `INSTALL_DIR="${this.config.codexInstallPath}" timeout 120 bash install.sh`,
+      `INSTALL_DIR="${this.config.codexRoot}" timeout 120 bash install.sh`,
     );
   };
 
@@ -121,15 +120,5 @@ export class Installer {
       return false;
     }
     return true;
-  };
-
-  saveCodexInstallPath = async (codexExe) => {
-    this.config.codexExe = this.fs.pathJoin([
-      this.config.codexInstallPath,
-      codexExe,
-    ]);
-    if (!this.fs.isFile(this.config.codexExe))
-      throw new Error("Codex executable not found.");
-    await this.configService.saveConfig();
   };
 }

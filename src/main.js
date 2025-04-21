@@ -103,12 +103,12 @@ export async function main() {
   const codexGlobals = new CodexGlobals();
   const uiService = new UiService();
   const fsService = new FsService();
-  const configService = new ConfigService(fsService);
-  const codexApp = new CodexApp(configService);
-  const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
-  const numberSelector = new NumberSelector(uiService);
   const shellService = new ShellService();
   const osService = new OsService();
+  const numberSelector = new NumberSelector(uiService);
+  const configService = new ConfigService(fsService, osService);
+  const codexApp = new CodexApp(configService);
+  const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
   const installer = new Installer(
     configService,
     shellService,

@@ -25,4 +25,8 @@ export class OsService {
   listProcesses = async () => {
     return await psList();
   };
+
+  stopProcess = (pid) => {
+    process.kill(pid, "SIGINT");
+  };
 }

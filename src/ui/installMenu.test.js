@@ -7,7 +7,7 @@ import { mockInstaller } from "../__mocks__/handler.mocks.js";
 
 describe("InstallMenu", () => {
   const config = {
-    codexInstallPath: "/codex",
+    codexRoot: "/codex",
   };
   let installMenu;
 
@@ -52,7 +52,7 @@ describe("InstallMenu", () => {
       "Configure your Codex installation",
       [
         {
-          label: "Install path: " + config.codexInstallPath,
+          label: "Install path: " + config.codexRoot,
           action: installMenu.selectInstallPath,
         },
         {
@@ -94,7 +94,8 @@ describe("InstallMenu", () => {
     expect(mockUiService.showInfoMessage).toHaveBeenCalledWith(
       "You are about to:\n" +
         " - Uninstall the Codex application\n" +
-        " - Delete the data stored in your Codex node",
+        " - Delete the data stored in your Codex node\n" +
+        " - Delete the log files of your Codex node",
     );
 
     expect(mockUiService.askMultipleChoice).toHaveBeenCalledWith(
@@ -113,14 +114,14 @@ describe("InstallMenu", () => {
   });
 
   it("allows selecting the install path", async () => {
-    const originalPath = config.codexInstallPath;
+    const originalPath = config.codexRoot;
     const newPath = "/new/path";
     mockPathSelector.show.mockResolvedValue(newPath);
 
     await installMenu.selectInstallPath();
 
     expect(mockPathSelector.show).toHaveBeenCalledWith(originalPath, false);
-    expect(config.codexInstallPath).toBe(newPath);
+    expect(config.codexRoot).toBe(newPath);
     expect(mockConfigService.saveConfig).toHaveBeenCalled();
   });
 

@@ -13,8 +13,10 @@ export const mockUiService = {
 
 export const mockConfigService = {
   get: vi.fn(),
-  saveConfig: vi.fn(),
+  getCodexExe: vi.fn(),
+  getCodexConfigFilePath: vi.fn(),
   loadConfig: vi.fn(),
+  saveConfig: vi.fn(),
   writeCodexConfigFile: vi.fn(),
 };
 
@@ -25,11 +27,12 @@ export const mockFsService = {
   isFile: vi.fn(),
   readDir: vi.fn(),
   makeDir: vi.fn(),
+  moveDir: vi.fn(),
   deleteDir: vi.fn(),
   readJsonFile: vi.fn(),
   writeJsonFile: vi.fn(),
   writeFile: vi.fn(),
-  toRelativePath: vi.fn(),
+  ensureDirExists: vi.fn(),
 };
 
 export const mockShellService = {
@@ -43,6 +46,7 @@ export const mockOsService = {
   isLinux: vi.fn(),
   getWorkingDir: vi.fn(),
   listProcesses: vi.fn(),
+  stopProcess: vi.fn(),
 };
 
 export const mockCodexGlobals = {
