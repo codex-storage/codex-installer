@@ -112,6 +112,33 @@ describe("ConfigService", () => {
     });
   });
 
+  describe("getEthFilePaths", () => {
+    const result1 = "path/to/key";
+    const result2 = "path/to/address";
+
+    it("returns the key and address file paths", () => {
+      const configService = new ConfigService(mockFsService, mockOsService);
+
+      mockFsService.pathJoin = vi.fn();
+      mockFsService.pathJoin.mockReturnValueOnce(result1);
+      mockFsService.pathJoin.mockReturnValueOnce(result2);
+
+      expect(configService.getEthFilePaths()).toEqual({
+        key: result1,
+        address: result2,
+      });
+
+      expect(mockFsService.pathJoin).toHaveBeenCalledWith([
+        expectedDefaultConfig.codexRoot,
+        "eth.key",
+      ]);
+      expect(mockFsService.pathJoin).toHaveBeenCalledWith([
+        expectedDefaultConfig.codexRoot,
+        "eth.address",
+      ]);
+    });
+  });
+
   describe("validateConfiguration", () => {
     var configService;
     var config;

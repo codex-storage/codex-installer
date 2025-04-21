@@ -91,12 +91,12 @@ export class MainMenu {
   };
 
   startCodex = async () => {
-    // const spinner = this.ui.createAndStartSpinner("Starting...");
+    const spinner = this.ui.createAndStartSpinner("Starting...");
     try {
       await this.processControl.startCodexProcess();
-      // this.ui.stopSpinnerSuccess(spinner);
+      this.ui.stopSpinnerSuccess(spinner);
     } catch (exception) {
-      // this.ui.stopSpinnerError(spinner);
+      this.ui.stopSpinnerError(spinner);
       this.ui.showErrorMessage(`Failed to start Codex. "${exception}"`);
     }
   };

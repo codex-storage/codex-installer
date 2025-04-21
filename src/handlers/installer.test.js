@@ -3,8 +3,9 @@ import {
   mockShellService,
   mockOsService,
   mockFsService,
+  mockConfigService,
+  mockMarketplaceSetup,
 } from "../__mocks__/service.mocks.js";
-import { mockConfigService } from "../__mocks__/service.mocks.js";
 import { Installer } from "./installer.js";
 
 describe("Installer", () => {
@@ -32,6 +33,7 @@ describe("Installer", () => {
       mockShellService,
       mockOsService,
       mockFsService,
+      mockMarketplaceSetup,
     );
   });
 
@@ -109,9 +111,22 @@ describe("Installer", () => {
       expect(installer.installCodexUnix).not.toHaveBeenCalled();
     });
 
+    it("returns early when marketplace client wizard returns false", async () => {
+      installer.arePrerequisitesCorrect.mockResolvedValue(true);
+      mockMarketplaceSetup.runClientWizard.mockResolvedValue(false);
+      await installer.installCodex(processCallbacks);
+      expect(processCallbacks.installStarts).not.toHaveBeenCalled();
+      expect(processCallbacks.installSuccessful).not.toHaveBeenCalled();
+      expect(processCallbacks.downloadSuccessful).not.toHaveBeenCalled();
+      expect(installer.isCodexInstalled).not.toHaveBeenCalled();
+      expect(installer.installCodexWindows).not.toHaveBeenCalled();
+      expect(installer.installCodexUnix).not.toHaveBeenCalled();
+    });
+
     describe("prerequisites OK", () => {
       beforeEach(() => {
         installer.arePrerequisitesCorrect.mockResolvedValue(true);
+        mockMarketplaceSetup.runClientWizard.mockResolvedValue(true);
         installer.isCodexInstalled.mockResolvedValue(true);
       });
 

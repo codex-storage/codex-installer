@@ -10,9 +10,11 @@ import { ProcessControl } from "./processControl.js";
 
 describe("ProcessControl", () => {
   let processControl;
+  const mockEthProvider = "mockEthProvider";
 
   beforeEach(() => {
     vi.resetAllMocks();
+    mockCodexGlobals.getEthProvider.mockReturnValue(mockEthProvider);
 
     processControl = new ProcessControl(
       mockConfigService,
@@ -195,7 +197,12 @@ describe("ProcessControl", () => {
       expect(mockShellService.spawnDetachedProcess).toHaveBeenCalledWith(
         exe,
         config.codexRoot,
-        [`--config-file=${configFile}`],
+        [
+          `--config-file=${configFile}`,
+          "persistence",
+          `--eth-provider=${mockEthProvider}`,
+          `--eth-private-key=eth.key`, // duplicated in configService.
+        ],
       );
     });
   });

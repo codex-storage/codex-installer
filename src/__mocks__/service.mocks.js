@@ -54,8 +54,13 @@ export const mockOsService = {
 export const mockCodexGlobals = {
   getPublicIp: vi.fn(),
   getTestnetSPRs: vi.fn(),
+  getEthProvider: vi.fn(),
 };
 
 export const mockCodexApp = {
   openCodexApp: vi.fn(),
+};
+
+export const mockMarketplaceSetup = {
+  runClientWizard: vi.fn(),
 };
