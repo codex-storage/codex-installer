@@ -45,12 +45,6 @@ describe("mainmenu", () => {
 
       expect(mockMenuLoop.showLoop).toHaveBeenCalled();
     });
-
-    it("shows the exit message after the menu loop", async () => {
-      await mainmenu.show();
-
-      expect(mockUiService.showInfoMessage).toHaveBeenCalledWith("K-THX-BYE");
-    });
   });
 
   describe("promptMainMenu", () => {

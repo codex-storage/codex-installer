@@ -23,8 +23,6 @@ export class MainMenu {
     this.ui.showLogo();
 
     await this.loop.showLoop();
-
-    this.ui.showInfoMessage("K-THX-BYE");
   };
 
   promptMainMenu = async () => {

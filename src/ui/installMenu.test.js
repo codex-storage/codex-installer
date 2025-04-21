@@ -111,6 +111,7 @@ describe("InstallMenu", () => {
     expect(mockUiService.showInfoMessage).toHaveBeenCalledWith(
       "You are about to:\n" +
         " - Uninstall the Codex application\n" +
+        " - Delete your Codex ethereum keys\n" +
         " - Delete the data stored in your Codex node\n" +
         " - Delete the log files of your Codex node",
     );
