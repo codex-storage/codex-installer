@@ -20,20 +20,20 @@ export class ShellService {
     var child = spawn(cmd, args, {
       cwd: workingDir,
       detached: true,
-      stdio: ["ignore", "ignore", "ignore"],
+      //stdio: ["ignore", "ignore", "ignore"],
     });
 
-    // child.stdout.on("data", (data) => {
-    //   console.log(`stdout: ${data}`);
-    // });
+    child.stdout.on("data", (data) => {
+      console.log(`stdout: ${data}`);
+    });
 
-    // child.stderr.on("data", (data) => {
-    //   console.error(`stderr: ${data}`);
-    // });
+    child.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    });
 
-    // child.on("close", (code) => {
-    //   console.log(`child process exited with code ${code}`);
-    // });
+    child.on("close", (code) => {
+      console.log(`child process exited with code ${code}`);
+    });
 
     child.unref();
 

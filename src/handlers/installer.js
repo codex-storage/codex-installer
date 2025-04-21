@@ -1,10 +1,17 @@
 export class Installer {
-  constructor(configService, shellService, osService, fsService) {
+  constructor(
+    configService,
+    shellService,
+    osService,
+    fsService,
+    marketplaceSetup,
+  ) {
     this.config = configService.get();
     this.configService = configService;
     this.shell = shellService;
     this.os = osService;
     this.fs = fsService;
+    this.market = marketplaceSetup;
   }
 
   isCodexInstalled = async () => {
@@ -27,6 +34,8 @@ export class Installer {
   installCodex = async (processCallbacks) => {
     this.fs.ensureDirExists(this.config.codexRoot);
     if (!(await this.arePrerequisitesCorrect(processCallbacks))) return;
+
+    if (!(await this.market.runClientWizard())) return;
 
     processCallbacks.installStarts();
     if (this.os.isWindows()) {

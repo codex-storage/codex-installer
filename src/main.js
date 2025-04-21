@@ -20,7 +20,6 @@ import {
 import { runCodex, checkNodeStatus } from "./handlers/nodeHandlers.js";
 import { showInfoMessage } from "./utils/messages.js";
 import { ConfigService } from "./services/configService.js";
-
 import { UiService } from "./services/uiService.js";
 import { FsService } from "./services/fsService.js";
 import { MainMenu } from "./ui/mainMenu.js";
@@ -35,6 +34,8 @@ import { OsService } from "./services/osService.js";
 import { ProcessControl } from "./handlers/processControl.js";
 import { CodexGlobals } from "./services/codexGlobals.js";
 import { CodexApp } from "./services/codexApp.js";
+import { EthersService } from "./services/ethersService.js";
+import { MarketplaceSetup } from "./ui/marketplaceSetup.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -108,11 +109,18 @@ export async function main() {
   const configService = new ConfigService(fsService, osService);
   const codexApp = new CodexApp(configService);
   const pathSelector = new PathSelector(uiService, new MenuLoop(), fsService);
+  const ethersService = new EthersService(fsService, configService);
+  const marketplaceSetup = new MarketplaceSetup(
+    uiService,
+    configService,
+    ethersService,
+  );
   const installer = new Installer(
     configService,
     shellService,
     osService,
     fsService,
+    marketplaceSetup,
   );
   const installMenu = new InstallMenu(
     uiService,

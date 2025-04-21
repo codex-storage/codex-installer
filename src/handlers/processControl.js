@@ -72,6 +72,13 @@ export class ProcessControl {
     const workingDir = this.configService.get().codexRoot;
     const args = [
       `--config-file=${this.configService.getCodexConfigFilePath()}`,
+
+      // Marketplace client parameters cannot be set via config file.
+      // Open issue: https://github.com/codex-storage/nim-codex/issues/1206
+      // So we're setting them here.
+      "persistence",
+      `--eth-provider=https://rpc.testnet.codex.storage`,
+      `--eth-private-key=eth.key`
     ];
     await this.shell.spawnDetachedProcess(executable, workingDir, args);
   };

@@ -13,6 +13,8 @@ const defaultConfig = {
 const datadir = "datadir";
 const codexLogFile = "codex.log";
 const codexConfigFile = "config.toml";
+const ethKeyFile = "eth.key";
+const ethAddressFile = "eth.address";
 
 export class ConfigService {
   constructor(fsService, osService) {
@@ -36,6 +38,13 @@ export class ConfigService {
 
   getCodexConfigFilePath = () => {
     return this.fs.pathJoin([this.config.codexRoot, codexConfigFile]);
+  };
+
+  getEthFilePaths = () => {
+    return {
+      key: this.fs.pathJoin([this.config.codexRoot, ethKeyFile]),
+      address: this.fs.pathJoin([this.config.codexRoot, ethAddressFile]),
+    };
   };
 
   loadConfig = () => {
@@ -76,7 +85,7 @@ export class ConfigService {
       throw new Error("Storage quota must be at least 100MB");
   };
 
-  writeCodexConfigFile = (publicIp, bootstrapNodes) => {
+  writeCodexConfigFile = (publicIp, bootstrapNodes, ethProvider) => {
     this.validateConfiguration();
 
     const nl = "\n";
@@ -85,15 +94,22 @@ export class ConfigService {
     this.fs.writeFile(
       this.getCodexConfigFilePath(),
       `data-dir="${datadir}"${nl}` +
-        `log-level="DEBUG"${nl}` +
-        `log-file="${codexLogFile}"${nl}` +
-        `storage-quota=${this.config.storageQuota}${nl}` +
-        `disc-port=${this.config.ports.discPort}${nl}` +
-        `listen-addrs=["/ip4/0.0.0.0/tcp/${this.config.ports.listenPort}"]${nl}` +
-        `api-port=${this.config.ports.apiPort}${nl}` +
-        `nat="extip:${publicIp}"${nl}` +
-        `api-cors-origin="*"${nl}` +
-        `bootstrap-node=[${bootNodes}]${nl}`,
+      `log-level="TRACE"${nl}` +
+      `log-file="${codexLogFile}"${nl}` +
+      `storage-quota=${this.config.storageQuota}${nl}` +
+      `disc-port=${this.config.ports.discPort}${nl}` +
+      `listen-addrs=["/ip4/0.0.0.0/tcp/${this.config.ports.listenPort}"]${nl}` +
+      `api-port=${this.config.ports.apiPort}${nl}` +
+      `nat="extip:${publicIp}"${nl}` +
+      `api-cors-origin="*"${nl}` +
+      `bootstrap-node=[${bootNodes}]${nl}` +
+      // Marketplace client parameters:
+      // `[persistence]${nl}` +
+      //`eth-provider="${ethProvider}"${nl}` +
+      // `eth-provider="https://rpc.testnet.codex.storage"${nl}` +
+      // //`eth-private-key="${ethKeyFile}"${nl}` + 
+      // `eth-private-key="notafile.no"${nl}` + 
+      `${nl}`
     );
   };
 }

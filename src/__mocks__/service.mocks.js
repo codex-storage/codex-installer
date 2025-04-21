@@ -30,6 +30,7 @@ export const mockFsService = {
   moveDir: vi.fn(),
   deleteDir: vi.fn(),
   readJsonFile: vi.fn(),
+  readFile: vi.fn(),
   writeJsonFile: vi.fn(),
   writeFile: vi.fn(),
   ensureDirExists: vi.fn(),

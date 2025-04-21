@@ -68,6 +68,10 @@ export class FsService {
     return JSON.parse(fs.readFileSync(filePath));
   };
 
+  readFile = (filePath) => {
+    return fs.readFileSync(filePath);
+  };
+
   writeJsonFile = (filePath, jsonObject) => {
     fs.writeFileSync(filePath, JSON.stringify(jsonObject));
   };
