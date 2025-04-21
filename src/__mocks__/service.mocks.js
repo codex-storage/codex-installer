@@ -47,6 +47,7 @@ export const mockOsService = {
   getWorkingDir: vi.fn(),
   listProcesses: vi.fn(),
   stopProcess: vi.fn(),
+  terminateProcess: vi.fn(),
 };
 
 export const mockCodexGlobals = {

@@ -25,9 +25,25 @@ export class ProcessControl {
     if (processes.length < 1) throw new Error("No codex process found");
 
     const pid = processes[0].pid;
+    await this.stopProcess(pid);
+  };
+
+  stopProcess = async (pid) => {
     this.os.stopProcess(pid);
     await this.sleep();
-  };
+
+    if (await this.isProcessRunning(pid)) {
+      this.os.terminateProcess(pid);
+      await this.sleep();
+    }
+  }
+
+  isProcessRunning = async (pid) => {
+    const processes = await this.os.listProcesses();
+    const p = processes.filter((p) => p.pid == pid);
+    const result = p.length > 0;
+    return result;
+  }
 
   startCodexProcess = async () => {
     await this.saveCodexConfigFile();
