@@ -9,12 +9,17 @@ export class FsService {
     Object.keys(devices).forEach(function (key) {
       var val = devices[key];
       val.volumes.forEach(function (volume) {
-        mountPoints.push(volume.mountPoint);
+        const mount = volume.mountPoint;
+        if (mount != null && mount != undefined && mount.length > 0) {
+          mountPoints.push(volume.mountPoint);
+        }
       });
     });
 
     if (mountPoints.length < 1) {
-      throw new Error("Failed to detect file system devices.");
+      // In certain containerized environments, the devices don't reveal any
+      // useful mounts. We'll proceed under the assumption that '/' is valid here.
+      return ['/'];
     }
     return mountPoints;
   };
