@@ -1,7 +1,11 @@
 import { describe, beforeEach, it, expect, vi } from "vitest";
 import { MainMenu } from "./mainMenu.js";
 import { mockUiService, mockCodexApp } from "../__mocks__/service.mocks.js";
-import { mockInstallMenu, mockConfigMenu } from "../__mocks__/ui.mocks.js";
+import {
+  mockInstallMenu,
+  mockConfigMenu,
+  mockDataMenu,
+} from "../__mocks__/ui.mocks.js";
 import {
   mockInstaller,
   mockProcessControl,
@@ -22,6 +26,7 @@ describe("mainmenu", () => {
       mockInstaller,
       mockProcessControl,
       mockCodexApp,
+      mockDataMenu,
     );
   });
 
@@ -102,7 +107,7 @@ describe("mainmenu", () => {
   });
 
   describe("showRunningMenu", () => {
-    it("shows a menu with options to stop Codex, open Codex app, or exit", async () => {
+    it("shows a menu with options to stop Codex, open Codex app, upload, download, or exit", async () => {
       await mainmenu.showRunningMenu();
 
       expect(mockUiService.askMultipleChoice).toHaveBeenCalledWith(
@@ -110,6 +115,8 @@ describe("mainmenu", () => {
         [
           { label: "Open Codex app", action: mockCodexApp.openCodexApp },
           { label: "Stop Codex", action: mainmenu.stopCodex },
+          { label: "Upload a file", action: mockDataMenu.performUpload },
+          { label: "Download a file", action: mockDataMenu.performDownload },
           {
             label: "Exit (Codex keeps running)",
             action: mockMenuLoop.stopLoop,

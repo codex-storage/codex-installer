@@ -7,3 +7,8 @@ export const mockInstallMenu = {
 export const mockConfigMenu = {
   show: vi.fn(),
 };
+
+export const mockDataMenu = {
+  performUpload: vi.fn(),
+  performDownload: vi.fn(),
+};

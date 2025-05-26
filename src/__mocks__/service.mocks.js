@@ -64,3 +64,8 @@ export const mockCodexApp = {
 export const mockMarketplaceSetup = {
   runClientWizard: vi.fn(),
 };
+
+export const mockDataService = {
+  upload: vi.fn(),
+  download: vi.fn(),
+};

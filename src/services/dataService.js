@@ -20,7 +20,7 @@ export class DataService {
 
     const metadata = { filename: filename, mimetype: contentType };
 
-    const strategy = new NodeUploadStategy(fileData, metadata); 
+    const strategy = new NodeUploadStategy(fileData, metadata);
     const uploadResponse = data.upload(strategy);
     const res = await uploadResponse.result;
 
@@ -31,6 +31,8 @@ export class DataService {
   };
 
   download = async (cid) => {
+    throw new Error("Waiting for fix of codex-js sdk");
+
     const data = this.getCodexData();
     const manifest = await data.fetchManifest(cid);
     const filename = this.getFilename(manifest);
