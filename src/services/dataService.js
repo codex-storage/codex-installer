@@ -31,16 +31,15 @@ export class DataService {
   };
 
   download = async (cid) => {
-    throw new Error("Waiting for fix of codex-js sdk");
-
     const data = this.getCodexData();
     const manifest = await data.fetchManifest(cid);
     const filename = this.getFilename(manifest);
 
     const response = await data.networkDownloadStream(cid);
-    const fileData = response.data;
+    const fileData = await response.data.text();
 
     fs.writeFileSync(filename, fileData);
+    return filename;
   };
 
   getCodexData = () => {
