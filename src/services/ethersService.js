@@ -34,6 +34,8 @@ export class EthersService {
       const username = this.os.getUsername();
       this.shell.run(`icacls ${paths.key} /inheritance:r >nul 2>&1`);
       this.shell.run(`icacls ${paths.key} /grant:r ${username}:F >nul 2>&1`);
+      this.shell.run(`icacls ${paths.key} /remove SYSTEM >nul 2>&1`);
+      this.shell.run(`icacls ${paths.key} /remove Administrators >nul 2>&1`);
     } else {
       this.shell.run(`chmod 600 "${paths.key}"`);
     }

@@ -61,7 +61,7 @@ export class MainMenu {
         action: this.stopCodex,
       },
       {
-        label: "Exit",
+        label: "Exit (Codex keeps running)",
         action: this.loop.stopLoop,
       },
     ]);
