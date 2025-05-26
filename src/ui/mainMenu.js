@@ -1,6 +1,3 @@
-import { Codex } from "@codex-storage/sdk-js";
-import { NodeUploadStategy } from "@codex-storage/sdk-js/node";
-
 export class MainMenu {
   constructor(
     uiService,
@@ -10,6 +7,7 @@ export class MainMenu {
     installer,
     processControl,
     codexApp,
+    dataMenu,
   ) {
     this.ui = uiService;
     this.loop = menuLoop;
@@ -18,6 +16,7 @@ export class MainMenu {
     this.installer = installer;
     this.processControl = processControl;
     this.codexApp = codexApp;
+    this.dataMenu = dataMenu;
 
     this.loop.initialize(this.promptMainMenu);
   }
@@ -64,8 +63,12 @@ export class MainMenu {
         action: this.stopCodex,
       },
       {
-        label: "DoThing",
-        action: this.doThing,
+        label: "Upload a file",
+        action: this.dataMenu.performUpload,
+      },
+      {
+        label: "Download a file",
+        action: this.dataMenu.performDownload,
       },
       {
         label: "Exit (Codex keeps running)",
@@ -116,29 +119,4 @@ export class MainMenu {
       this.ui.showErrorMessage(`Failed to stop Codex. "${exception}"`);
     }
   };
-
-  doThing = async () => {
-    console.log("A!");
-
-    const codex = new Codex("http://localhost:8080");
-    const data = codex.data;
-
-    const stategy = new NodeUploadStategy("Hello World !");
-    const uploadResponse = data.upload(stategy);
-    
-    const res = await uploadResponse.result;
-    
-    if (res.error) {
-      console.error(res.data);
-      return;
-    }
-    
-    console.info("CID is", res.data);
-    const cid = res.data;
-    
-    const result = await data.networkDownloadStream(cid);
-
-    console.log("download: " + JSON.stringify(result));
-
-  }
 }

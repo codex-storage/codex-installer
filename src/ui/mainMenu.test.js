@@ -110,7 +110,10 @@ describe("mainmenu", () => {
         [
           { label: "Open Codex app", action: mockCodexApp.openCodexApp },
           { label: "Stop Codex", action: mainmenu.stopCodex },
-          { label: "Exit (Codex keeps running)", action: mockMenuLoop.stopLoop },
+          {
+            label: "Exit (Codex keeps running)",
+            action: mockMenuLoop.stopLoop,
+          },
         ],
       );
     });

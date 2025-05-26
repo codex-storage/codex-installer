@@ -36,6 +36,8 @@ import { CodexGlobals } from "./services/codexGlobals.js";
 import { CodexApp } from "./services/codexApp.js";
 import { EthersService } from "./services/ethersService.js";
 import { MarketplaceSetup } from "./ui/marketplaceSetup.js";
+import { DataService } from "./services/dataService.js";
+import { DataMenu } from "./ui/dataMenu.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -147,6 +149,8 @@ export async function main() {
     fsService,
     codexGlobals,
   );
+  const dataService = new DataService(configService);
+  const dataMenu = new DataMenu(uiService, fsService, dataService);
   const mainMenu = new MainMenu(
     uiService,
     new MenuLoop(),
@@ -155,6 +159,7 @@ export async function main() {
     installer,
     processControl,
     codexApp,
+    dataMenu,
   );
 
   await mainMenu.show();
