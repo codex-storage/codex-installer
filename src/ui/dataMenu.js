@@ -10,12 +10,12 @@ export class DataMenu {
       "⚠️  Codex does not encrypt files. Anything uploaded will be available publicly on testnet.",
     );
 
-    const filePath = this.ui.askPrompt("Enter the file path");
+    const filePath = await this.ui.askPrompt("Enter the file path");
     if (!this.fs.isFile(filePath)) {
       this.ui.showErrorMessage("File not found");
     } else {
       try {
-        const cid = this.dataService.upload(filePath);
+        const cid = await this.dataService.upload(filePath);
         this.ui.showInfoMessage(`Upload successful.\n CID: '${cid}'`);
       } catch (exception) {
         this.ui.showErrorMessage("Error during upload: " + exception);
@@ -24,10 +24,10 @@ export class DataMenu {
   };
 
   performDownload = async () => {
-    const cid = this.ui.askPrompt("Enter the CID");
+    const cid = await this.ui.askPrompt("Enter the CID");
     if (cid.length < 1) return;
     try {
-      const filename = this.dataService.download(cid);
+      const filename = await this.dataService.download(cid);
       this.ui.showInfoMessage(`Download successful.\n File: '${filename}'`);
     } catch (exception) {
       this.ui.showErrorMessage("Error during download: " + exception);

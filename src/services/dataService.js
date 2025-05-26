@@ -1,6 +1,5 @@
 import { Codex } from "@codex-storage/sdk-js";
 import { NodeUploadStategy } from "@codex-storage/sdk-js/node";
-import mime from "mime-types";
 import path from "path";
 import fs from "fs";
 
@@ -11,19 +10,22 @@ export class DataService {
 
   upload = async (filePath) => {
     const data = this.getCodexData();
+
+    // We can use mime util to determine the content type of the file. But Codex will reject some
+    // mimetypes. So we set it to octet-stream always.
+    const contentType = "application/octet-stream";
+
     const filename = path.basename(filePath);
-    const contentType = mime.lookup(filePath) || "application/octet-stream";
     const fileData = fs.readFileSync(filePath);
 
-    const strategy = new NodeUploadStategy(fileData, {
-      filename: filename,
-      mimetype: contentType,
-    });
+    const metadata = { filename: filename, mimetype: contentType };
+
+    const strategy = new NodeUploadStategy(fileData, metadata); 
     const uploadResponse = data.upload(strategy);
     const res = await uploadResponse.result;
 
     if (res.error) {
-      throw new Exception(res.data);
+      throw new Error(res.data);
     }
     return res.data;
   };
