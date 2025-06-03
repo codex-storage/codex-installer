@@ -45,14 +45,14 @@ export class DataService {
   debugInfo = async () => {
     const debug = this.getCodexDebug();
     return await debug.info();
-  }
+  };
 
   localData = async () => {
     const data = this.getCodexData();
     return await data.cids();
   };
 
-  getCodex = () =>{
+  getCodex = () => {
     const config = this.configService.get();
     const url = `http://localhost:${config.ports.apiPort}`;
     const codex = new Codex(url);
@@ -63,7 +63,7 @@ export class DataService {
     return this.getCodex().data;
   };
 
-  getCodexDebug = () =>{
+  getCodexDebug = () => {
     return this.getCodex().debug;
   };
 

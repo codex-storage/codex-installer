@@ -19,13 +19,13 @@ export class NodeStatusMenu {
     if (isOnline) {
       this.showSuccessMessage(
         "Node is ONLINE & DISCOVERABLE",
-        "🔌 Node Status"
-      )
+        "🔌 Node Status",
+      );
     } else {
       this.showInfoMessage(
         "Node is ONLINE but has few peers",
-        "🔌 Node Status"
-      )
+        "🔌 Node Status",
+      );
     }
 
     await this.loop.showLoop();
@@ -51,31 +51,31 @@ export class NodeStatusMenu {
   showPeers = async () => {
     const peerCount = this.debugInfo.table.nodes.length;
     if (peerCount > 0) {
-        this.ui.showInfoMessage('Connected Peers');
-        this.debugInfo.table.nodes.forEach((node, index) => {
-          this.ui.showInfoMessage(
-                `Peer ${index + 1}:\n` +
-                `${chalk.cyan('Peer ID:')} ${node.peerId}\n` +
-                `${chalk.cyan('Address:')} ${node.address}\n` +
-                `${chalk.cyan('Status:')} ${node.seen ? chalk.green('Active') : chalk.gray('Inactive')}`,
-            );
-        });
+      this.ui.showInfoMessage("Connected Peers");
+      this.debugInfo.table.nodes.forEach((node, index) => {
+        this.ui.showInfoMessage(
+          `Peer ${index + 1}:\n` +
+            `${chalk.cyan("Peer ID:")} ${node.peerId}\n` +
+            `${chalk.cyan("Address:")} ${node.address}\n` +
+            `${chalk.cyan("Status:")} ${node.seen ? chalk.green("Active") : chalk.gray("Inactive")}`,
+        );
+      });
     } else {
-      this.ui.showInfoMessage('No connected peers found.');
+      this.ui.showInfoMessage("No connected peers found.");
     }
   };
 
   showNodeInfo = async () => {
     const data = this.debugInfo;
     this.ui.showInfoMessage(
-      `${chalk.cyan('Version:')} ${data.codex.version}\n` +
-      `${chalk.cyan('Revision:')} ${data.codex.revision}\n\n` +
-      `${chalk.cyan('Node ID:')} ${data.table.localNode.nodeId}\n` +
-      `${chalk.cyan('Peer ID:')} ${data.table.localNode.peerId}\n` +
-      `${chalk.cyan('Listening Address:')} ${data.table.localNode.address}\n\n` +
-      `${chalk.cyan('Public IP:')} ${data.announceAddresses[0].split('/')[2]}\n` +
-      `${chalk.cyan('Port:')} ${data.announceAddresses[0].split('/')[4]}\n` +
-      `${chalk.cyan('Connected Peers:')} ${data.table.nodes.length}`,
+      `${chalk.cyan("Version:")} ${data.codex.version}\n` +
+        `${chalk.cyan("Revision:")} ${data.codex.revision}\n\n` +
+        `${chalk.cyan("Node ID:")} ${data.table.localNode.nodeId}\n` +
+        `${chalk.cyan("Peer ID:")} ${data.table.localNode.peerId}\n` +
+        `${chalk.cyan("Listening Address:")} ${data.table.localNode.address}\n\n` +
+        `${chalk.cyan("Public IP:")} ${data.announceAddresses[0].split("/")[2]}\n` +
+        `${chalk.cyan("Port:")} ${data.announceAddresses[0].split("/")[4]}\n` +
+        `${chalk.cyan("Connected Peers:")} ${data.table.nodes.length}`,
     );
   };
 
@@ -83,13 +83,11 @@ export class NodeStatusMenu {
     const spinner = this.ui.createAndStartSpinner("Fetching...");
     try {
       return await this.dataService.debugInfo();
-    }
-    catch {
+    } catch {
       this.ui.showErrorMessage("Failed to fetch debug/info");
       return;
-    }
-    finally {
+    } finally {
       this.ui.stopSpinnerSuccess(spinner);
     }
-  }
+  };
 }

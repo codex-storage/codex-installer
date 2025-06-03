@@ -98,36 +98,44 @@ export class MainMenu {
     }
   };
 
-  ifInstalled = async (call) => {
-    if (await this.isInstalled()) {
-      await call();
-    } else {
-      this.ui.showInfoMessage("Codex is not yet installed.");
-    }
-  }
-
-  ifNotInstalled = async (call) => {
-    if (!await this.isInstalled()) {
-      await call();
-    } else {
-      this.ui.showInfoMessage("Codex is installed.");
-    }
-  }
-
-  ifRunning = async (call) => {
-    if (await this.isRunning()) {
-      await call();
-    } else {
-      this.ui.showInfoMessage("Codex is not yet running.");
-    }
+  ifInstalled = (call) => {
+    return async () => {
+      if (await this.isInstalled()) {
+        await call();
+      } else {
+        this.ui.showInfoMessage("Codex is not yet installed.");
+      }
+    };
   };
 
-  ifNotRunning = async (call) => {
-    if (!await this.isRunning()) {
-      await call();
-    } else {
-      this.ui.showInfoMessage("Codex is running.");
-    }    
+  ifNotInstalled = (call) => {
+    return async () => {
+      if (!(await this.isInstalled())) {
+        await call();
+      } else {
+        this.ui.showInfoMessage("Codex is installed.");
+      }
+    };
+  };
+
+  ifRunning = (call) => {
+    return async () => {
+      if (await this.isRunning()) {
+        await call();
+      } else {
+        this.ui.showInfoMessage("Codex is not yet running.");
+      }
+    };
+  };
+
+  ifNotRunning = (call) => {
+    return async () => {
+      if (!(await this.isRunning())) {
+        await call();
+      } else {
+        this.ui.showInfoMessage("Codex is running.");
+      }
+    };
   };
 
   isInstalled = async () => {
@@ -135,6 +143,6 @@ export class MainMenu {
   };
 
   isRunning = async () => {
-    return ((await this.processControl.getNumberOfCodexProcesses()) > 0);
+    return (await this.processControl.getNumberOfCodexProcesses()) > 0;
   };
 }

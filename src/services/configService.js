@@ -60,7 +60,6 @@ export class ConfigService {
           this.config = defaultConfig;
           this.saveConfig();
         }
-
       }
     } catch (error) {
       console.error(
