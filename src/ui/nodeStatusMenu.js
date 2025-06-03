@@ -11,18 +11,18 @@ export class NodeStatusMenu {
 
   showNodeStatus = async () => {
     this.debugInfo = await this.fetchDebugInfo();
-    if (debugInfo == undefined) return;
+    if (this.debugInfo == undefined) return;
 
     const peerCount = this.debugInfo.table.nodes.length;
     const isOnline = peerCount > 2;
 
     if (isOnline) {
-      this.showSuccessMessage(
+      this.ui.showSuccessMessage(
         "Node is ONLINE & DISCOVERABLE",
         "🔌 Node Status",
       );
     } else {
-      this.showInfoMessage(
+      this.ui.showInfoMessage(
         "Node is ONLINE but has few peers",
         "🔌 Node Status",
       );

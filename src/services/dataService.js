@@ -44,12 +44,20 @@ export class DataService {
 
   debugInfo = async () => {
     const debug = this.getCodexDebug();
-    return await debug.info();
+    const res = await debug.info();
+    if (res.error) {
+      throw new Error(res.data);
+    }
+    return res.data;
   };
 
   localData = async () => {
     const data = this.getCodexData();
-    return await data.cids();
+    const res = await data.cids();
+    if (res.error) {
+      throw new Error(res.data);
+    }
+    return res.data;
   };
 
   getCodex = () => {

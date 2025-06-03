@@ -54,13 +54,13 @@ export class DataMenu {
       filesData.content.forEach((file, index) => {
         const { cid, manifest } = file;
         const {
-          originalBytes,
+          datasetSize,
           protected: isProtected,
           filename,
           mimetype,
         } = manifest;
 
-        const fileSize = (originalBytes / 1024).toFixed(2);
+        const fileSize = (datasetSize / 1024).toFixed(2);
 
         this.ui.showInfoMessage(
           `${chalk.cyan("File")} ${index + 1} of ${filesData.content.length}\n\n` +
