@@ -47,7 +47,10 @@ export class DataService {
     return await debug.info();
   }
 
-  
+  localData = async () => {
+    const data = this.getCodexData();
+    return await data.cids();
+  };
 
   getCodex = () =>{
     const config = this.configService.get();
