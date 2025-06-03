@@ -33,4 +33,12 @@ export class DataMenu {
       this.ui.showErrorMessage("Error during download: " + exception);
     }
   };
+
+  showNodeStatus = async () => {
+
+  };
+
+  showLocalData = async () => {
+
+  };
 }

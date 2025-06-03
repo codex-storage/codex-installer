@@ -29,7 +29,7 @@ export class InstallMenu {
         action: this.selectInstallPath,
       },
       {
-        label: "Storage provider module: Disabled (todo)",
+        label: "Storage provider module: Disabled (Coming soon!)",
         action: this.storageProviderOption,
       },
       {

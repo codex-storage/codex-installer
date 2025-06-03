@@ -8,6 +8,7 @@ export class MainMenu {
     processControl,
     codexApp,
     dataMenu,
+    feedbackService,
   ) {
     this.ui = uiService;
     this.loop = menuLoop;
@@ -17,6 +18,7 @@ export class MainMenu {
     this.processControl = processControl;
     this.codexApp = codexApp;
     this.dataMenu = dataMenu;
+    this.feedbackService = feedbackService;
 
     this.loop.initialize(this.promptMainMenu);
   }
@@ -63,7 +65,7 @@ export class MainMenu {
       },
       {
         label: "Submit feedback",
-        action: ,
+        action: this.feedbackService.openFeedbackPage,
       },
       {
         label: "Exit",
