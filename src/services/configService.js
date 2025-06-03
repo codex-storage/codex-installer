@@ -55,6 +55,12 @@ export class ConfigService {
         this.saveConfig();
       } else {
         this.config = this.fs.readJsonFile(filePath);
+
+        if (this.config.codexRoot == undefined) {
+          this.config = defaultConfig;
+          this.saveConfig();
+        }
+
       }
     } catch (error) {
       console.error(

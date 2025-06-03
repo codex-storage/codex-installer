@@ -53,6 +53,7 @@ describe("ConfigService", () => {
     it("loads the config.json file when it does exist", () => {
       mockFsService.isFile.mockReturnValue(true);
       const savedConfig = {
+        codexRoot: "defined",
         isTestConfig: "Yes, very",
       };
       mockFsService.readJsonFile.mockReturnValue(savedConfig);
@@ -63,6 +64,22 @@ describe("ConfigService", () => {
       expect(mockFsService.readJsonFile).toHaveBeenCalledWith(configPath);
       expect(mockFsService.writeJsonFile).not.toHaveBeenCalled();
       expect(service.config).toEqual(savedConfig);
+    });
+
+    it("saves the default config when config.json exists but doesn't define the codexRoot", () => {
+      mockFsService.isFile.mockReturnValue(true);
+      const savedConfig = {
+        codexRoot: undefined, // it still blows my mind we have a language in which we can define things to be undefined.
+        isTestConfig: "Yes, very",
+      };
+      mockFsService.readJsonFile.mockReturnValue(savedConfig);
+
+      const service = new ConfigService(mockFsService, mockOsService);
+
+      expect(mockFsService.isFile).toHaveBeenCalledWith(configPath);
+      expect(mockFsService.readJsonFile).toHaveBeenCalledWith(configPath);
+      expect(mockFsService.writeJsonFile).toHaveBeenCalled();
+      expect(service.config).toEqual(expectedDefaultConfig);
     });
   });
 
