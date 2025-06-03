@@ -42,11 +42,26 @@ export class DataService {
     return filename;
   };
 
-  getCodexData = () => {
+  debugInfo = async () => {
+    const debug = this.getCodexDebug();
+    return await debug.info();
+  }
+
+  
+
+  getCodex = () =>{
     const config = this.configService.get();
     const url = `http://localhost:${config.ports.apiPort}`;
     const codex = new Codex(url);
-    return codex.data;
+    return codex;
+  };
+
+  getCodexData = () => {
+    return this.getCodex().data;
+  };
+
+  getCodexDebug = () =>{
+    return this.getCodex().debug;
   };
 
   getFilename = (manifest) => {

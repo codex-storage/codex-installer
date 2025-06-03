@@ -9,6 +9,7 @@ export class MainMenu {
     codexApp,
     dataMenu,
     feedbackService,
+    nodeStatusMenu,
   ) {
     this.ui = uiService;
     this.loop = menuLoop;
@@ -19,6 +20,7 @@ export class MainMenu {
     this.codexApp = codexApp;
     this.dataMenu = dataMenu;
     this.feedbackService = feedbackService;
+    this.nodeStatusMenu = nodeStatusMenu;
 
     this.loop.initialize(this.promptMainMenu);
   }
@@ -41,7 +43,7 @@ export class MainMenu {
       },
       {
         label: "Check node status",
-        action: this.dataMenu.showNodeStatus,
+        action: this.nodeStatusMenu.showNodeStatus,
       },
       {
         label: "Upload a file",

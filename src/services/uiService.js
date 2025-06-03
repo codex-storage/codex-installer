@@ -10,14 +10,14 @@ function show(msg) {
 }
 
 export class UiService {
-  showSuccessMessage = (message) => {
+  showSuccessMessage = (message, title = "✅ SUCCESS") => {
     show(
       boxen(chalk.green(message), {
         padding: 1,
         margin: 1,
         borderStyle: "round",
         borderColor: "green",
-        title: "✅ SUCCESS",
+        title: title,
         titleAlignment: "center",
       }),
     );
@@ -36,14 +36,14 @@ export class UiService {
     );
   };
 
-  showInfoMessage = (message) => {
+  showInfoMessage = (message, title = "ℹ️  INFO") => {
     show(
       boxen(chalk.cyan(message), {
         padding: 1,
         margin: 1,
         borderStyle: "round",
         borderColor: "cyan",
-        title: "ℹ️  INFO",
+        title: title,
         titleAlignment: "center",
       }),
     );

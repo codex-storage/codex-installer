@@ -39,6 +39,7 @@ import { MarketplaceSetup } from "./ui/marketplaceSetup.js";
 import { DataService } from "./services/dataService.js";
 import { DataMenu } from "./ui/dataMenu.js";
 import { FeedbackService } from "./services/feedbackService.js";
+import { NodeStatusMenu } from "./ui/nodeStatusMenu.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -153,6 +154,7 @@ export async function main() {
   const dataService = new DataService(configService);
   const dataMenu = new DataMenu(uiService, fsService, dataService);
   const feedbackService = new FeedbackService();
+  const nodeStatusMenu = new NodeStatusMenu(uiService, dataService, new MenuLoop());
   const mainMenu = new MainMenu(
     uiService,
     new MenuLoop(),
@@ -163,6 +165,7 @@ export async function main() {
     codexApp,
     dataMenu,
     feedbackService,
+    nodeStatusMenu,
   );
 
   await mainMenu.show();

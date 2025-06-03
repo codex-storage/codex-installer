@@ -34,10 +34,6 @@ export class DataMenu {
     }
   };
 
-  showNodeStatus = async () => {
-
-  };
-
   showLocalData = async () => {
 
   };
