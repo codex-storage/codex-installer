@@ -35,35 +35,35 @@ export class MainMenu {
     await this.ui.askMultipleChoice("Select an option", [
       {
         label: "Download and install Codex",
-        action: this.installMenu.show,
+        action: this.ifNotInstalled(this.installMenu.show),
       },
       {
         label: "Start Codex node",
-        action: this.startCodex,
+        action: this.ifInstalled(this.ifNotRunning(this.startCodex)),
       },
       {
         label: "Check node status",
-        action: this.nodeStatusMenu.showNodeStatus,
+        action: this.ifRunning(this.nodeStatusMenu.showNodeStatus),
       },
       {
         label: "Upload a file",
-        action: this.dataMenu.performUpload,
+        action: this.ifRunning(this.dataMenu.performUpload),
       },
       {
         label: "Download a file",
-        action: this.dataMenu.performDownload,
+        action: this.ifRunning(this.dataMenu.performDownload),
       },
       {
         label: "Show local data",
-        action: this.dataMenu.showLocalData,
+        action: this.ifRunning(this.dataMenu.showLocalData),
       },
       {
         label: "Stop Codex node",
-        action: this.stopCodex,
+        action: this.ifRunning(this.stopCodex),
       },
       {
         label: "Uninstall Codex node",
-        action: this.installMenu.show,
+        action: this.ifInstalled(this.ifNotRunning(this.installMenu.show)),
       },
       {
         label: "Submit feedback",
@@ -96,5 +96,45 @@ export class MainMenu {
       this.ui.stopSpinnerError(spinner);
       this.ui.showErrorMessage(`Failed to stop Codex. "${exception}"`);
     }
+  };
+
+  ifInstalled = async (call) => {
+    if (await this.isInstalled()) {
+      await call();
+    } else {
+      this.ui.showInfoMessage("Codex is not yet installed.");
+    }
+  }
+
+  ifNotInstalled = async (call) => {
+    if (!await this.isInstalled()) {
+      await call();
+    } else {
+      this.ui.showInfoMessage("Codex is installed.");
+    }
+  }
+
+  ifRunning = async (call) => {
+    if (await this.isRunning()) {
+      await call();
+    } else {
+      this.ui.showInfoMessage("Codex is not yet running.");
+    }
+  };
+
+  ifNotRunning = async (call) => {
+    if (!await this.isRunning()) {
+      await call();
+    } else {
+      this.ui.showInfoMessage("Codex is running.");
+    }    
+  };
+
+  isInstalled = async () => {
+    return await this.installer.isCodexInstalled();
+  };
+
+  isRunning = async () => {
+    return ((await this.processControl.getNumberOfCodexProcesses()) > 0);
   };
 }
