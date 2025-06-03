@@ -28,39 +28,18 @@ export class MainMenu {
   };
 
   promptMainMenu = async () => {
-    if ((await this.processControl.getNumberOfCodexProcesses()) > 0) {
-      await this.showRunningMenu();
-    } else {
-      if (await this.installer.isCodexInstalled()) {
-        await this.showNotRunningMenu();
-      } else {
-        await this.showNotInstalledMenu();
-      }
-    }
-  };
-
-  showNotInstalledMenu = async () => {
-    await this.ui.askMultipleChoice("Codex is not installed", [
+    await this.ui.askMultipleChoice("Select an option", [
       {
-        label: "Install Codex",
+        label: "Download and install Codex",
         action: this.installMenu.show,
       },
       {
-        label: "Exit",
-        action: this.loop.stopLoop,
-      },
-    ]);
-  };
-
-  showRunningMenu = async () => {
-    await this.ui.askMultipleChoice("Codex is running", [
-      {
-        label: "Open Codex app",
-        action: this.codexApp.openCodexApp,
+        label: "Start Codex node",
+        action: this.startCodex,
       },
       {
-        label: "Stop Codex",
-        action: this.stopCodex,
+        label: "Check node status",
+        action: this.dataMenu.showNodeStatus,
       },
       {
         label: "Upload a file",
@@ -71,25 +50,20 @@ export class MainMenu {
         action: this.dataMenu.performDownload,
       },
       {
-        label: "Exit (Codex keeps running)",
-        action: this.loop.stopLoop,
-      },
-    ]);
-  };
-
-  showNotRunningMenu = async () => {
-    await this.ui.askMultipleChoice("Codex is installed but not running", [
-      {
-        label: "Start Codex",
-        action: this.startCodex,
+        label: "Show local data",
+        action: this.dataMenu.showLocalData,
       },
       {
-        label: "Edit Codex config",
-        action: this.configMenu.show,
+        label: "Stop Codex node",
+        action: this.stopCodex,
       },
       {
-        label: "Uninstall Codex",
+        label: "Uninstall Codex node",
         action: this.installMenu.show,
+      },
+      {
+        label: "Submit feedback",
+        action: ,
       },
       {
         label: "Exit",
