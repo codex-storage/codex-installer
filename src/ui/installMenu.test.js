@@ -73,7 +73,7 @@ describe("InstallMenu", () => {
           action: installMenu.selectInstallPath,
         },
         {
-          label: "Storage provider module: Disabled (todo)",
+          label: "Storage provider module: Disabled (Coming soon!)",
           action: installMenu.storageProviderOption,
         },
         {
