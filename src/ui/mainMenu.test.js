@@ -5,6 +5,7 @@ import {
   mockInstallMenu,
   mockConfigMenu,
   mockDataMenu,
+  mockNodeStatusMenu,
 } from "../__mocks__/ui.mocks.js";
 import {
   mockInstaller,
@@ -27,6 +28,7 @@ describe("mainmenu", () => {
       mockProcessControl,
       mockCodexApp,
       mockDataMenu,
+      mockNodeStatusMenu,
     );
   });
 
@@ -115,8 +117,13 @@ describe("mainmenu", () => {
         [
           { label: "Open Codex app", action: mockCodexApp.openCodexApp },
           { label: "Stop Codex", action: mainmenu.stopCodex },
+          {
+            label: "Show node status",
+            action: mockNodeStatusMenu.showNodeStatus,
+          },
           { label: "Upload a file", action: mockDataMenu.performUpload },
           { label: "Download a file", action: mockDataMenu.performDownload },
+          { label: "Show local data", action: mockDataMenu.showLocalData },
           {
             label: "Exit (Codex keeps running)",
             action: mockMenuLoop.stopLoop,

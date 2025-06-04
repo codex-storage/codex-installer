@@ -152,7 +152,11 @@ export async function main() {
   );
   const dataService = new DataService(configService);
   const dataMenu = new DataMenu(uiService, fsService, dataService);
-  const nodeStatusMenu = new NodeStatusMenu(uiService, dataService, new MenuLoop());
+  const nodeStatusMenu = new NodeStatusMenu(
+    uiService,
+    dataService,
+    new MenuLoop(),
+  );
   const mainMenu = new MainMenu(
     uiService,
     new MenuLoop(),
@@ -162,7 +166,7 @@ export async function main() {
     processControl,
     codexApp,
     dataMenu,
-    nodeStatusMenu
+    nodeStatusMenu,
   );
 
   await mainMenu.show();

@@ -120,4 +120,95 @@ describe("DataMenu", () => {
       );
     });
   });
+
+  describe("showLocalData", () => {
+    beforeEach(() => {
+      dataMenu.displayLocalData = vi.fn();
+    });
+
+    it("calls localData on dataService", async () => {
+      await dataMenu.showLocalData();
+
+      expect(mockDataService.localData).toHaveBeenCalled();
+    });
+
+    it("passes localData to displayLocalData", async () => {
+      const someData = "yes";
+
+      mockDataService.localData.mockResolvedValue(someData);
+
+      await dataMenu.showLocalData();
+
+      expect(dataMenu.displayLocalData).toHaveBeenCalledWith(someData);
+    });
+
+    it("shows an error message when localData raises", async () => {
+      const error = "Omg error!";
+      mockDataService.localData.mockRejectedValue(new Error(error));
+
+      await dataMenu.showLocalData();
+
+      expect(dataMenu.displayLocalData).not.toHaveBeenCalled();
+      expect(mockUiService.showErrorMessage).toHaveBeenCalledWith(
+        "Failed to fetch local data: Error: " + error,
+      );
+    });
+  });
+
+  describe("displayLocalData", () => {
+    const cid = "testCid";
+    const datasetSize = 2048;
+    var isProtected = true;
+    const filename = "filename.test";
+    const mimetype = "test";
+    var fileData = {};
+
+    beforeEach(() => {
+      fileData = {
+        content: [
+          {
+            cid: cid,
+            manifest: {
+              datasetSize,
+              protected: isProtected,
+              filename,
+              mimetype,
+            },
+          },
+        ],
+      };
+    });
+
+    it("shows no datasets when content is undefined", () => {
+      fileData.content = undefined;
+
+      dataMenu.displayLocalData(fileData);
+
+      expect(mockUiService.showInfoMessage).toHaveBeenCalledWith(
+        "Node contains no datasets.",
+      );
+    });
+
+    it("shows no datasets when content is empty array", () => {
+      fileData.content = [];
+      dataMenu.displayLocalData(fileData);
+
+      expect(mockUiService.showInfoMessage).toHaveBeenCalledWith(
+        "Node contains no datasets.",
+      );
+    });
+
+    it("shows details for each entry (protected)", () => {
+      dataMenu.displayLocalData(fileData);
+
+      expect(mockUiService.showInfoMessage).toHaveBeenCalledWith(
+        `File 1 of 1\n\n` +
+          `Filename: ${filename}\n` +
+          `CID: ${cid}\n` +
+          `Size: ${(datasetSize / 1024).toFixed(2)} KB\n` +
+          `MIME Type: ${mimetype}\n` +
+          `Protected: Yes`,
+      );
+    });
+  });
 });

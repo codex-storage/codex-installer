@@ -68,4 +68,6 @@ export const mockMarketplaceSetup = {
 export const mockDataService = {
   upload: vi.fn(),
   download: vi.fn(),
+  debugInfo: vi.fn(),
+  localData: vi.fn(),
 };

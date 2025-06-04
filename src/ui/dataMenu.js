@@ -1,5 +1,3 @@
-import chalk from "chalk";
-
 export class DataMenu {
   constructor(uiService, fsService, dataService) {
     this.ui = uiService;
@@ -63,12 +61,12 @@ export class DataMenu {
         const fileSize = (datasetSize / 1024).toFixed(2);
 
         this.ui.showInfoMessage(
-          `${chalk.cyan("File")} ${index + 1} of ${filesData.content.length}\n\n` +
-            `${chalk.cyan("Filename:")} ${filename}\n` +
-            `${chalk.cyan("CID:")} ${cid}\n` +
-            `${chalk.cyan("Size:")} ${fileSize} KB\n` +
-            `${chalk.cyan("MIME Type:")} ${mimetype}\n` +
-            `${chalk.cyan("Protected:")} ${isProtected ? chalk.green("Yes") : chalk.red("No")}`,
+          `File ${index + 1} of ${filesData.content.length}\n\n` +
+            `Filename: ${filename}\n` +
+            `CID: ${cid}\n` +
+            `Size: ${fileSize} KB\n` +
+            `MIME Type: ${mimetype}\n` +
+            `Protected: ${isProtected ? "Yes" : "No"}`,
         );
       });
     } else {

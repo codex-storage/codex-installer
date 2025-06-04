@@ -11,4 +11,9 @@ export const mockConfigMenu = {
 export const mockDataMenu = {
   performUpload: vi.fn(),
   performDownload: vi.fn(),
+  showLocalData: vi.fn(),
+};
+
+export const mockNodeStatusMenu = {
+  showNodeStatus: vi.fn(),
 };
