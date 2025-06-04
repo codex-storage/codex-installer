@@ -38,6 +38,7 @@ import { EthersService } from "./services/ethersService.js";
 import { MarketplaceSetup } from "./ui/marketplaceSetup.js";
 import { DataService } from "./services/dataService.js";
 import { DataMenu } from "./ui/dataMenu.js";
+import { NodeStatusMenu } from "./ui/nodeStatusMenu.js";
 
 async function showNavigationMenu() {
   console.log("\n");
@@ -151,6 +152,7 @@ export async function main() {
   );
   const dataService = new DataService(configService);
   const dataMenu = new DataMenu(uiService, fsService, dataService);
+  const nodeStatusMenu = new NodeStatusMenu(uiService, dataService, new MenuLoop());
   const mainMenu = new MainMenu(
     uiService,
     new MenuLoop(),
@@ -160,6 +162,7 @@ export async function main() {
     processControl,
     codexApp,
     dataMenu,
+    nodeStatusMenu
   );
 
   await mainMenu.show();

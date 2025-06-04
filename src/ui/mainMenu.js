@@ -8,6 +8,7 @@ export class MainMenu {
     processControl,
     codexApp,
     dataMenu,
+    nodeStatusMenu,
   ) {
     this.ui = uiService;
     this.loop = menuLoop;
@@ -17,6 +18,7 @@ export class MainMenu {
     this.processControl = processControl;
     this.codexApp = codexApp;
     this.dataMenu = dataMenu;
+    this.nodeStatusMenu = nodeStatusMenu;
 
     this.loop.initialize(this.promptMainMenu);
   }
@@ -63,12 +65,20 @@ export class MainMenu {
         action: this.stopCodex,
       },
       {
+        label: "Show node status",
+        action: this.nodeStatusMenu.showNodeStatus,
+      },
+      {
         label: "Upload a file",
         action: this.dataMenu.performUpload,
       },
       {
         label: "Download a file",
         action: this.dataMenu.performDownload,
+      },
+      {
+        label: "Show local data",
+        action: this.dataMenu.showLocalData,
       },
       {
         label: "Exit (Codex keeps running)",
