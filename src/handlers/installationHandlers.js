@@ -115,6 +115,46 @@ async function clearCodexExePathFromConfig(config) {
   saveConfig(config);
 }
 
+async function configureShellPath(installPath) {
+    try {
+        const homedir = os.homedir();
+        let shellConfigFile;
+        let exportLine = `export PATH="${installPath}:$PATH"`;
+
+        if (platform === 'win32') {
+            // For Windows, update the User PATH environment variable
+            const currentPath = process.env.PATH || '';
+            if (!currentPath.includes(installPath)) {
+                await runCommand(`setx PATH "${installPath};%PATH%"`);
+            }
+            return true;
+        } else {
+            // For Unix-like systems (macOS and Linux)
+            if (platform === 'darwin') {
+                // Check for zsh first (default on modern macOS)
+                if (fs.existsSync(path.join(homedir, '.zshrc'))) {
+                    shellConfigFile = path.join(homedir, '.zshrc');
+                } else {
+                    shellConfigFile = path.join(homedir, '.bash_profile');
+                }
+            } else {
+                // Linux
+                shellConfigFile = path.join(homedir, '.bashrc');
+            }
+
+            // Check if PATH is already configured
+            const fileContent = fs.existsSync(shellConfigFile) ? fs.readFileSync(shellConfigFile, 'utf8') : '';
+            if (!fileContent.includes(installPath)) {
+                fs.appendFileSync(shellConfigFile, `\n${exportLine}\n`);
+            }
+            return true;
+        }
+    } catch (error) {
+        console.log(showErrorMessage(`Failed to configure PATH: ${error.message}`));
+        return false;
+    }
+}
+
 async function performInstall(config) {
   const agreed = await showPrivacyDisclaimer();
   if (!agreed) {
@@ -185,34 +225,114 @@ async function performInstall(config) {
                         };
                         die if $@;
                     '`;
-          await runCommand(timeoutCommand);
-        } else {
-          await runCommand(
-            `INSTALL_DIR="${installPath}" timeout 120 bash install.sh`,
-          );
+                    await runCommand(timeoutCommand);
+                } else {
+                    await runCommand(`INSTALL_DIR="${installPath}" timeout 120 bash install.sh`);
+                }
+
+                await saveCodexExePath(config, path.join(installPath, "codex"));
+                
+            } catch (error) {
+                if (error.message.includes('ECONNREFUSED') || error.message.includes('ETIMEDOUT')) {
+                    throw new Error('Installation failed. Please check your internet connection and try again.');
+                } else if (error.message.includes('Permission denied')) {
+                    throw new Error('Permission denied. Please try running the command with sudo.');
+                } else if (error.message.includes('timeout')) {
+                    throw new Error('Installation is taking longer than expected. Please try running with sudo.');
+                } else {
+                    throw new Error('Installation failed. Please try running with sudo if you haven\'t already.');
+                }
+            } finally {
+                await runCommand('rm -f install.sh').catch(() => {});
+            }
+        }
+        
+        try {
+            const version = await getCodexVersion(config);
+            console.log(chalk.green(version));
+
+            // Configure shell PATH
+            const pathConfigured = await configureShellPath(installPath);
+            spinner.success();
+            
+            if (pathConfigured) {
+                console.log(boxen(
+                    chalk.green('Codex is installed successfully!\n\n') +
+                    chalk.cyan('Current configuration:\n') +
+                    `${chalk.white('Data path')}     = ${config.dataDir}\n` +
+                    `${chalk.white('Logs path')}     = ${config.logsDir}\n` +
+                    `${chalk.white('Storage quota')} = ${config.storageQuota} Bytes\n` +
+                    `${chalk.white('Discovery port')} = ${config.ports.discPort}\n` +
+                    `${chalk.white('P2P Listen port')} = ${config.ports.listenPort}\n` +
+                    `${chalk.white('API Port')}      = ${config.ports.apiPort}\n\n` +
+                    chalk.gray('You can modify the above configuration from the main menu.'),
+                    {
+                        padding: 1,
+                        margin: 1,
+                        borderStyle: 'round',
+                        borderColor: 'green',
+                        title: '✅ Installation Complete',
+                        titleAlignment: 'center'
+                    }
+                ));
+
+                const { choice } = await inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'choice',
+                        message: 'What would you like to do?',
+                        choices: [
+                            '1. Return to main menu',
+                            '2. Exit',
+                        ],
+                        pageSize: 2,
+                        loop: true
+                    }
+                ]);
+
+                switch (choice.split('.')[0].trim()) {
+                    case '1':
+                        await showNavigationMenu();
+                        break;
+                    case '2':
+                        process.exit(0);
+                }
+            } else {
+                console.log(showInfoMessage(
+                    'Codex is installed but PATH configuration failed.\n' +
+                    `Please manually add "${installPath}" to your PATH.\n`
+                ));
+            }
+        } catch (error) {
+            throw new Error('Installation completed but Codex command is not available. Please restart your terminal and try again.');
         }
 
-        await saveCodexExePath(config, path.join(installPath, "codex"));
-      } catch (error) {
-        if (
-          error.message.includes("ECONNREFUSED") ||
-          error.message.includes("ETIMEDOUT")
-        ) {
-          throw new Error(
-            "Installation failed. Please check your internet connection and try again.",
-          );
-        } else if (error.message.includes("Permission denied")) {
-          throw new Error(
-            "Permission denied. Please try running the command with sudo.",
-          );
-        } else if (error.message.includes("timeout")) {
-          throw new Error(
-            "Installation is taking longer than expected. Please try running with sudo.",
-          );
-        } else {
-          throw new Error(
-            "Installation failed. Please try running with sudo if you haven't already.",
-          );
+        console.log(showInfoMessage(
+            "Please review the configuration before starting Codex."
+        ));
+        
+        return true;
+    } catch (error) {
+        spinner.error();
+        console.log(showErrorMessage(`Failed to install Codex: ${error.message}`));
+        return false;
+    }
+}
+
+function removeDir(dir) {
+    fs.rmSync(dir, { recursive: true, force: true });
+}
+
+export async function uninstallCodex(config, showNavigationMenu) {
+    const { confirm } = await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'confirm',
+            message: chalk.yellow(
+                '⚠️  Are you sure you want to uninstall Codex? This action cannot be undone. \n' +
+                'All data stored in the local Codex node will be deleted as well.'
+            ),
+            default: false
         }
       } finally {
         await runCommand("rm -f install.sh").catch(() => {});
