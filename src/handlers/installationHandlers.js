@@ -12,6 +12,7 @@ import {
   showSuccessMessage,
 } from "../utils/messages.js";
 import { checkDependencies } from "../services/nodeService.js";
+import { getDefaultCodexRootPath } from "../utils/appData.js";
 
 const platform = os.platform();
 
@@ -153,6 +154,14 @@ async function configureShellPath(installPath) {
         console.log(showErrorMessage(`Failed to configure PATH: ${error.message}`));
         return false;
     }
+}
+
+function getCodexBinPath() {
+  return getDefaultCodexRootPath();
+}
+
+function getCodexRootPath() {
+  return getDefaultCodexRootPath();
 }
 
 async function performInstall(config) {
@@ -324,57 +333,6 @@ function removeDir(dir) {
 }
 
 export async function uninstallCodex(config, showNavigationMenu) {
-    const { confirm } = await inquirer.prompt([
-        {
-            type: 'confirm',
-            name: 'confirm',
-            message: chalk.yellow(
-                '⚠️  Are you sure you want to uninstall Codex? This action cannot be undone. \n' +
-                'All data stored in the local Codex node will be deleted as well.'
-            ),
-            default: false
-        }
-      } finally {
-        await runCommand("rm -f install.sh").catch(() => {});
-      }
-    }
-
-    try {
-      const version = await getCodexVersion(config);
-      console.log(chalk.green(version));
-
-      console.log(
-        showSuccessMessage(
-          "Codex is successfully installed!\n" +
-            `Install path: "${config.codexExe}"\n\n` +
-            "The default configuration should work for most platforms.\n" +
-            "Please review the configuration before starting Codex.\n",
-        ),
-      );
-    } catch (error) {
-      throw new Error(
-        "Installation completed but Codex command is not available. Please restart your terminal and try again.",
-      );
-    }
-
-    console.log(
-      showInfoMessage("Please review the configuration before starting Codex."),
-    );
-
-    spinner.success();
-    return true;
-  } catch (error) {
-    spinner.error();
-    console.log(showErrorMessage(`Failed to install Codex: ${error.message}`));
-    return false;
-  }
-}
-
-function removeDir(dir) {
-  fs.rmSync(dir, { recursive: true, force: true });
-}
-
-export async function uninstallCodex(config, showNavigationMenu) {
   const { confirm } = await inquirer.prompt([
     {
       type: "confirm",
@@ -414,3 +372,5 @@ export async function uninstallCodex(config, showNavigationMenu) {
     await showNavigationMenu();
   }
 }
+
+
