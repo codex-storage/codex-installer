@@ -1,243 +1,194 @@
-import path from 'path';
-import inquirer from 'inquirer';
-import boxen from 'boxen';
-import chalk from 'chalk';
-import fs from 'fs';
-import { filesystemSync } from 'fs-filesystem';
+export class PathSelector {
+  constructor(uiService, menuLoop, fsService) {
+    this.ui = uiService;
+    this.loop = menuLoop;
+    this.fs = fsService;
 
-function showMsg(msg) {
-  console.log(boxen(chalk.white(msg), {
-    padding: 1,
-    margin: 1,
-    borderStyle: 'round',
-    borderColor: 'white',
-    titleAlignment: 'center'
-  }));
-}
+    this.pathMustExist = true;
+    this.loop.initialize(this.showPathSelector);
+  }
 
-function getAvailableRoots() {
-  const devices = filesystemSync();
-  var mountPoints = [];
-  Object.keys(devices).forEach(function(key) {
-      var val = devices[key];
-      val.volumes.forEach(function(volume) {
-          mountPoints.push(volume.mountPoint);
+  show = async (startingPath, pathMustExist) => {
+    this.startingPath = startingPath;
+    this.pathMustExist = pathMustExist;
+    this.roots = this.fs.getAvailableRoots();
+    this.currentPath = this.splitPath(startingPath);
+    if (!this.hasValidRoot(this.currentPath)) {
+      this.currentPath = [this.roots[0]];
+    }
+
+    await this.loop.showLoop();
+
+    return this.resultingPath;
+  };
+
+  showPathSelector = async () => {
+    this.showCurrent();
+    await this.ui.askMultipleChoice("Select an option:", [
+      {
+        label: "Enter path",
+        action: this.enterPath,
+      },
+      {
+        label: "Go up one",
+        action: this.upOne,
+      },
+      {
+        label: "Go down one",
+        action: this.downOne,
+      },
+      {
+        label: "Create new folder here",
+        action: this.createSubDir,
+      },
+      {
+        label: "Select this path",
+        action: this.selectThisPath,
+      },
+      {
+        label: "Cancel",
+        action: this.cancel,
+      },
+    ]);
+  };
+
+  splitPath = (str) => {
+    var result = this.dropEmptyParts(str.replaceAll("\\", "/").split("/"));
+    if (str.startsWith("/") && this.roots.includes("/")) {
+      result = ["/", ...result];
+    }
+    return result;
+  };
+
+  dropEmptyParts = (parts) => {
+    return parts.filter((part) => part.length > 0);
+  };
+
+  combine = (parts) => {
+    const toJoin = this.dropEmptyParts(parts);
+    if (toJoin.length == 1) return toJoin[0];
+    var result = this.fs.pathJoin(toJoin);
+    if (result.startsWith("//")) {
+      result = result.substring(1);
+    }
+    return result;
+  };
+
+  combineWith = (parts, extra) => {
+    const toJoin = this.dropEmptyParts(parts);
+    if (toJoin.length == 1) return this.fs.pathJoin([toJoin[0], extra]);
+    return this.fs.pathJoin([...toJoin, extra]);
+  };
+
+  showCurrent = () => {
+    const len = this.currentPath.length;
+    this.ui.showInfoMessage(
+      `Current path: [${len}]\n` + this.combine(this.currentPath),
+    );
+
+    if (len < 2) {
+      this.ui.showInfoMessage(
+        "Warning - Known issue:\n" +
+          "Path selection does not work in root paths on some platforms.\n" +
+          'Use "Enter path" or "Create new folder" to navigate and create folders\n' +
+          "if this is the case for you.",
+      );
+    }
+  };
+
+  hasValidRoot = (checkPath) => {
+    if (checkPath.length < 1) return false;
+    var result = false;
+    this.roots.forEach(function (root) {
+      if (root.toLowerCase() == checkPath[0].toLowerCase()) {
+        result = true;
+      }
+    });
+    return result;
+  };
+
+  updateCurrentIfValidFull = (newFullPath) => {
+    if (this.pathMustExist && !this.fs.isDir(newFullPath)) {
+      this.ui.showErrorMessage("The path does not exist.");
+      return;
+    }
+    this.updateCurrentIfValidParts(this.splitPath(newFullPath));
+  };
+
+  updateCurrentIfValidParts = (newParts) => {
+    if (!this.hasValidRoot(newParts)) {
+      this.ui.showErrorMessage("The path has no valid root.");
+      return;
+    }
+    this.currentPath = newParts;
+  };
+
+  enterPath = async () => {
+    const newPath = await this.ui.askPrompt("Enter Path:");
+    this.updateCurrentIfValidFull(newPath);
+  };
+
+  upOne = () => {
+    const newParts = this.currentPath.slice(0, this.currentPath.length - 1);
+    this.updateCurrentIfValidParts(newParts);
+  };
+
+  isSubDir = (entry) => {
+    const newPath = this.combineWith(this.currentPath, entry);
+    return this.fs.isDir(newPath);
+  };
+
+  getSubDirOptions = () => {
+    const fullPath = this.combine(this.currentPath);
+    try {
+      const entries = this.fs.readDir(fullPath);
+      return entries.filter((entry) => this.isSubDir(entry));
+    } catch {
+      return [];
+    }
+  };
+
+  downOne = async () => {
+    const options = this.getSubDirOptions();
+    if (options.length == 0) {
+      this.ui.showInfoMessage("There are no subdirectories here.");
+      return;
+    }
+
+    var selected = "";
+    var uiOptions = [];
+    options.forEach(function (option) {
+      uiOptions.push({
+        label: option,
+        action: () => {
+          selected = option;
+        },
       });
     });
 
-  if (mountPoints.length < 1) {
-    throw new Error("Failed to detect file system devices.");
-  }
-  return mountPoints;
-}
+    await this.ui.askMultipleChoice("Select an subdir", uiOptions);
 
-function splitPath(str) {
-  return str.replaceAll("\\", "/").split("/");
-}
+    if (selected.length < 1) return;
+    this.updateCurrentIfValidParts([...this.currentPath, selected]);
+  };
 
-function dropEmptyParts(parts) {
-  var result = [];
-  parts.forEach(function(part) {
-    if (part.length > 0) {
-      result.push(part);
+  createSubDir = async () => {
+    const name = await this.ui.askPrompt("Enter name:");
+    if (name.length < 1) return;
+    const newPath = [...this.currentPath, name];
+    if (this.pathMustExist) {
+      this.fs.makeDir(this.combine(newPath));
     }
-  })
-  return result;
-}
+    this.updateCurrentIfValidParts(newPath);
+  };
 
-function combine(parts) {
-  const toJoin = dropEmptyParts(parts);
-  if (toJoin.length == 1) return toJoin[0];
-  return path.join(...toJoin);
-}
+  selectThisPath = async () => {
+    this.resultingPath = this.combine(this.currentPath);
+    this.loop.stopLoop();
+  };
 
-function combineWith(parts, extra) {
-  const toJoin = dropEmptyParts(parts);
-  if (toJoin.length == 1) return path.join(toJoin[0], extra);
-  return path.join(...toJoin, extra);
-}
-
-function showCurrent(currentPath) {
-  const len = currentPath.length;
-  showMsg(`Current path: [${len}]\n` + combine(currentPath));
-
-  if (len < 2) {
-    showMsg(
-      'Warning - Known issue:\n' +
-      'Path selection does not work in root paths on some platforms.\n' +
-      'Use "Enter path" or "Create new folder" to navigate and create folders\n' +
-      'if this is the case for you.'
-    );
-  }
-}
-
-function hasValidRoot(roots, checkPath) {
-  if (checkPath.length < 1) return false;
-  var result = false;
-  roots.forEach(function(root) {
-    if (root.toLowerCase() == checkPath[0].toLowerCase()) {
-      console.log("valid root: " + combine(checkPath));
-      result = true;
-    }
-  });
-  if (!result) console.log("invalid root: " + combine(checkPath));
-  return result;
-}
-
-async function showMain(currentPath) {
-  showCurrent(currentPath);
-  const { choice } = await inquirer.prompt([
-    {
-        type: 'list',
-        name: 'choice',
-        message: 'Select an option:',
-        choices: [
-            '1. Enter path',
-            '2. Go up one',
-            '3. Go down one',
-            '4. Create new folder here',
-            '5. Select this path',
-            '6. Cancel'
-        ],
-        pageSize: 6,
-        loop: true
-    }
-  ]).catch(() => {
-    handleExit();
-    return { choice: '6' };
-  });
-
-  return choice;
-}
-
-export async function showPathSelector(startingPath, pathMustExist) {
-  const roots = getAvailableRoots();
-  var currentPath = splitPath(startingPath);
-  if (!hasValidRoot(roots, currentPath)) {
-    currentPath = [roots[0]];
-  }
-
-  while (true) {
-    const choice = await showMain(currentPath);
-
-    var newCurrentPath = currentPath;
-    switch (choice.split('.')[0]) {
-      case '1':
-          newCurrentPath = await enterPath(currentPath, pathMustExist);
-          break;
-      case '2':
-          newCurrentPath = upOne(currentPath);
-          break;
-      case '3':
-          newCurrentPath = await downOne(currentPath);
-          break;
-      case '4':
-          newCurrentPath = await createSubDir(currentPath, pathMustExist);
-          break;
-      case '5':
-        if (pathMustExist && !isDir(combine(currentPath))) {
-          console.log("Current path does not exist.");
-          break;
-        } else {
-          return combine(currentPath);
-        }
-      case '6':
-          return combine(currentPath);
-    }
-
-    if (hasValidRoot(roots, newCurrentPath)) {
-      currentPath = newCurrentPath;
-    } else {
-      console.log("Selected path has no valid root.");
-    }
-  }
-}
-
-async function enterPath(currentPath, pathMustExist) {
-  const response = await inquirer.prompt([
-    {
-        type: 'input',
-        name: 'path',
-        message: 'Enter Path:'
-    }]);
-
-  const newPath = response.path;
-  if (pathMustExist && !isDir(newPath)) {
-    console.log("The entered path does not exist.");
-    return currentPath;
-  }
-  return splitPath(response.path);
-}
-
-function upOne(currentPath) {
-  return currentPath.slice(0, currentPath.length - 1);
-}
-
-export function isDir(dir) {
-  try {
-    return fs.lstatSync(dir).isDirectory();
-  } catch {
-    return false;
-  }
-}
-
-function isSubDir(currentPath, entry) {
-  const newPath = combineWith(currentPath, entry);
-  return isDir(newPath);
-}
-
-function getSubDirOptions(currentPath) {
-  const fullPath = combine(currentPath);
-  const entries = fs.readdirSync(fullPath);
-  var result = [];
-  var counter = 1;
-  entries.forEach(function(entry) {
-    if (isSubDir(currentPath, entry)) {
-      result.push(counter + '. ' + entry);
-      counter = counter + 1;
-    }
-  });
-  return result;
-}
-
-async function downOne(currentPath) {
-  const options = getSubDirOptions(currentPath);
-  if (options.length == 0) {
-    console.log("There are no subdirectories here.");
-    return currentPath;
-  }
-
-  const { choice } = await inquirer.prompt([
-    {
-        type: 'list',
-        name: 'choice',
-        message: 'Select an subdir:',
-        choices: options,
-        pageSize: options.length,
-        loop: true
-    }
-  ]).catch(() => {
-    return currentPath;
-  });
-
-  const subDir = choice.split('. ')[1];
-  return [...currentPath, subDir];
-}
-
-async function createSubDir(currentPath, pathMustExist) {
-  const response = await inquirer.prompt([
-    {
-        type: 'input',
-        name: 'name',
-        message: 'Enter name:'
-    }]);
-
-  const name = response.name;
-  if (name.length < 1) return;
-
-  const fullDir = combineWith(currentPath, name);
-  if (pathMustExist && !isDir(fullDir)) {
-    fs.mkdirSync(fullDir);
-  }
-  return [...currentPath, name];
+  cancel = async () => {
+    this.resultingPath = this.startingPath;
+    this.loop.stopLoop();
+  };
 }

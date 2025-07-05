@@ -72,6 +72,13 @@ npm install
 npm start
 ```
 
+## Trouble?
+
+Is the installer crashing? Make sure these packages are installed:
+```
+apt-get install	fdisk	procps
+```
+
 ## License
 
 MIT
